@@ -1,16 +1,21 @@
 package com.ReRollBag.domain.dto;
 
 import com.ReRollBag.domain.entity.Users;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
+@AllArgsConstructor
 public class UsersSaveRequestDto {
-    public String usersId;
-    public String nickname;
-    public String password;
+    private String usersId;
+    private String nickname;
+    private String password;
 
     public Users toEntity() {
         return Users.builder()
                 .usersId(usersId)
                 .nickname(nickname)
+                .password(password)
                 .build();
     }
 }

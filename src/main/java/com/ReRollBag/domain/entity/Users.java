@@ -1,8 +1,7 @@
 package com.ReRollBag.domain.entity;
 
-import com.sun.istack.NotNull;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -17,16 +16,20 @@ import java.util.Collection;
 @AllArgsConstructor
 public class Users implements UserDetails{
 
-    @Id @Column @NotNull
-    private String usersPk;
+    @Id @Column
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long usersPk;
 
     @NotNull
     @Column(name = "usersId", nullable = false)
     private String usersId;
 
+    @NotNull
     @Column(name = "nickname", nullable = false)
     private String nickname;
 
+    @NotNull
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Override
@@ -36,7 +39,7 @@ public class Users implements UserDetails{
 
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     @Override
