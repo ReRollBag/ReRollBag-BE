@@ -1,5 +1,6 @@
 package com.ReRollBag.integration;
 
+import com.ReRollBag.domain.dto.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.UsersResponseDto;
 import com.ReRollBag.domain.dto.UsersSaveRequestDto;
 import com.ReRollBag.repository.UsersRepository;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.transaction.Transactional;
@@ -36,6 +38,7 @@ public class UsersIntegrationTest {
 
     @Test
     @DisplayName("[Integration] 회원 가입")
+    @Rollback(value = false)
     void Integration_회원가입_테스트() throws Exception {
         //given
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
@@ -57,6 +60,25 @@ public class UsersIntegrationTest {
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(responseDto)))
                 .andDo(print());
 
+    }
+
+    @Test
+    @DisplayName("[Integration] 로그인")
+    void Integration_로그인_테스트() throws Exception {
+        //given
+        UsersLoginRequestDto requestDto = new UsersLoginRequestDto(
+                "test@gmail.com",
+                "testPassword"
+        );
+
+        //when
+        mockMvc.perform(post("/api/users/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(requestDto))
+        )
+        //then
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
 }

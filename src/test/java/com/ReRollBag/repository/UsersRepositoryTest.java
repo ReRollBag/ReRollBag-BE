@@ -6,6 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.Commit;
+import org.springframework.test.annotation.Rollback;
+
+import javax.transaction.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,7 +20,7 @@ public class UsersRepositoryTest {
     UsersRepository usersRepository;
 
     @Test
-    @DisplayName("[Repository] 사용자 회원 가입")
+    @DisplayName("[Repository] 회원 가입 테스트")
     void Repository_회원가입_테스트 () {
         Users users = Users.builder()
                 .usersId("test@gmail.com")

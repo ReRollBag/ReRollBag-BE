@@ -5,11 +5,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import jdk.nashorn.internal.parser.Token;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,28 +26,27 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    public static final Logger logger = LogManager.getLogger(JwtTokenProvider.class);
     @Value("${jwtToken.secretKey}")
     private String secretKey;
 
     private final CustomUserDetailService userDetailService;
 
-    private static final long accessTokenValidTime = 30 * 60 * 1000L;
-    private static final long refreshTokenValidTime = 30 * 60 * 1000L;
+    private static long accessTokenValidTime = 30 * 60 * 1000L;
+    private static long refreshTokenValidTime = 3600 * 60 * 1000L;
 
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    private String createToken (TokenType tokenType, String usersPK) {
+    private String createToken (TokenType tokenType, String usersId) {
 
         long tokenValidTime;
         if (tokenType == TokenType.AccessToken) tokenValidTime = accessTokenValidTime;
         else tokenValidTime = refreshTokenValidTime;
 
-        Claims claims = Jwts.claims().setSubject(usersPK);
-        claims.put("usersPk", usersPK);
+        Claims claims = Jwts.claims().setSubject(usersId);
+        claims.put("usersId", usersId);
         claims.put("tokenType", tokenType);
 
         Date now = new Date();
@@ -62,20 +58,20 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String createAccessToken (String usersPK) {
-        return createToken(TokenType.AccessToken, usersPK);
+    public String createAccessToken (String usersId) {
+        return createToken(TokenType.AccessToken, usersId);
     }
 
-    public String createRefreshToken (String usersPK) {
-        return createToken(TokenType.RefreshToken, usersPK);
+    public String createRefreshToken (String usersId) {
+        return createToken(TokenType.RefreshToken, usersId);
     }
 
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailService.loadUserByUsername(getUsersPk(token));
+        UserDetails userDetails = userDetailService.loadUserByUsername(getusersId(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    public String getUsersPk (String token) {
+    public String getusersId (String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 

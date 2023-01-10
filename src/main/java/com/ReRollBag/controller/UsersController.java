@@ -1,5 +1,6 @@
 package com.ReRollBag.controller;
 
+import com.ReRollBag.domain.dto.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.UsersSaveRequestDto;
 import com.ReRollBag.service.UsersService;
 import lombok.RequiredArgsConstructor;
@@ -16,5 +17,10 @@ public class UsersController extends BaseController {
     @PostMapping("api/users/save")
     public ResponseEntity<?> save (@RequestBody UsersSaveRequestDto requestDto) {
         return sendResponseHttpByJson(usersService.save(requestDto));
+    }
+
+    @PostMapping("api/users/login")
+    public ResponseEntity<?> login (@RequestBody UsersLoginRequestDto requestDto) {
+        return sendResponseHttpByJson(usersService.login(requestDto));
     }
 }
