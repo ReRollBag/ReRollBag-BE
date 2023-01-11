@@ -7,6 +7,7 @@ import com.ReRollBag.domain.dto.UsersResponseDto;
 import com.ReRollBag.domain.dto.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
+import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -38,17 +39,16 @@ public class UsersService {
         return true;
     }
 
-    public UsersLoginResponseDto login (UsersLoginRequestDto requestDto) {
+    public UsersLoginResponseDto login (UsersLoginRequestDto requestDto) throws UsersIdOrPasswordInvalidException {
         String targetUsersId = requestDto.getUsersId();
         Users targetUsers = usersRepository.findByUsersId(targetUsersId);
 
-        if (targetUsers == null) throw new IllegalArgumentException("Users Id is wrong");
+        if (targetUsers == null)
+            throw new UsersIdOrPasswordInvalidException();
 
-        if (!passwordEncoder.matches(requestDto.getPassword(), targetUsers.getPassword())) {
-            throw new IllegalArgumentException("Password is wrong");
-        }
+        if (!passwordEncoder.matches(requestDto.getPassword(), targetUsers.getPassword()))
+            throw new UsersIdOrPasswordInvalidException();
 
-        if (jwtTokenProvider == null) log.error("jwtTokenProvider is NULL!");
         String accessToken = jwtTokenProvider.createAccessToken(requestDto.getUsersId());
         String refreshToken = jwtTokenProvider.createRefreshToken(requestDto.getUsersId());
 
@@ -56,5 +56,10 @@ public class UsersService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public boolean dummyMethod() {
+        log.info("dummyMethod is called! Success to Authentication");
+        return true;
     }
 }

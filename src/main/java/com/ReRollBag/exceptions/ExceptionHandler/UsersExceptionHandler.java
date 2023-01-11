@@ -1,9 +1,10 @@
 package com.ReRollBag.exceptions.ExceptionHandler;
 
 import com.ReRollBag.controller.BaseController;
-import com.ReRollBag.exceptions.CustomExceptions;
+import com.ReRollBag.exceptions.ErrorCode;
 import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
+import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,17 @@ public class UsersExceptionHandler extends BaseController {
         log.error("DuplicatedUsersException");
         ErrorJson errorJson = ErrorJson.builder()
                 .message("UsersIdAlreadyExistException")
-                .errorCode(CustomExceptions.UsersIdAlreadyExistException)
+                .errorCode(ErrorCode.UsersIdAlreadyExistException)
+                .build();
+        return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
+    }
+
+    @ExceptionHandler(UsersIdOrPasswordInvalidException.class)
+    public ResponseEntity<?> handleUsersIdOrPasswordInvalidException (UsersIdOrPasswordInvalidException e) {
+        log.error("UsersIdOrPasswordInvalidException");
+        ErrorJson errorJson = ErrorJson.builder()
+                .message("UsersIdOrPasswordInvalidException")
+                .errorCode(ErrorCode.UsersIdOrPasswordInvalidException)
                 .build();
         return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
     }

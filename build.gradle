@@ -25,6 +25,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.15.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-jul', version: '2.15.0'
@@ -39,7 +40,9 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
 }
 
 tasks.named('test') {

@@ -1,5 +1,7 @@
 package com.ReRollBag.exceptions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -7,5 +9,9 @@ import lombok.Getter;
 @Getter
 public class ErrorJson {
     public String message;
-    public CustomExceptions errorCode;
+    public ErrorCode errorCode;
+
+    public String convertToJson() throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(this);
+    }
 }

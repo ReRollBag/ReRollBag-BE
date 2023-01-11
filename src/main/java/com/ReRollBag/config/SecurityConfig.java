@@ -1,5 +1,6 @@
 package com.ReRollBag.config;
 
+import com.ReRollBag.auth.ExceptionHandlerFilter;
 import com.ReRollBag.auth.JwtAuthenticationFilter;
 import com.ReRollBag.auth.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +36,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.httpBasic().disable()
                 .authorizeRequests()
-                .antMatchers("/v1").authenticated()
-                .antMatchers("/v2", "h2-console/**").permitAll()
+                .antMatchers("/api/v1/**").authenticated()
+                .antMatchers("/api/v2/**", "/h2-console/**").permitAll()
                 .and()
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new ExceptionHandlerFilter(), JwtAuthenticationFilter.class)
+                ;
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 }

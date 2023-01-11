@@ -70,7 +70,7 @@ public class UsersControllerTest {
 
 
         //when
-        mockMvc.perform(post("/api/users/save")
+        mockMvc.perform(post("/api/v2/users/save")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(requestDto))
                 )
@@ -93,7 +93,7 @@ public class UsersControllerTest {
         //mocking
         when(usersService.login(any())).thenReturn(responseDto);
         //when
-        mockMvc.perform(post("/api/users/login")
+        mockMvc.perform(post("/api/v2/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(requestDto))
                 )
@@ -112,7 +112,7 @@ public class UsersControllerTest {
         when(usersService.checkUserExist(usersId)).thenReturn(true);
         //when
         try {
-            mockMvc.perform(get("/api/users/checkUserExist/"+usersId))
+            mockMvc.perform(get("/api/v2/users/checkUserExist/"+usersId))
         //then
                     .andExpect(status().isOk())
                     .andReturn();
@@ -132,7 +132,8 @@ public class UsersControllerTest {
         when(usersService.checkUserExist(usersId)).thenThrow(UsersIdAlreadyExistException.class);
         //when
         try {
-            mockMvc.perform(get("/api/users/checkUserExist/" + usersId))
+            mockMvc.perform(get("/api/v2/users/checkUserExist/" + usersId))
+        //then
                     .andExpect(status().isAccepted())
                     .andReturn();
         } catch (UsersIdAlreadyExistException e) {
@@ -140,6 +141,14 @@ public class UsersControllerTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    @DisplayName("[Controller] Token 없이 v1 메소드 테스트")
+    void Controller_토큰검증_실패() throws Exception {
+        mockMvc.perform(get("/api/v1/users/dummyMethod"))
+                .andExpect(status().isForbidden())
+                .andReturn();
     }
 
 }

@@ -1,6 +1,11 @@
 package com.ReRollBag.auth;
 
+import com.ReRollBag.domain.entity.AccessToken;
+import com.ReRollBag.domain.entity.RefreshToken;
+import com.ReRollBag.repository.AccessTokenRepository;
+import com.ReRollBag.repository.RefreshTokenRepository;
 import com.ReRollBag.service.CustomUserDetailService;
+import com.ReRollBag.service.RedisService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -30,9 +35,12 @@ public class JwtTokenProvider {
     private String secretKey;
 
     private final CustomUserDetailService userDetailService;
+    private final RedisService redisService;
+    private final AccessTokenRepository accessTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    private static long accessTokenValidTime = 30 * 60 * 1000L;
-    private static long refreshTokenValidTime = 3600 * 60 * 1000L;
+    private static final long accessTokenValidTime =   5 * 60L;
+    private static final long refreshTokenValidTime = 3600 * 60L;
 
     @PostConstruct
     protected void init() {
@@ -53,17 +61,21 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + tokenValidTime))
+                .setExpiration(new Date(now.getTime() + tokenValidTime*1000L))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
     public String createAccessToken (String usersId) {
-        return createToken(TokenType.AccessToken, usersId);
+        String accessToken = createToken(TokenType.AccessToken, usersId);
+        redisService.saveAccessToken(usersId, accessToken, accessTokenValidTime);
+        return accessToken;
     }
 
     public String createRefreshToken (String usersId) {
-        return createToken(TokenType.RefreshToken, usersId);
+        String refreshToken = createToken(TokenType.RefreshToken, usersId);
+        redisService.saveRefreshToken(usersId, refreshToken, refreshTokenValidTime);
+        return refreshToken;
     }
 
     public Authentication getAuthentication(String token) {
@@ -88,13 +100,8 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken (String jwtToken) {
-        try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
-            return !claims.getBody().getExpiration().before(new Date());
-        }
-        catch (Exception e) {
-            return false;
-        }
+        Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
+        return !claims.getBody().getExpiration().before(new Date());
     }
 
 }
