@@ -1,12 +1,11 @@
 package com.ReRollBag.service;
 
 import com.ReRollBag.auth.JwtTokenProvider;
-import com.ReRollBag.domain.dto.UsersLoginRequestDto;
-import com.ReRollBag.domain.dto.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.UsersResponseDto;
 import com.ReRollBag.domain.dto.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.repository.UsersRepository;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +37,7 @@ public class UsersServiceTest {
     private CustomUserDetailService userDetailService;
 
 
+    @SneakyThrows
     @Test
     @DisplayName("[Service] 회원 가입")
     public void Service_회원가입_테스트 () {
@@ -64,6 +64,7 @@ public class UsersServiceTest {
         assertThat(targetResponseDto.nickname).isEqualTo(expectedNickname);
         assertThat(targetResponseDto.usersId).isEqualTo(expectedUsersId);
     }
+
 
 //    @Test
 //    @DisplayName("[Service] 로그인 및 토큰 발급")
