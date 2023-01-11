@@ -7,8 +7,7 @@ import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.repository.UsersRepository;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UsersIntegrationTest {
 
     @Autowired
@@ -39,6 +39,7 @@ public class UsersIntegrationTest {
     private MockMvc mockMvc;
 
     @Test
+    @Order(1)
     @DisplayName("[Integration] 회원 가입")
     @Rollback(value = false)
     void Integration_회원가입_테스트() throws Exception {
@@ -102,20 +103,6 @@ public class UsersIntegrationTest {
     @Test
     @DisplayName("[Integration] 아이디 중복 검사 실패 case")
     void Integration_아이디_중복검사_실패() throws Exception {
-
-        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
-                "test@gmail.com",
-                "testNickname",
-                "testPassword"
-        );
-
-        UsersResponseDto responseDto = new UsersResponseDto("test@gmail.com", "testNickname");
-
-        //when
-        mockMvc.perform(post("/api/users/save")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(requestDto)));
-
         //given
         String usersId = "test@gmail.com";
 
