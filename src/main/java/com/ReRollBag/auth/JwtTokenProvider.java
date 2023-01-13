@@ -1,7 +1,9 @@
 package com.ReRollBag.auth;
 
+import antlr.Token;
 import com.ReRollBag.domain.entity.AccessToken;
 import com.ReRollBag.domain.entity.RefreshToken;
+import com.ReRollBag.exceptions.tokenExceptions.TokenIsNullException;
 import com.ReRollBag.repository.AccessTokenRepository;
 import com.ReRollBag.repository.RefreshTokenRepository;
 import com.ReRollBag.service.CustomUserDetailService;
@@ -87,8 +89,10 @@ public class JwtTokenProvider {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
-    public String resolveToken (HttpServletRequest request) {
-        return request.getHeader("Token");
+    public String resolveToken (HttpServletRequest request) throws TokenIsNullException {
+        String token = request.getHeader("Token");
+        if (token == null) throw new TokenIsNullException();
+        return token;
     }
 
     public String resolveAccessToken (HttpServletRequest request) {

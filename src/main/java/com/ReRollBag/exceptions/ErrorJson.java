@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 public class ErrorJson {
     public String message;
-    public ErrorCode errorCode;
+    public int errorCode;
 
     public String convertToJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);

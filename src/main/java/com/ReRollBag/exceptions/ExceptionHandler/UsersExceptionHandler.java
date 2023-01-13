@@ -20,7 +20,7 @@ public class UsersExceptionHandler extends BaseController {
         log.error("DuplicatedUsersException");
         ErrorJson errorJson = ErrorJson.builder()
                 .message("UsersIdAlreadyExistException")
-                .errorCode(ErrorCode.UsersIdAlreadyExistException)
+                .errorCode(ErrorCode.UsersIdAlreadyExistException.getErrorCode())
                 .build();
         return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
     }
@@ -30,7 +30,7 @@ public class UsersExceptionHandler extends BaseController {
         log.error("UsersIdOrPasswordInvalidException");
         ErrorJson errorJson = ErrorJson.builder()
                 .message("UsersIdOrPasswordInvalidException")
-                .errorCode(ErrorCode.UsersIdOrPasswordInvalidException)
+                .errorCode(ErrorCode.UsersIdOrPasswordInvalidException.getErrorCode())
                 .build();
         return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
     }

@@ -2,7 +2,7 @@ package com.ReRollBag.auth;
 
 import com.ReRollBag.exceptions.ErrorCode;
 import com.ReRollBag.exceptions.ErrorJson;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ReRollBag.exceptions.tokenExceptions.TokenIsNullException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -20,19 +20,23 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try{
+        try {
             filterChain.doFilter(request, response);
-        } catch (Exception e) {
-            log.error(e.getMessage());
+        }
+        catch (TokenIsNullException e) {
             e.printStackTrace();
-            setErrorResponse(HttpStatus.ACCEPTED, response, e, ErrorCode.UnknownException);
+            setErrorResponse(HttpStatus.ACCEPTED, response, "TokenIsNullException", ErrorCode.TokenIsNullException);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            setErrorResponse(HttpStatus.ACCEPTED, response, e.getMessage(), ErrorCode.UnknownException);
         }
     }
 
-    public void setErrorResponse (HttpStatus httpStatus, HttpServletResponse response, Throwable e, ErrorCode errorCode) {
+    public void setErrorResponse (HttpStatus httpStatus, HttpServletResponse response, String message, ErrorCode errorCode) {
         ErrorJson errorJson = ErrorJson.builder()
-                .message(e.getMessage())
-                .errorCode(ErrorCode.UnknownException)
+                .message(message)
+                .errorCode(errorCode.getErrorCode())
                 .build();
 
         response.setStatus(httpStatus.value());
