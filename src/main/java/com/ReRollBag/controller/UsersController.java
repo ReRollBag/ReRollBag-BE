@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RequiredArgsConstructor
 @RestController
 public class UsersController extends BaseController {
@@ -25,12 +27,17 @@ public class UsersController extends BaseController {
     }
 
     @GetMapping("api/v2/users/checkUserExist/{usersId}")
-    public ResponseEntity<?> checkUserExist (@PathVariable String usersId) throws UsersIdAlreadyExistException {
+    public ResponseEntity<?> checkUserExist(@PathVariable String usersId) throws UsersIdAlreadyExistException {
         return sendResponseHttpByJson(usersService.checkUserExist(usersId));
     }
 
     @GetMapping("api/v1/users/dummyMethod")
-    public ResponseEntity<?> dummyMethod () {
+    public ResponseEntity<?> dummyMethod() {
         return sendResponseHttpByJson(usersService.dummyMethod());
+    }
+
+    @PostMapping("api/v2/users/reIssue")
+    public ResponseEntity<?> reIssue(HttpServletRequest request) {
+        return sendResponseHttpByJson(usersService.reIssue(request));
     }
 }

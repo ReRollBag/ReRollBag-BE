@@ -14,6 +14,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 @Log4j2
@@ -55,6 +56,10 @@ public class UsersService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public String reIssue(HttpServletRequest request) {
+        return jwtTokenProvider.reIssue(request);
     }
 
     public boolean dummyMethod() {

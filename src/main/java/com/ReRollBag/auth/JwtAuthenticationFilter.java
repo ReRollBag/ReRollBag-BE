@@ -1,11 +1,7 @@
 package com.ReRollBag.auth;
 
-import com.ReRollBag.exceptions.tokenExceptions.TokenIsNullException;
-import jdk.nashorn.internal.parser.Token;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
@@ -27,11 +23,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String token;
 
-        try {
-            token = jwtTokenProvider.resolveToken((HttpServletRequest) request);
-        } catch (TokenIsNullException e) {
-            throw new TokenIsNullException();
-        }
+        token = jwtTokenProvider.resolveToken((HttpServletRequest) request);
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
