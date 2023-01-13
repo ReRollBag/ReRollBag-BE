@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
 public class BaseController {
     public ResponseEntity<?> sendResponseHttpByJson(Object data) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        //headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
         return new ResponseEntity<Object> (data, headers, HttpStatus.OK);
     }
 

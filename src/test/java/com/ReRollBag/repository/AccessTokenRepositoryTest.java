@@ -18,7 +18,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AccessTokenRepositoryTest {
 
-    private static final Long AccessTokenValidTime = 5L;
+    private static final Long AccessTokenValidTime = 1L;
 
     private static final AccessToken dummyToken = AccessToken.builder()
             .usersId("dummyUsersId")
@@ -70,7 +70,7 @@ public class AccessTokenRepositoryTest {
         String validUsersId = "test@gmail.com";
         //when
         try {
-            Thread.sleep(5000L);
+            Thread.sleep(AccessTokenValidTime*1000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

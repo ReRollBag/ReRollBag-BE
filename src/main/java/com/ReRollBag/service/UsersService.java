@@ -34,7 +34,6 @@ public class UsersService {
     }
 
     public Boolean checkUserExist (String usersId) throws UsersIdAlreadyExistException {
-        log.info(usersRepository.existsByUsersId(usersId));
         if (usersRepository.existsByUsersId(usersId)) throw new UsersIdAlreadyExistException();
         return true;
     }

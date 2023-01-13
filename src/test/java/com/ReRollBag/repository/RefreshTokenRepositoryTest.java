@@ -17,7 +17,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RefreshTokenRepositoryTest {
 
-    private static final Long RefreshTokenValidTime = 5L;
+    private static final Long RefreshTokenValidTime = 1L;
 
     private static final RefreshToken dummyToken = RefreshToken.builder()
             .usersId("dummyUsersId")
@@ -71,7 +71,7 @@ public class RefreshTokenRepositoryTest {
         String validUsersId = "test@gmail.com";
         //when
         try {
-            Thread.sleep(5000L);
+            Thread.sleep(RefreshTokenValidTime*1000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
