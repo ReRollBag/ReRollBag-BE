@@ -6,6 +6,7 @@ import com.ReRollBag.domain.dto.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.UsersResponseDto;
 import com.ReRollBag.domain.dto.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.repository.UsersRepository;
@@ -44,12 +45,17 @@ public class UsersService {
                 .build();
     }
 
-    public Boolean checkUserExist (String usersId) throws UsersIdAlreadyExistException {
+    public Boolean checkUserExist(String usersId) throws UsersIdAlreadyExistException {
         if (usersRepository.existsByUsersId(usersId)) throw new UsersIdAlreadyExistException();
         return true;
     }
 
-    public UsersLoginResponseDto login (UsersLoginRequestDto requestDto) throws UsersIdOrPasswordInvalidException {
+    public Boolean checkNicknameExist(String nickname) throws NicknameAlreadyExistException {
+        if (usersRepository.existsByNickname(nickname)) throw new NicknameAlreadyExistException();
+        return true;
+    }
+
+    public UsersLoginResponseDto login(UsersLoginRequestDto requestDto) throws UsersIdOrPasswordInvalidException {
         String targetUsersId = requestDto.getUsersId();
         Users targetUsers = usersRepository.findByUsersId(targetUsersId);
 

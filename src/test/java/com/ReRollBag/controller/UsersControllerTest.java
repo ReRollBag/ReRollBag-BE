@@ -6,6 +6,7 @@ import com.ReRollBag.domain.dto.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.UsersResponseDto;
 import com.ReRollBag.domain.dto.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -151,5 +152,46 @@ public class UsersControllerTest {
                 .andExpect(status().isForbidden())
                 .andReturn();
     }
+
+    @Test
+    @DisplayName("[Controller] 닉네임 중복 검사 성공 case")
+    void Controller_닉네임_중복검사_성공() throws NicknameAlreadyExistException {
+        //given
+        String nickname = "nickname";
+        //mocking
+        when(usersService.checkNicknameExist(nickname)).thenReturn(true);
+        //when
+        try {
+            mockMvc.perform(get("/api/v2/users/checkNicknameExist/" + nickname))
+                    //then
+                    .andExpect(status().isOk())
+                    .andReturn();
+        } catch (NicknameAlreadyExistException e) {
+            throw new NicknameAlreadyExistException();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    @DisplayName("[Controller] 닉네임 중복 검사 실패 case")
+    void Controller_닉네임_중복검사_실패() throws NicknameAlreadyExistException {
+//given
+        String nickname = "nickname";
+        //mocking
+        when(usersService.checkNicknameExist(nickname)).thenThrow(NicknameAlreadyExistException.class);
+        //when
+        try {
+            mockMvc.perform(get("/api/v2/users/checkNicknameExist/" + nickname))
+                    //then
+                    .andExpect(status().isAccepted())
+                    .andReturn();
+        } catch (NicknameAlreadyExistException e) {
+            throw new NicknameAlreadyExistException();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }

@@ -4,6 +4,7 @@ import com.ReRollBag.domain.dto.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.UsersResponseDto;
 import com.ReRollBag.domain.dto.UsersSaveRequestDto;
+import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.repository.UsersRepository;
 import com.ReRollBag.service.RedisService;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -137,11 +139,18 @@ public class UsersIntegrationTest {
         //given
         String usersId = "test@gmail.com";
 
+        ErrorJson errorJson = ErrorJson.builder()
+                .errorCode(1000)
+                .message("UsersIdAlreadyExistException")
+                .build();
+
         //when
         try {
             mockMvc.perform(get("/api/v2/users/checkUserExist/" + usersId))
-        //then
-                    .andExpect(status().isAccepted());
+                    //then
+                    .andExpect(status().isAccepted())
+                    .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)));
+            ;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -171,11 +180,49 @@ public class UsersIntegrationTest {
         String accessToken = loginResponseDto.getAccessToken();
         String refreshToken = loginResponseDto.getRefreshToken();
         mockMvc.perform(get("/api/v1/users/dummyMethod")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Token", accessToken))
-        //then
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Token", accessToken))
+                //then
                 .andExpect(status().isOk())
                 .andReturn();
 
+    }
+
+    @Test
+    @DisplayName("[Integration] 닉네임 중복 검사 성공 case")
+    void Integration_닉네임_중복검사_성공() throws UsersIdAlreadyExistException {
+        //given
+        String nickname = "notDuplicatedNickname";
+
+        //when
+        try {
+            mockMvc.perform(get("/api/v2/users/checkNicknameExist/" + nickname))
+                    //then
+                    .andExpect(status().isOk());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    @DisplayName("[Integration] 닉네임 중복 검사 실패 case")
+    void Integration_닉네임_중복검사_실패() throws Exception {
+        //given
+        String nickname = "testNickname";
+
+        ErrorJson errorJson = ErrorJson.builder()
+                .errorCode(1002)
+                .message("NicknameAlreadyExistException")
+                .build();
+
+        //when
+        try {
+            mockMvc.perform(get("/api/v2/users/checkNicknameExist/" + nickname))
+                    //then
+                    .andExpect(status().isAccepted())
+                    .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
