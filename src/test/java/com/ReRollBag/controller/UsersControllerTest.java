@@ -55,28 +55,29 @@ public class UsersControllerTest {
                 .password("testPassword")
                 .build();
 
-        UsersResponseDto responseDto = UsersResponseDto.builder()
-                .users(users)
-                .build();
-
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
                 "testNickname",
                 "testPassword"
         );
 
+        UsersLoginResponseDto loginResponseDto = UsersLoginResponseDto.builder()
+                .accessToken("accessToken")
+                .refreshToken("refreshToken")
+                .build();
+
         //mocking
-        when(usersService.save(any())).thenReturn(responseDto);
+        when(usersService.save(any())).thenReturn(loginResponseDto);
 
 
         //when
         mockMvc.perform(post("/api/v2/users/save")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(requestDto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(requestDto))
                 )
-        //then
+                //then
                 .andExpect(status().isOk())
-                .andExpect(content().json(new ObjectMapper().writeValueAsString(responseDto)))
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(loginResponseDto)))
                 .andDo(print());
 
     }
@@ -94,10 +95,10 @@ public class UsersControllerTest {
         when(usersService.login(any())).thenReturn(responseDto);
         //when
         mockMvc.perform(post("/api/v2/users/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(requestDto))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(requestDto))
                 )
-        //then
+                //then
                 .andExpect(status().isOk())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(responseDto)))
                 .andDo(print());
@@ -112,8 +113,8 @@ public class UsersControllerTest {
         when(usersService.checkUserExist(usersId)).thenReturn(true);
         //when
         try {
-            mockMvc.perform(get("/api/v2/users/checkUserExist/"+usersId))
-        //then
+            mockMvc.perform(get("/api/v2/users/checkUserExist/" + usersId))
+                    //then
                     .andExpect(status().isOk())
                     .andReturn();
         } catch (UsersIdAlreadyExistException e) {
@@ -133,7 +134,7 @@ public class UsersControllerTest {
         //when
         try {
             mockMvc.perform(get("/api/v2/users/checkUserExist/" + usersId))
-        //then
+                    //then
                     .andExpect(status().isAccepted())
                     .andReturn();
         } catch (UsersIdAlreadyExistException e) {

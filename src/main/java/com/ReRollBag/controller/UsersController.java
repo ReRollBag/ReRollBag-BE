@@ -17,7 +17,7 @@ public class UsersController extends BaseController {
     private final UsersService usersService;
 
     @PostMapping("api/v2/users/save")
-    public ResponseEntity<?> save (@RequestBody UsersSaveRequestDto requestDto) {
+    public ResponseEntity<?> save(@RequestBody UsersSaveRequestDto requestDto) throws UsersIdOrPasswordInvalidException {
         return sendResponseHttpByJson(usersService.save(requestDto));
     }
 

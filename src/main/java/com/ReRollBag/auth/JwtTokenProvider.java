@@ -7,7 +7,6 @@ import com.ReRollBag.repository.RefreshTokenRepository;
 import com.ReRollBag.service.CustomUserDetailService;
 import com.ReRollBag.service.RedisService;
 import io.jsonwebtoken.*;
-import jdk.nashorn.internal.parser.Token;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
-import java.util.NoSuchElementException;
 
 @Log4j2
 @RequiredArgsConstructor

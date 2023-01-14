@@ -40,7 +40,7 @@ public class UsersServiceTest {
 
     @Test
     @DisplayName("[Service] 회원 가입")
-    public void Service_회원가입_테스트 () {
+    public void Service_회원가입_테스트() throws UsersIdOrPasswordInvalidException {
         //given
 
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
@@ -57,13 +57,17 @@ public class UsersServiceTest {
         //mocking
         given(usersRepository.save(any()))
                 .willReturn(users);
+        given(jwtTokenProvider.createAccessToken(any()))
+                .willReturn("AccessToken");
+        given(jwtTokenProvider.createRefreshToken(any()))
+                .willReturn("RefreshToken");
 
         //when
-        UsersResponseDto targetResponseDto = usersService.save(requestDto);
+        UsersLoginResponseDto targetResponseDto = usersService.save(requestDto);
 
         //then
-        assertThat(targetResponseDto.nickname).isEqualTo(expectedNickname);
-        assertThat(targetResponseDto.usersId).isEqualTo(expectedUsersId);
+        assertThat(targetResponseDto.getAccessToken()).isEqualTo("AccessToken");
+        assertThat(targetResponseDto.getRefreshToken()).isEqualTo("RefreshToken");
     }
 
     @Test

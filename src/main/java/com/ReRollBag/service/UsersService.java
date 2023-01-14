@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.test.annotation.Commit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
@@ -26,12 +27,21 @@ public class UsersService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
-    public UsersResponseDto save(UsersSaveRequestDto requestDto) {
+    @Commit
+    public UsersLoginResponseDto save(UsersSaveRequestDto requestDto) throws UsersIdOrPasswordInvalidException {
         Users users = requestDto.toEntity();
         String encryptedPassword = passwordEncoder.encode(users.getPassword());
         users.setPassword(encryptedPassword);
         usersRepository.save(users);
-        return new UsersResponseDto(users);
+        // save 이후 login 까지 한 번에 처리
+        UsersLoginRequestDto usersLoginRequestDto = new UsersLoginRequestDto(users.getUsersId(), users.getPassword());
+        String accessToken = jwtTokenProvider.createAccessToken(requestDto.getUsersId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(requestDto.getUsersId());
+
+        return UsersLoginResponseDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     public Boolean checkUserExist (String usersId) throws UsersIdAlreadyExistException {
