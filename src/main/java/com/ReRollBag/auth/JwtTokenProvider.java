@@ -1,15 +1,15 @@
 package com.ReRollBag.auth;
 
+import com.ReRollBag.exceptions.authExceptions.ReIssueBeforeAccessTokenExpiredException;
+import com.ReRollBag.exceptions.authExceptions.TokenIsNullException;
+import com.ReRollBag.repository.AccessTokenRepository;
+import com.ReRollBag.repository.RefreshTokenRepository;
 import com.ReRollBag.service.CustomUserDetailService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.ReRollBag.service.RedisService;
+import io.jsonwebtoken.*;
 import jdk.nashorn.internal.parser.Token;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
+import java.util.NoSuchElementException;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -29,76 +30,103 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    public static final Logger logger = LogManager.getLogger(JwtTokenProvider.class);
     @Value("${jwtToken.secretKey}")
     private String secretKey;
 
     private final CustomUserDetailService userDetailService;
+    private final RedisService redisService;
+    private final AccessTokenRepository accessTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    private static final long accessTokenValidTime = 30 * 60 * 1000L;
-    private static final long refreshTokenValidTime = 30 * 60 * 1000L;
+    private static long accessTokenValidTime = 5 * 60L;
+    private static long refreshTokenValidTime = 3600 * 60L;
+
+    public void setAccessTokenValidTime(Long time) {
+        accessTokenValidTime = time;
+    }
+
+    public void setRefreshTokenValidTime(Long time) {
+        refreshTokenValidTime = time;
+    }
 
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    private String createToken (TokenType tokenType, String usersPK) {
+    private String createToken(TokenType tokenType, String usersId) {
 
         long tokenValidTime;
         if (tokenType == TokenType.AccessToken) tokenValidTime = accessTokenValidTime;
         else tokenValidTime = refreshTokenValidTime;
 
-        Claims claims = Jwts.claims().setSubject(usersPK);
-        claims.put("usersPk", usersPK);
+        Claims claims = Jwts.claims().setSubject(usersId);
+        claims.put("usersId", usersId);
         claims.put("tokenType", tokenType);
 
         Date now = new Date();
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + tokenValidTime))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
-                .compact();
+        return Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidTime * 1000L)).signWith(SignatureAlgorithm.HS256, secretKey).compact();
     }
 
-    public String createAccessToken (String usersPK) {
-        return createToken(TokenType.AccessToken, usersPK);
+    public String createAccessToken(String usersId) {
+        String accessToken = createToken(TokenType.AccessToken, usersId);
+        redisService.saveAccessToken(usersId, accessToken, accessTokenValidTime);
+        return accessToken;
     }
 
-    public String createRefreshToken (String usersPK) {
-        return createToken(TokenType.RefreshToken, usersPK);
+    public String createRefreshToken(String usersId) {
+        String refreshToken = createToken(TokenType.RefreshToken, usersId);
+        redisService.saveRefreshToken(usersId, refreshToken, refreshTokenValidTime);
+        return refreshToken;
     }
 
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailService.loadUserByUsername(getUsersPk(token));
+        UserDetails userDetails = userDetailService.loadUserByUsername(getUsersId(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    public String getUsersPk (String token) {
+    private String getUsersId(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
-    public String resolveToken (HttpServletRequest request) {
-        return request.getHeader("Token");
+    private TokenType getTokenType(String token) {
+        String tokenType = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("tokenType").toString();
+        if (tokenType.equals("AccessToken")) return TokenType.AccessToken;
+        return TokenType.RefreshToken;
     }
 
-    public String resolveAccessToken (HttpServletRequest request) {
-        return request.getHeader("AccessToken");
+    public String resolveToken(HttpServletRequest request) throws TokenIsNullException {
+        String token = request.getHeader("Token");
+        if (token == null) throw new TokenIsNullException();
+        return token;
     }
 
-    public String resolveRefreshToken (HttpServletRequest request) {
-        return request.getHeader("RefreshToken");
+    public boolean validateToken(String token) throws ReIssueBeforeAccessTokenExpiredException {
+        Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+        return !claims.getBody().getExpiration().before(new Date());
     }
 
-    public boolean validateToken (String jwtToken) {
+    private void checkRefreshTokenIsExpired(String token) {
+        Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+        claims.getBody().getExpiration().before(new Date());
+    }
+
+    private Boolean checkAccessTokenIsExpired(String token) {
+        String usersId = getUsersId(token);
+        return redisService.findAccessToken(usersId) == null;
+    }
+
+    public String reIssue(HttpServletRequest request) throws ReIssueBeforeAccessTokenExpiredException {
+        String refreshToken = resolveToken(request);
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
-            return !claims.getBody().getExpiration().before(new Date());
+            checkRefreshTokenIsExpired(refreshToken);
+        } catch (MalformedJwtException | SignatureException e) {
+            throw e;
         }
-        catch (Exception e) {
-            return false;
-        }
+        if (!checkAccessTokenIsExpired(refreshToken)) throw new ReIssueBeforeAccessTokenExpiredException();
+
+        String usersId = getUsersId(refreshToken);
+        return createAccessToken(usersId);
     }
 
 }

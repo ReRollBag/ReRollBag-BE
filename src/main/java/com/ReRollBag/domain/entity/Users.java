@@ -1,7 +1,7 @@
 package com.ReRollBag.domain.entity;
 
+import com.sun.istack.NotNull;
 import lombok.*;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

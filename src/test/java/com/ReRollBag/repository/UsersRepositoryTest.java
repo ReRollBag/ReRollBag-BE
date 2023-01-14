@@ -16,7 +16,7 @@ public class UsersRepositoryTest {
     UsersRepository usersRepository;
 
     @Test
-    @DisplayName("[Repository] 사용자 회원 가입")
+    @DisplayName("[Repository] 회원 가입 테스트")
     void Repository_회원가입_테스트 () {
         Users users = Users.builder()
                 .usersId("test@gmail.com")
