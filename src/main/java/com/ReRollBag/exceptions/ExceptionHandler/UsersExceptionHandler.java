@@ -3,6 +3,7 @@ package com.ReRollBag.exceptions.ExceptionHandler;
 import com.ReRollBag.controller.BaseController;
 import com.ReRollBag.exceptions.ErrorCode;
 import com.ReRollBag.exceptions.ErrorJson;
+import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
@@ -14,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import javax.xml.ws.Response;
 
 @ControllerAdvice
 @Log4j2
@@ -79,6 +78,16 @@ public class UsersExceptionHandler extends BaseController {
                 .errorCode(ErrorCode.ExpiredJwtException.getErrorCode())
                 .build();
         return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
+    }
+
+    @ExceptionHandler(DuplicateUserSaveException.class)
+    public ResponseEntity<?> handleDuplicateUserSaveException(DuplicateUserSaveException e) {
+        log.error("DuplicateUserSaveException");
+        ErrorJson errorJson = ErrorJson.builder()
+                .message("DuplicateUserSaveException")
+                .errorCode(ErrorCode.DuplicateUserSaveException.getErrorCode())
+                .build();
+        return sendResponseHttpByJson(errorJson, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(Exception.class)

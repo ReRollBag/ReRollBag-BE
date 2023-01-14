@@ -3,9 +3,9 @@ package com.ReRollBag.service;
 import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.dto.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.UsersLoginResponseDto;
-import com.ReRollBag.domain.dto.UsersResponseDto;
 import com.ReRollBag.domain.dto.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.test.annotation.Commit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
@@ -28,12 +27,16 @@ public class UsersService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
-    @Commit
     public UsersLoginResponseDto save(UsersSaveRequestDto requestDto) throws UsersIdOrPasswordInvalidException {
+        // 이미 저장되어 있는 회원인 경우, 바로 예외 처리
+        if (usersRepository.existsByUsersId(requestDto.getUsersId())) throw new DuplicateUserSaveException();
+
+        // 주어진 정보 바탕으로 users 저장
         Users users = requestDto.toEntity();
         String encryptedPassword = passwordEncoder.encode(users.getPassword());
         users.setPassword(encryptedPassword);
         usersRepository.save(users);
+
         // save 이후 login 까지 한 번에 처리
         UsersLoginRequestDto usersLoginRequestDto = new UsersLoginRequestDto(users.getUsersId(), users.getPassword());
         String accessToken = jwtTokenProvider.createAccessToken(requestDto.getUsersId());

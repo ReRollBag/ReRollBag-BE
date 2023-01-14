@@ -4,6 +4,7 @@ import com.ReRollBag.domain.dto.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.UsersResponseDto;
 import com.ReRollBag.domain.dto.UsersSaveRequestDto;
+import com.ReRollBag.exceptions.ErrorCode;
 import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.repository.UsersRepository;
@@ -82,6 +83,33 @@ public class UsersIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
+
+    }
+
+    @Test
+    @DisplayName("[Integration] 회원가입 후 같은 정보로 한번 더 회원가입 실패")
+    void Integration_회원가입후_같은정보로_한번더회원가입_실패() throws Exception {
+        //given
+        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
+                "test@gmail.com",
+                "testNickname",
+                "testPassword"
+        );
+
+        ErrorJson errorJson = ErrorJson.builder()
+                .errorCode(ErrorCode.DuplicateUserSaveException.getErrorCode())
+                .message("DuplicateUserSaveException")
+                .build();
+
+        //when
+        MvcResult saveResult = mockMvc.perform(post("/api/v2/users/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(requestDto))
+                )
+                //then
+                .andExpect(status().isForbidden())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
+                .andReturn();
 
     }
 
