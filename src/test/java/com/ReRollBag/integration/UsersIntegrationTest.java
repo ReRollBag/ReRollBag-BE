@@ -24,7 +24,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -47,9 +46,9 @@ public class UsersIntegrationTest {
 
     @Test
     @Order(1)
-    @DisplayName("[Integration] 회원 가입")
+    @DisplayName("[Integration] 회원가입 후 즉시 로그인 및 토큰 리턴 테스트")
     @Rollback(value = false)
-    void Integration_회원가입_테스트() throws Exception {
+    void Integration_회원가입후_즉시로그인및_발급된토큰으로_dummyMethod_성공() throws Exception {
         //given
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
@@ -60,15 +59,27 @@ public class UsersIntegrationTest {
         UsersResponseDto responseDto = new UsersResponseDto("test@gmail.com", "testNickname");
 
         //when
-        mockMvc.perform(post("/api/v2/users/save")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(requestDto))
-        )
-
-        //then
+        MvcResult saveResult = mockMvc.perform(post("/api/v2/users/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(requestDto))
+                )
                 .andExpect(status().isOk())
-                .andExpect(content().json(new ObjectMapper().writeValueAsString(responseDto)))
-                .andDo(print());
+                .andDo(print())
+                .andReturn();
+
+        String content = saveResult.getResponse().getContentAsString();
+        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
+
+        String accessToken = loginResponseDto.getAccessToken();
+        String refreshToken = loginResponseDto.getRefreshToken();
+
+        mockMvc.perform(get("/api/v1/users/dummyMethod")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Token", accessToken))
+                //then
+                .andExpect(status().isOk())
+                .andReturn();
+
 
     }
 
@@ -167,5 +178,4 @@ public class UsersIntegrationTest {
                 .andReturn();
 
     }
-
 }
