@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCode {
     UsersIdAlreadyExistException(1000),
     UsersIdOrPasswordInvalidException(1001),
+    NicknameAlreadyExistException(1002),
+    DuplicateUserSaveException(1003),
 
     ExpiredJwtException(2000),
     ReIssueBeforeAccessTokenExpiredException(2001),

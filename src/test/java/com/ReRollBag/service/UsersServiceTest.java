@@ -6,6 +6,7 @@ import com.ReRollBag.domain.dto.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.UsersResponseDto;
 import com.ReRollBag.domain.dto.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.repository.UsersRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -68,6 +70,25 @@ public class UsersServiceTest {
         //then
         assertThat(targetResponseDto.getAccessToken()).isEqualTo("AccessToken");
         assertThat(targetResponseDto.getRefreshToken()).isEqualTo("RefreshToken");
+    }
+
+    @Test
+    @DisplayName("[Service] 회원 가입 후 같은 정보로 회원가입 시 실패")
+    public void Service_회원가입후_같은정보로_회원가입시_실패() throws UsersIdOrPasswordInvalidException {
+        //given
+        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
+                "test@gmail.com",
+                "testNickname",
+                "testPassword"
+        );
+
+        //mocking
+        given(usersRepository.existsByUsersId(any()))
+                .willReturn(true);
+
+        //when
+        //then
+        assertThrows(DuplicateUserSaveException.class, () -> usersService.save(requestDto));
     }
 
     @Test

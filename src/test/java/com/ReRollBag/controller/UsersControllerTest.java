@@ -3,16 +3,18 @@ package com.ReRollBag.controller;
 import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.dto.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.UsersLoginResponseDto;
-import com.ReRollBag.domain.dto.UsersResponseDto;
 import com.ReRollBag.domain.dto.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.exceptions.ErrorCode;
+import com.ReRollBag.exceptions.ErrorJson;
+import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
+import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -80,6 +82,34 @@ public class UsersControllerTest {
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(loginResponseDto)))
                 .andDo(print());
 
+    }
+
+    @Test
+    @DisplayName("[Controller] 회원 중복 가입 예외")
+    void Controller_회원중복가입_예외_테스트() throws Exception {
+        //given
+        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
+                "test@gmail.com",
+                "testNickname",
+                "testPassword"
+        );
+
+        ErrorJson errorJson = ErrorJson.builder()
+                .errorCode(ErrorCode.DuplicateUserSaveException.getErrorCode())
+                .message("DuplicateUserSaveException")
+                .build();
+
+        //mocking
+        when(usersService.save(any())).thenThrow(DuplicateUserSaveException.class);
+
+        //when
+        mockMvc.perform(post("/api/v2/users/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(requestDto))
+                )
+                //then
+                .andExpect(status().isForbidden())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)));
     }
 
     @Test
@@ -151,5 +181,46 @@ public class UsersControllerTest {
                 .andExpect(status().isForbidden())
                 .andReturn();
     }
+
+    @Test
+    @DisplayName("[Controller] 닉네임 중복 검사 성공 case")
+    void Controller_닉네임_중복검사_성공() throws NicknameAlreadyExistException {
+        //given
+        String nickname = "nickname";
+        //mocking
+        when(usersService.checkNicknameExist(nickname)).thenReturn(true);
+        //when
+        try {
+            mockMvc.perform(get("/api/v2/users/checkNicknameExist/" + nickname))
+                    //then
+                    .andExpect(status().isOk())
+                    .andReturn();
+        } catch (NicknameAlreadyExistException e) {
+            throw new NicknameAlreadyExistException();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    @DisplayName("[Controller] 닉네임 중복 검사 실패 case")
+    void Controller_닉네임_중복검사_실패() throws NicknameAlreadyExistException {
+        //given
+        String nickname = "nickname";
+        //mocking
+        when(usersService.checkNicknameExist(nickname)).thenThrow(NicknameAlreadyExistException.class);
+        //when
+        try {
+            mockMvc.perform(get("/api/v2/users/checkNicknameExist/" + nickname))
+                    //then
+                    .andExpect(status().isAccepted())
+                    .andReturn();
+        } catch (NicknameAlreadyExistException e) {
+            throw new NicknameAlreadyExistException();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }

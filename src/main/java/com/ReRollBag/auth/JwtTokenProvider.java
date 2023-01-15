@@ -33,8 +33,6 @@ public class JwtTokenProvider {
 
     private final CustomUserDetailService userDetailService;
     private final RedisService redisService;
-    private final AccessTokenRepository accessTokenRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     private static long accessTokenValidTime = 5 * 60L;
     private static long refreshTokenValidTime = 3600 * 60L;
@@ -85,12 +83,6 @@ public class JwtTokenProvider {
 
     private String getUsersId(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-    }
-
-    private TokenType getTokenType(String token) {
-        String tokenType = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("tokenType").toString();
-        if (tokenType.equals("AccessToken")) return TokenType.AccessToken;
-        return TokenType.RefreshToken;
     }
 
     public String resolveToken(HttpServletRequest request) throws TokenIsNullException {

@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Log4j2
-@Component
 public class ExceptionHandlerFilter extends OncePerRequestFilter {
 
     @Override
@@ -31,7 +30,6 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             setErrorResponse(HttpStatus.ACCEPTED, response, "TokenIsNullException", ErrorCode.TokenIsNullException);
         } catch (SignatureException | MalformedJwtException e) {
             e.printStackTrace();
-            log.info("**********************************");
             setErrorResponse(HttpStatus.FORBIDDEN, response, "SignatureException", ErrorCode.SignatureException);
         } catch (ExpiredJwtException e) {
             e.printStackTrace();

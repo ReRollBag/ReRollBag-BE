@@ -63,8 +63,8 @@ public class AuthIntegrationTest {
     private void init_saveUsers() throws Exception {
 
         // Set jwtToken Valid Time
-        jwtTokenProvider.setAccessTokenValidTime(2L);
-        jwtTokenProvider.setRefreshTokenValidTime(6L);
+        jwtTokenProvider.setAccessTokenValidTime(1L);
+        jwtTokenProvider.setRefreshTokenValidTime(2L);
 
         UsersSaveRequestDto usersSaveRequestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
@@ -149,7 +149,7 @@ public class AuthIntegrationTest {
     @DisplayName("[Integration] Expired Access Token 보낼 때 예외 (httpStatus : 202 / AccessTokenExpiredException) 테스트")
     void Integration_Expired_AccessToken_테스트() throws Exception {
         // Access Token 의 만료를 위해 2초 대기
-        Thread.sleep(2 * 1000L);
+        Thread.sleep(1000L);
 
         ErrorJson errorJson = ErrorJson.builder()
                 .errorCode(2000)
@@ -196,7 +196,7 @@ public class AuthIntegrationTest {
     @DisplayName("[Integration] 올바르지 않은 RefreshToken 값 보낼 때 예외 (httpStatus : 403 / SignatureException) 테스트")
     void Integration_Invalid_RefreshToken_테스트() throws Exception {
         // Access Token 이 Expired 될 때 까지 대기
-        Thread.sleep(2 * 1000L);
+        Thread.sleep(1 * 1000L);
 
         String invalidRefreshToken = "invalidRefreshToken";
 
@@ -214,8 +214,7 @@ public class AuthIntegrationTest {
     @Order(6)
     @DisplayName("[Integration] Refresh Token 만료 이후 ReIssue 예외 (httpStatus : 202 / RefreshTokenExpiredException) 테스트")
     void Integration_Expired_RefreshToken_테스트() throws Exception {
-        // Refresh Token 의 만료를 위해 4초 대기
-        Thread.sleep(6 * 1000L);
+        // Refresh Token 은 이미 Expired
 
         ErrorJson errorJson = ErrorJson.builder()
                 .errorCode(2000)

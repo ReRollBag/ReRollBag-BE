@@ -3,6 +3,8 @@ package com.ReRollBag.exceptions.ExceptionHandler;
 import com.ReRollBag.controller.BaseController;
 import com.ReRollBag.exceptions.ErrorCode;
 import com.ReRollBag.exceptions.ErrorJson;
+import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
+import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -19,11 +21,21 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class UsersExceptionHandler extends BaseController {
 
     @ExceptionHandler(UsersIdAlreadyExistException.class)
-    public ResponseEntity<?> handleDuplicatedUsersException (UsersIdAlreadyExistException e) {
-        log.error("DuplicatedUsersException");
+    public ResponseEntity<?> handleUsersIdAlreadyExistException(UsersIdAlreadyExistException e) {
+        log.error("UsersIdAlreadyExistException");
         ErrorJson errorJson = ErrorJson.builder()
                 .message("UsersIdAlreadyExistException")
                 .errorCode(ErrorCode.UsersIdAlreadyExistException.getErrorCode())
+                .build();
+        return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
+    }
+
+    @ExceptionHandler(NicknameAlreadyExistException.class)
+    public ResponseEntity<?> handleNicknameAlreadyExistException(NicknameAlreadyExistException e) {
+        log.error("NicknameAlreadyExistException");
+        ErrorJson errorJson = ErrorJson.builder()
+                .message("NicknameAlreadyExistException")
+                .errorCode(ErrorCode.NicknameAlreadyExistException.getErrorCode())
                 .build();
         return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
     }
@@ -66,6 +78,16 @@ public class UsersExceptionHandler extends BaseController {
                 .errorCode(ErrorCode.ExpiredJwtException.getErrorCode())
                 .build();
         return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
+    }
+
+    @ExceptionHandler(DuplicateUserSaveException.class)
+    public ResponseEntity<?> handleDuplicateUserSaveException(DuplicateUserSaveException e) {
+        log.error("DuplicateUserSaveException");
+        ErrorJson errorJson = ErrorJson.builder()
+                .message("DuplicateUserSaveException")
+                .errorCode(ErrorCode.DuplicateUserSaveException.getErrorCode())
+                .build();
+        return sendResponseHttpByJson(errorJson, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(Exception.class)
