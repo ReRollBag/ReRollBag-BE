@@ -37,18 +37,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             web.ignoring()
                     .antMatchers(
                             "/api/v2/**",
-                            "/h2-console/**"
+                            "/h2-console/**",
+                            "/docs/**"
                     );
         };
     }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
         http.headers().frameOptions().disable();
         http.csrf().disable();
         http.httpBasic().disable()
                 .authorizeRequests()
                 .antMatchers("/api/v1/**").authenticated()
-                .antMatchers("/api/v2/**", "/h2-console/**").permitAll()
+                .antMatchers("/api/v2/**", "/h2-console/**", "/docs/**").permitAll()
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new ExceptionHandlerFilter(), JwtAuthenticationFilter.class)

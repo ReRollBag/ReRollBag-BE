@@ -12,17 +12,27 @@ import com.ReRollBag.service.RedisService;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import javax.transaction.Transactional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -33,7 +43,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ExtendWith(RestDocumentationExtension.class)
 public class UsersIntegrationTest {
+    // override default by registering extension for setting directory
+    // default : build/generated-snippets
+//    @RegisterExtension
+//    final RestDocumentationExtension restDocumentationExtension = new RestDocumentationExtension("custom");
 
     @Autowired
     private UsersService usersService;
@@ -46,6 +61,13 @@ public class UsersIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @BeforeEach
+    void setUpForSpringRestDocs(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .apply(documentationConfiguration(restDocumentation))
+                .build();
+    }
 
     @Test
     @Order(1)
@@ -68,6 +90,10 @@ public class UsersIntegrationTest {
                 )
                 .andExpect(status().isOk())
                 .andDo(print())
+                .andDo(document("Users", responseFields(
+                        fieldWithPath("accessToken").description("User's access token value").type(JsonFieldType.STRING),
+                        fieldWithPath("refreshToken").description("User's refresh token value").type(JsonFieldType.STRING)
+                )))
                 .andReturn();
 
         String content = saveResult.getResponse().getContentAsString();
@@ -80,10 +106,7 @@ public class UsersIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Token", accessToken))
                 //then
-                .andExpect(status().isOk())
-                .andReturn();
-
-
+                .andExpect(status().isOk());
     }
 
     @Test
