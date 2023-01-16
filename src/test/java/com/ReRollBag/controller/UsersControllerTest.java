@@ -10,6 +10,7 @@ import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
+import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -132,6 +133,30 @@ public class UsersControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(responseDto)))
                 .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Controller] 잘못된 ID 또는 PW로 로그인 시도 예외")
+    void Controller_잘못된IDPW_로그인_예외_테스트() throws Exception {
+        //given
+        UsersLoginRequestDto requestDto = new UsersLoginRequestDto("test@gmail.com", "testPassword");
+
+        ErrorJson errorJson = ErrorJson.builder()
+                .errorCode(ErrorCode.UsersIdOrPasswordInvalidException.getErrorCode())
+                .message("UsersIdOrPasswordInvalidException")
+                .build();
+
+        //mocking
+        when(usersService.login(any())).thenThrow(UsersIdOrPasswordInvalidException.class);
+
+        //when
+        mockMvc.perform(post("/api/v2/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(requestDto))
+                )
+                //then
+                .andExpect(status().isForbidden())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)));
     }
 
     @Test

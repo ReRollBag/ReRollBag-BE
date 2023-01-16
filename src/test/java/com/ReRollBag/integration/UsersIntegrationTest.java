@@ -186,6 +186,29 @@ public class UsersIntegrationTest {
     }
 
     @Test
+    @DisplayName("[Integration] 잘못된 ID 또는 Pw로 로그인 시도 예외")
+    void Integration_잘못된IDPW_로그인_예외_테스트() throws Exception {
+        //given
+        UsersLoginRequestDto requestDto = new UsersLoginRequestDto("invalidUsersId@gmail.com", "invalidUsersPassword");
+
+        ErrorJson errorJson = ErrorJson.builder()
+                .errorCode(ErrorCode.UsersIdOrPasswordInvalidException.getErrorCode())
+                .message("UsersIdOrPasswordInvalidException")
+                .build();
+
+        //when
+        mockMvc.perform(post("/api/v2/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(requestDto))
+                )
+                //then
+                .andExpect(status().isForbidden())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
+                .andDo(print())
+                .andReturn();
+    }
+
+    @Test
     @DisplayName("[Integration] 아이디 중복 검사 성공 case")
     void Integration_아이디_중복검사_성공() throws UsersIdAlreadyExistException {
         //given

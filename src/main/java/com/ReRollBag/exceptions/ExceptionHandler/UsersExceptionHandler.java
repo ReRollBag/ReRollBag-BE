@@ -47,7 +47,7 @@ public class UsersExceptionHandler extends BaseController {
                 .message("UsersIdOrPasswordInvalidException")
                 .errorCode(ErrorCode.UsersIdOrPasswordInvalidException.getErrorCode())
                 .build();
-        return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
+        return sendResponseHttpByJson(errorJson, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(MalformedJwtException.class)
