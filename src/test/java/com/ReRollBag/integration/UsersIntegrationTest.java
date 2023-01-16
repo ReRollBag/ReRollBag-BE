@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,8 +32,7 @@ import javax.transaction.Transactional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -45,10 +45,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ExtendWith(RestDocumentationExtension.class)
 public class UsersIntegrationTest {
-    // override default by registering extension for setting directory
-    // default : build/generated-snippets
-//    @RegisterExtension
-//    final RestDocumentationExtension restDocumentationExtension = new RestDocumentationExtension("custom");
 
     @Autowired
     private UsersService usersService;
@@ -90,10 +86,19 @@ public class UsersIntegrationTest {
                 )
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andDo(document("Users", responseFields(
-                        fieldWithPath("accessToken").description("User's access token value").type(JsonFieldType.STRING),
-                        fieldWithPath("refreshToken").description("User's refresh token value").type(JsonFieldType.STRING)
-                )))
+                .andDo(document("Users-save",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestFields(
+                                fieldWithPath("usersId").description("usersID value to save.").type(JsonFieldType.STRING),
+                                fieldWithPath("nickname").description("nickname value to save.").type(JsonFieldType.STRING),
+                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING)
+                        ),
+                        responseFields(
+                                fieldWithPath("accessToken").description("User's access token value").type(JsonFieldType.STRING),
+                                fieldWithPath("refreshToken").description("User's refresh token value").type(JsonFieldType.STRING)
+                        )
+                ))
                 .andReturn();
 
         String content = saveResult.getResponse().getContentAsString();
@@ -132,6 +137,18 @@ public class UsersIntegrationTest {
                 //then
                 .andExpect(status().isForbidden())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
+                .andDo(document("Users-save-DuplicatedUserSaveException",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestFields(
+                                fieldWithPath("usersId").description("Duplicated usersID").type(JsonFieldType.STRING),
+                                fieldWithPath("nickname").description("Duplicated nickname").type(JsonFieldType.STRING),
+                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING)
+                        ),
+                        responseFields(
+                                fieldWithPath("errorCode").description("errorCode of DuplicatedUserSaveException").type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("message of DuplicatedUserSaveException").type(JsonFieldType.STRING)
+                        )))
                 .andReturn();
 
     }

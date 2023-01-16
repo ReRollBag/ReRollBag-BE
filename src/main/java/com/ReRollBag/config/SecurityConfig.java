@@ -38,7 +38,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers(
                             "/api/v2/**",
                             "/h2-console/**",
-                            "/docs/**"
+                            "/docs/**",
+                            "/favicon.ico"
                     );
         };
     }
@@ -50,7 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.httpBasic().disable()
                 .authorizeRequests()
                 .antMatchers("/api/v1/**").authenticated()
-                .antMatchers("/api/v2/**", "/h2-console/**", "/docs/**").permitAll()
+                .antMatchers("/api/v2/**", "/h2-console/**", "/docs/**", "/favicon.ico").permitAll()
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new ExceptionHandlerFilter(), JwtAuthenticationFilter.class)
