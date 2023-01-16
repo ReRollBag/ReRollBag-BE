@@ -64,7 +64,7 @@ public class AuthIntegrationTest {
 
         // Set jwtToken Valid Time
         jwtTokenProvider.setAccessTokenValidTime(1L);
-        jwtTokenProvider.setRefreshTokenValidTime(2L);
+        jwtTokenProvider.setRefreshTokenValidTime(3L);
 
         UsersSaveRequestDto usersSaveRequestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
@@ -214,8 +214,8 @@ public class AuthIntegrationTest {
     @Order(6)
     @DisplayName("[Integration] Refresh Token 만료 이후 ReIssue 예외 (httpStatus : 202 / RefreshTokenExpiredException) 테스트")
     void Integration_Expired_RefreshToken_테스트() throws Exception {
-        // Refresh Token 은 이미 Expired
-
+        // Refresh Token 이 Expired 될 때 까지 대기
+        Thread.sleep(1 * 1000L);
         ErrorJson errorJson = ErrorJson.builder()
                 .errorCode(2000)
                 .message("ExpiredJwtException")
