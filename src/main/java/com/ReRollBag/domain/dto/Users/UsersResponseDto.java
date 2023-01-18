@@ -1,4 +1,4 @@
-package com.ReRollBag.domain.dto;
+package com.ReRollBag.domain.dto.Users;
 
 import com.ReRollBag.domain.entity.Users;
 import lombok.AllArgsConstructor;

@@ -1,9 +1,10 @@
 package com.ReRollBag.controller;
 
 import com.ReRollBag.auth.JwtTokenProvider;
-import com.ReRollBag.domain.dto.UsersLoginRequestDto;
-import com.ReRollBag.domain.dto.UsersLoginResponseDto;
-import com.ReRollBag.domain.dto.UsersSaveRequestDto;
+import com.ReRollBag.domain.dto.MockResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
+import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.exceptions.ErrorCode;
 import com.ReRollBag.exceptions.ErrorJson;
@@ -164,8 +165,11 @@ public class UsersControllerTest {
     void Controller_아이디_중복검사_성공() throws UsersIdAlreadyExistException {
         //given
         String usersId = "test@gmail.com";
+        MockResponseDto responseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
         //mocking
-        when(usersService.checkUserExist(usersId)).thenReturn(true);
+        when(usersService.checkUserExist(usersId)).thenReturn(responseDto);
         //when
         try {
             mockMvc.perform(get("/api/v2/users/checkUserExist/" + usersId))
@@ -212,8 +216,11 @@ public class UsersControllerTest {
     void Controller_닉네임_중복검사_성공() throws NicknameAlreadyExistException {
         //given
         String nickname = "nickname";
+        MockResponseDto responseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
         //mocking
-        when(usersService.checkNicknameExist(nickname)).thenReturn(true);
+        when(usersService.checkNicknameExist(nickname)).thenReturn(responseDto);
         //when
         try {
             mockMvc.perform(get("/api/v2/users/checkNicknameExist/" + nickname))

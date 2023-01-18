@@ -11,4 +11,9 @@ public class WebController {
     public String docs_users() {
         return "users.html";
     }
+
+    @GetMapping("docs/auth")
+    public String docs_auth() {
+        return "auth.html";
+    }
 }
