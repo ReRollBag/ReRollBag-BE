@@ -1,7 +1,7 @@
 package com.ReRollBag.controller;
 
-import com.ReRollBag.domain.dto.UsersLoginRequestDto;
-import com.ReRollBag.domain.dto.UsersSaveRequestDto;
+import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
+import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.ws.Response;
 
 @RequiredArgsConstructor
 @RestController

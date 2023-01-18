@@ -1,10 +1,10 @@
 package com.ReRollBag.service;
 
 import com.ReRollBag.auth.JwtTokenProvider;
-import com.ReRollBag.domain.dto.UsersLoginRequestDto;
-import com.ReRollBag.domain.dto.UsersLoginResponseDto;
-import com.ReRollBag.domain.dto.UsersResponseDto;
-import com.ReRollBag.domain.dto.UsersSaveRequestDto;
+import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
+import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;

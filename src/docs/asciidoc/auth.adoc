@@ -1,0 +1,55 @@
+= RRB API
+Powered By Dongwhwan, https://github.com/wkazxf
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs // 문서에 표기되는 코드들의 하이라이팅을 highlightjs를 사용
+:toc: left // toc (Table Of Contents)를 문서의 좌측에 두기
+:toclevels: 1
+:sectlinks:
+
+
+[[Auth-TokenIsNullException]]
+== Auth-TokenIsNullException
+
+* When header's token fields is null
+
+operation::Auth-TokenIsNullException[snippets='http-request,http-response,response-fields']
+
+---
+
+[[Auth-accessToken-SignatureException]]
+== Auth-accessToken-SignatureException
+
+* When accessToken value is wrong value
+
+operation::Auth-accessToken-SignatureException[snippets='http-request,request-headers,response-body,response-fields']
+
+---
+
+[[Auth-accessToken-ExpiredJwtException]]
+== Auth-accessToken-ExpiredJwtException
+
+* When accessToken is expired
+
+operation::Auth-accessToken-ExpiredJwtException[snippets='http-request,request-headers,response-body,response-fields']
+
+---
+
+[[Auth-reIssue]]
+== Auth-reIssue
+
+operation::Auth-reIssue[snippets='http-request,request-headers,response-body,response-fields']
+
+---
+
+[[Auth-reIssue-SignatureException]]
+== Auth-reIssue-SignatureException
+
+operation::Auth-reIssue-SignatureException[snippets='http-request,request-headers,response-body,response-fields']
+
+---
+
+[[Auth-reIssue-ExpiredJwtException]]
+==Auth-reIssue-ExpiredJwtException
+
+operation::Auth-reIssue-ExpiredJwtException[snippets='http-request,request-headers,response-body,response-fields']

@@ -1,5 +1,6 @@
 package com.ReRollBag.auth;
 
+import com.ReRollBag.domain.dto.Tokens.AccessTokenResponseDto;
 import com.ReRollBag.exceptions.authExceptions.ReIssueBeforeAccessTokenExpiredException;
 import com.ReRollBag.exceptions.authExceptions.TokenIsNullException;
 import com.ReRollBag.repository.AccessTokenRepository;
@@ -17,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.Access;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -106,7 +108,7 @@ public class JwtTokenProvider {
         return redisService.findAccessToken(usersId) == null;
     }
 
-    public String reIssue(HttpServletRequest request) throws ReIssueBeforeAccessTokenExpiredException {
+    public AccessTokenResponseDto reIssue(HttpServletRequest request) throws ReIssueBeforeAccessTokenExpiredException {
         String refreshToken = resolveToken(request);
         try {
             checkRefreshTokenIsExpired(refreshToken);
@@ -116,7 +118,10 @@ public class JwtTokenProvider {
         if (!checkAccessTokenIsExpired(refreshToken)) throw new ReIssueBeforeAccessTokenExpiredException();
 
         String usersId = getUsersId(refreshToken);
-        return createAccessToken(usersId);
+        String newAccessToken = createAccessToken(usersId);
+        return AccessTokenResponseDto.builder()
+                .accessToken(newAccessToken)
+                .build();
     }
 
 }

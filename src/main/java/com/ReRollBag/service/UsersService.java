@@ -1,9 +1,11 @@
 package com.ReRollBag.service;
 
 import com.ReRollBag.auth.JwtTokenProvider;
-import com.ReRollBag.domain.dto.UsersLoginRequestDto;
-import com.ReRollBag.domain.dto.UsersLoginResponseDto;
-import com.ReRollBag.domain.dto.UsersSaveRequestDto;
+import com.ReRollBag.domain.dto.MockResponseDto;
+import com.ReRollBag.domain.dto.Tokens.AccessTokenResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
+import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
@@ -48,14 +50,18 @@ public class UsersService {
                 .build();
     }
 
-    public Boolean checkUserExist(String usersId) throws UsersIdAlreadyExistException {
+    public MockResponseDto checkUserExist(String usersId) throws UsersIdAlreadyExistException {
         if (usersRepository.existsByUsersId(usersId)) throw new UsersIdAlreadyExistException();
-        return true;
+        return MockResponseDto.builder()
+                .data(true)
+                .build();
     }
 
-    public Boolean checkNicknameExist(String nickname) throws NicknameAlreadyExistException {
+    public MockResponseDto checkNicknameExist(String nickname) throws NicknameAlreadyExistException {
         if (usersRepository.existsByNickname(nickname)) throw new NicknameAlreadyExistException();
-        return true;
+        return MockResponseDto.builder()
+                .data(true)
+                .build();
     }
 
     public UsersLoginResponseDto login(UsersLoginRequestDto requestDto) throws UsersIdOrPasswordInvalidException {
@@ -77,7 +83,7 @@ public class UsersService {
                 .build();
     }
 
-    public String reIssue(HttpServletRequest request) {
+    public AccessTokenResponseDto reIssue(HttpServletRequest request) {
         return jwtTokenProvider.reIssue(request);
     }
 

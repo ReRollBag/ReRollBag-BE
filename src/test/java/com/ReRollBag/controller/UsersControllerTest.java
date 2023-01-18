@@ -1,15 +1,17 @@
 package com.ReRollBag.controller;
 
 import com.ReRollBag.auth.JwtTokenProvider;
-import com.ReRollBag.domain.dto.UsersLoginRequestDto;
-import com.ReRollBag.domain.dto.UsersLoginResponseDto;
-import com.ReRollBag.domain.dto.UsersSaveRequestDto;
+import com.ReRollBag.domain.dto.MockResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
+import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.exceptions.ErrorCode;
 import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
+import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -135,12 +137,39 @@ public class UsersControllerTest {
     }
 
     @Test
+    @DisplayName("[Controller] 잘못된 ID 또는 PW로 로그인 시도 예외")
+    void Controller_잘못된IDPW_로그인_예외_테스트() throws Exception {
+        //given
+        UsersLoginRequestDto requestDto = new UsersLoginRequestDto("test@gmail.com", "testPassword");
+
+        ErrorJson errorJson = ErrorJson.builder()
+                .errorCode(ErrorCode.UsersIdOrPasswordInvalidException.getErrorCode())
+                .message("UsersIdOrPasswordInvalidException")
+                .build();
+
+        //mocking
+        when(usersService.login(any())).thenThrow(UsersIdOrPasswordInvalidException.class);
+
+        //when
+        mockMvc.perform(post("/api/v2/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(requestDto))
+                )
+                //then
+                .andExpect(status().isForbidden())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)));
+    }
+
+    @Test
     @DisplayName("[Controller] 아이디 중복 검사 성공 case")
     void Controller_아이디_중복검사_성공() throws UsersIdAlreadyExistException {
         //given
         String usersId = "test@gmail.com";
+        MockResponseDto responseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
         //mocking
-        when(usersService.checkUserExist(usersId)).thenReturn(true);
+        when(usersService.checkUserExist(usersId)).thenReturn(responseDto);
         //when
         try {
             mockMvc.perform(get("/api/v2/users/checkUserExist/" + usersId))
@@ -187,8 +216,11 @@ public class UsersControllerTest {
     void Controller_닉네임_중복검사_성공() throws NicknameAlreadyExistException {
         //given
         String nickname = "nickname";
+        MockResponseDto responseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
         //mocking
-        when(usersService.checkNicknameExist(nickname)).thenReturn(true);
+        when(usersService.checkNicknameExist(nickname)).thenReturn(responseDto);
         //when
         try {
             mockMvc.perform(get("/api/v2/users/checkNicknameExist/" + nickname))
