@@ -1,7 +1,7 @@
 package com.ReRollBag.exceptions.ExceptionHandler;
 
 import com.ReRollBag.controller.BaseController;
-import com.ReRollBag.exceptions.ErrorCode;
+import com.ReRollBag.enums.ErrorCode;
 import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;

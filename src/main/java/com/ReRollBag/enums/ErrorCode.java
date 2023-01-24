@@ -1,4 +1,4 @@
-package com.ReRollBag.exceptions;
+package com.ReRollBag.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

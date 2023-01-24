@@ -1,6 +1,6 @@
 package com.ReRollBag.auth;
 
-import com.ReRollBag.exceptions.ErrorCode;
+import com.ReRollBag.enums.ErrorCode;
 import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.exceptions.authExceptions.ReIssueBeforeAccessTokenExpiredException;
 import com.ReRollBag.exceptions.authExceptions.TokenIsNullException;
@@ -9,7 +9,6 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;

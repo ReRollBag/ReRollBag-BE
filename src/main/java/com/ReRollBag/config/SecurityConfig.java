@@ -3,6 +3,7 @@ package com.ReRollBag.config;
 import com.ReRollBag.auth.ExceptionHandlerFilter;
 import com.ReRollBag.auth.JwtAuthenticationFilter;
 import com.ReRollBag.auth.JwtTokenProvider;
+import com.ReRollBag.enums.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -52,6 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/v1/**").authenticated()
                 .antMatchers("/api/v2/**", "/h2-console/**", "/docs/**", "/favicon.ico").permitAll()
+                .antMatchers("/api/v3/**").hasRole("ADMIN")
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new ExceptionHandlerFilter(), JwtAuthenticationFilter.class)

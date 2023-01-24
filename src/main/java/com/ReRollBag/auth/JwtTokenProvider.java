@@ -1,10 +1,9 @@
 package com.ReRollBag.auth;
 
 import com.ReRollBag.domain.dto.Tokens.AccessTokenResponseDto;
+import com.ReRollBag.enums.TokenType;
 import com.ReRollBag.exceptions.authExceptions.ReIssueBeforeAccessTokenExpiredException;
 import com.ReRollBag.exceptions.authExceptions.TokenIsNullException;
-import com.ReRollBag.repository.AccessTokenRepository;
-import com.ReRollBag.repository.RefreshTokenRepository;
 import com.ReRollBag.service.CustomUserDetailService;
 import com.ReRollBag.service.RedisService;
 import io.jsonwebtoken.*;
@@ -18,7 +17,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.Access;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;

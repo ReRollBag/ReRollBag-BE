@@ -6,6 +6,7 @@ import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.repository.UsersRepository;
@@ -48,7 +49,8 @@ public class UsersServiceTest {
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
                 "testNickname",
-                "testPassword"
+                "testPassword",
+                null
         );
         Users users = requestDto.toEntity();
         UsersResponseDto responseDto = new UsersResponseDto(users);
@@ -79,7 +81,8 @@ public class UsersServiceTest {
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
                 "testNickname",
-                "testPassword"
+                "testPassword",
+                null
         );
 
         //mocking
@@ -104,6 +107,7 @@ public class UsersServiceTest {
                 .usersId("test@gmail.com")
                 .nickname("testNickname")
                 .password(encodedPassword)
+                .userRole(UserRole.ROLE_USER)
                 .build();
         //mocking
         given(passwordEncoder.matches(rawPassword, encodedPassword))

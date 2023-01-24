@@ -5,7 +5,7 @@ import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
-import com.ReRollBag.exceptions.ErrorCode;
+import com.ReRollBag.enums.ErrorCode;
 import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.repository.UsersRepository;
@@ -79,7 +79,8 @@ public class UsersIntegrationTest {
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
                 "testNickname",
-                "testPassword"
+                "testPassword",
+                null
         );
 
         UsersResponseDto responseDto = new UsersResponseDto("test@gmail.com", "testNickname");
@@ -97,7 +98,8 @@ public class UsersIntegrationTest {
                         requestFields(
                                 fieldWithPath("usersId").description("usersID value to save.").type(JsonFieldType.STRING),
                                 fieldWithPath("nickname").description("nickname value to save.").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING)
+                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING),
+                                fieldWithPath("userRole").description("userRole value to save. If null will return default value.").type(JsonFieldType.NULL)
                         ),
                         responseFields(
                                 fieldWithPath("accessToken").description("User's access token value").type(JsonFieldType.STRING),
@@ -126,7 +128,8 @@ public class UsersIntegrationTest {
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
                 "testNickname",
-                "testPassword"
+                "testPassword",
+                null
         );
 
         ErrorJson errorJson = ErrorJson.builder()
@@ -148,7 +151,8 @@ public class UsersIntegrationTest {
                         requestFields(
                                 fieldWithPath("usersId").description("Duplicated usersID").type(JsonFieldType.STRING),
                                 fieldWithPath("nickname").description("Duplicated nickname").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING)
+                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING),
+                                fieldWithPath("userRole").description("userRole value to save. If null will return default value.").type(JsonFieldType.NULL)
                         ),
                         responseFields(
                                 fieldWithPath("errorCode").description("errorCode of DuplicatedUserSaveException").type(JsonFieldType.NUMBER),
@@ -388,5 +392,57 @@ public class UsersIntegrationTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    @Order(1)
+    @DisplayName("[Integration] 관리자 회원가입 후 즉시 로그인 및 토큰 리턴 테스트")
+    @Rollback(value = false)
+    void Integration_관리자_회원가입후_즉시로그인및_발급된토큰으로_dummyMethod_성공() throws Exception {
+        //given
+        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
+                "testAdmin",
+                "testAdmin",
+                "testPassword",
+                "ROLE_ADMIN"
+        );
+
+        UsersResponseDto responseDto = new UsersResponseDto("testAdmin", "testAdmin");
+
+        //when
+        MvcResult saveResult = mockMvc.perform(post("/api/v2/users/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(requestDto))
+                )
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andDo(document("Users-save-admin",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestFields(
+                                fieldWithPath("usersId").description("usersID value to save.").type(JsonFieldType.STRING),
+                                fieldWithPath("nickname").description("nickname value to save.").type(JsonFieldType.STRING),
+                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING),
+                                fieldWithPath("userRole").description("userRole value to save. ROLE_ADMIN for register new admin.").type(JsonFieldType.STRING)
+                        ),
+                        responseFields(
+                                fieldWithPath("accessToken").description("User's access token value").type(JsonFieldType.STRING),
+                                fieldWithPath("refreshToken").description("User's refresh token value").type(JsonFieldType.STRING)
+                        )
+                ))
+                .andReturn();
+
+        String content = saveResult.getResponse().getContentAsString();
+        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
+
+        String accessToken = loginResponseDto.getAccessToken();
+        String refreshToken = loginResponseDto.getRefreshToken();
+
+        mockMvc.perform(get("/api/v3/users/dummyMethod")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Token", accessToken))
+                //then
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 }

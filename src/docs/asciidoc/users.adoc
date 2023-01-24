@@ -15,6 +15,12 @@ operation::Users-save[snippets='http-request,request-fields,http-response,respon
 
 ---
 
+[[Users-save-admin]]
+== Users-save-admin
+
+operation::Users-save-admin[snippets='http-request,request-fields,http-response,response-fields']
+---
+
 [[Users-save-DuplicatedUserSaveException]]
 == Users-save-DuplicatedUserSaveException
 
