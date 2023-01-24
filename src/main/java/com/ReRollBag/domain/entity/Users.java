@@ -1,11 +1,15 @@
 package com.ReRollBag.domain.entity;
 
+import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
+import com.ReRollBag.enums.UserRole;
 import com.sun.istack.NotNull;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity
@@ -32,9 +36,18 @@ public class Users implements UserDetails{
     @Column(name = "password", nullable = false)
     private String password;
 
+    @NotNull
+    @Column(name = "userrole", nullable = false)
+    private UserRole userRole;
+
+    @Transient
+    private Collection<? extends GrantedAuthority> authorities;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(userRole.name()));
+        return authorities;
     }
 
     @Override

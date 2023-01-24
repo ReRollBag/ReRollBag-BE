@@ -42,6 +42,11 @@ public class UsersController extends BaseController {
         return sendResponseHttpByJson(usersService.dummyMethod());
     }
 
+    @GetMapping("api/v3/users/dummyMethod")
+    public ResponseEntity<?> dummyMethodForV3() {
+        return sendResponseHttpByJson(usersService.dummyMethod());
+    }
+
     @PostMapping("api/v2/users/reIssue")
     public ResponseEntity<?> reIssue(HttpServletRequest request) {
         return sendResponseHttpByJson(usersService.reIssue(request));

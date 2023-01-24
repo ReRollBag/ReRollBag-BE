@@ -96,7 +96,8 @@ public class AuthIntegrationTest {
         UsersSaveRequestDto usersSaveRequestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
                 "testNickname",
-                "testPassword"
+                "testPassword",
+                null
         );
 
         UsersResponseDto responseDto = new UsersResponseDto("test@gmail.com", "testNickname");

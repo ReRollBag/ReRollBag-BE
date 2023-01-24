@@ -6,7 +6,8 @@ import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
-import com.ReRollBag.exceptions.ErrorCode;
+import com.ReRollBag.enums.ErrorCode;
+import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
@@ -57,12 +58,14 @@ public class UsersControllerTest {
                 .usersId("test@gmail.com")
                 .nickname("testNickname")
                 .password("testPassword")
+                .userRole(UserRole.ROLE_USER)
                 .build();
 
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
                 "testNickname",
-                "testPassword"
+                "testPassword",
+                null
         );
 
         UsersLoginResponseDto loginResponseDto = UsersLoginResponseDto.builder()
@@ -93,7 +96,8 @@ public class UsersControllerTest {
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
                 "testNickname",
-                "testPassword"
+                "testPassword",
+                null
         );
 
         ErrorJson errorJson = ErrorJson.builder()
