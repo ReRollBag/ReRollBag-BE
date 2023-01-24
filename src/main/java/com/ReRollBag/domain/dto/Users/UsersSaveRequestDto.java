@@ -17,7 +17,7 @@ public class UsersSaveRequestDto {
 
     public Users toEntity() {
         //Setting Default Parameter
-        if (this.userRole == null)
+        if (this.userRole == null || this.userRole.equals(""))
             userRole = "ROLE_USER";
 
         return Users.builder()

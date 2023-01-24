@@ -395,7 +395,6 @@ public class UsersIntegrationTest {
     }
 
     @Test
-    @Order(1)
     @DisplayName("[Integration] 관리자 회원가입 후 즉시 로그인 및 토큰 리턴 테스트")
     @Rollback(value = false)
     void Integration_관리자_회원가입후_즉시로그인및_발급된토큰으로_dummyMethod_성공() throws Exception {
