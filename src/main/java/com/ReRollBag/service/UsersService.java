@@ -52,16 +52,16 @@ public class UsersService {
     }
 
     public MockResponseDto checkUserExist(String usersId) throws UsersIdAlreadyExistException {
-        if (usersRepository.existsByUsersId(usersId)) throw new UsersIdAlreadyExistException();
+        boolean result = usersRepository.existsByUsersId(usersId);
         return MockResponseDto.builder()
-                .data(true)
+                .data(!result)
                 .build();
     }
 
     public MockResponseDto checkNicknameExist(String nickname) throws NicknameAlreadyExistException {
-        if (usersRepository.existsByNickname(nickname)) throw new NicknameAlreadyExistException();
+        boolean result = usersRepository.existsByNickname(nickname);
         return MockResponseDto.builder()
-                .data(true)
+                .data(!result)
                 .build();
     }
 

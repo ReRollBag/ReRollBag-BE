@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
-    UsersIdAlreadyExistException(1000),
+//    UsersIdAlreadyExistException(1000),
     UsersIdOrPasswordInvalidException(1001),
-    NicknameAlreadyExistException(1002),
+    //    NicknameAlreadyExistException(1002),
     DuplicateUserSaveException(1003),
 
     ExpiredJwtException(2000),

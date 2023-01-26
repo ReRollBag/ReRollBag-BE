@@ -254,7 +254,7 @@ public class UsersIntegrationTest {
                     //then
                     .andExpect(status().isOk())
                     .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
-                    .andDo(document("Users-checkUserExist",
+                    .andDo(document("Users-checkUserExist-True",
                             Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                             Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                             pathParameters(
@@ -275,26 +275,24 @@ public class UsersIntegrationTest {
         //given
         String usersId = "test@gmail.com";
 
-        ErrorJson errorJson = ErrorJson.builder()
-                .errorCode(1000)
-                .message("UsersIdAlreadyExistException")
+        MockResponseDto expectedResponseDto = MockResponseDto.builder()
+                .data(false)
                 .build();
 
         //when
         try {
             mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v2/users/checkUserExist/{usersId}", usersId))
                     //then
-                    .andExpect(status().isAccepted())
-                    .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
-                    .andDo(document("Users-checkUserExist-UsersIdAlreadyExistException",
+                    .andExpect(status().isOk())
+                    .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
+                    .andDo(document("Users-checkUserExist-False",
                             Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                             Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                             pathParameters(
-                                    parameterWithName("usersId").description("duplicated usersId")
+                                    parameterWithName("usersId").description("usersId for checking duplication")
                             ),
                             responseFields(
-                                    fieldWithPath("errorCode").description("errorCode of UsersIdAlreadyExistException").type(JsonFieldType.NUMBER),
-                                    fieldWithPath("message").description("message of UsersIdAlreadyExistException").type(JsonFieldType.STRING)
+                                    fieldWithPath("data").description("Result of checking duplication").type(JsonFieldType.BOOLEAN)
                             )
                     ));
             ;
@@ -350,7 +348,9 @@ public class UsersIntegrationTest {
                     //then
                     .andExpect(status().isOk())
                     .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
-                    .andDo(document("Users-checkNicknameExist",
+                    .andDo(document("Users-checkNicknameExist-True",
+                            Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                            Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                             pathParameters(
                                     parameterWithName("nickname").description("nickname for checking duplication")
                             ),
@@ -369,24 +369,24 @@ public class UsersIntegrationTest {
         //given
         String nickname = "testNickname";
 
-        ErrorJson errorJson = ErrorJson.builder()
-                .errorCode(1002)
-                .message("NicknameAlreadyExistException")
+        MockResponseDto expectedResponseDto = MockResponseDto.builder()
+                .data(false)
                 .build();
 
         //when
         try {
             mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v2/users/checkNicknameExist/{nickname}", nickname))
                     //then
-                    .andExpect(status().isAccepted())
-                    .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
-                    .andDo(document("Users-checkNicknameExist-NicknameAlreadyExistException",
+                    .andExpect(status().isOk())
+                    .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
+                    .andDo(document("Users-checkNicknameExist-False",
+                            Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                            Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                             pathParameters(
-                                    parameterWithName("nickname").description("duplicated nickname")
+                                    parameterWithName("nickname").description("nickname for checking duplication")
                             ),
                             responseFields(
-                                    fieldWithPath("errorCode").description("errorCode of NicknameAlreadyExistException").type(JsonFieldType.NUMBER),
-                                    fieldWithPath("message").description("message of NicknameAlreadyExistException").type(JsonFieldType.STRING)
+                                    fieldWithPath("data").description("Result of checking duplication").type(JsonFieldType.BOOLEAN)
                             )
                     ));
         } catch (Exception e) {
