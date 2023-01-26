@@ -22,7 +22,7 @@ operation::Auth-TokenIsNullException[snippets='http-request,http-response,respon
 
 * When accessToken value is wrong value
 
-operation::Auth-accessToken-SignatureException[snippets='http-request,request-headers,response-body,response-fields']
+operation::Auth-accessToken-SignatureException[snippets='http-request,request-headers,http-response,response-fields']
 
 ---
 
@@ -31,25 +31,25 @@ operation::Auth-accessToken-SignatureException[snippets='http-request,request-he
 
 * When accessToken is expired
 
-operation::Auth-accessToken-ExpiredJwtException[snippets='http-request,request-headers,response-body,response-fields']
+operation::Auth-accessToken-ExpiredJwtException[snippets='http-request,request-headers,http-response,response-fields']
 
 ---
 
 [[Auth-reIssue]]
 == Auth-reIssue
 
-operation::Auth-reIssue[snippets='http-request,request-headers,response-body,response-fields']
+operation::Auth-reIssue[snippets='http-request,request-headers,http-response,response-fields']
 
 ---
 
 [[Auth-reIssue-SignatureException]]
 == Auth-reIssue-SignatureException
 
-operation::Auth-reIssue-SignatureException[snippets='http-request,request-headers,response-body,response-fields']
+operation::Auth-reIssue-SignatureException[snippets='http-request,request-headers,http-response,response-fields']
 
 ---
 
 [[Auth-reIssue-ExpiredJwtException]]
-==Auth-reIssue-ExpiredJwtException
+== Auth-reIssue-ExpiredJwtException
 
-operation::Auth-reIssue-ExpiredJwtException[snippets='http-request,request-headers,response-body,response-fields']
+operation::Auth-reIssue-ExpiredJwtException[snippets='http-request,request-headers,http-response,response-fields']

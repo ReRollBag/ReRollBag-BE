@@ -40,27 +40,27 @@ operation::Users-login-UsersIdOrPasswordInvalidException[snippets='http-request,
 
 ---
 
-[[Users-checkUserExist]]
-== Users-checkUserExist
+[[Users-checkUserExist-True]]
+== Users-checkUserExist-True
 
-operation::Users-checkUserExist[snippets='http-request,path-parameters,http-response']
-
----
-
-[[Users-checkUserExist-UsersIDAlreadyExistException]]
-== Users-checkUserExist-UsersIDAlreadyExistException
-
-operation::Users-checkUserExist-UsersIdAlreadyExistException[snippets='http-request,path-parameters,http-response,response-fields']
-
-[[Users-checkNicknameExist]]
-== Users-checkNicknameExist
-
-operation::Users-checkNicknameExist[snippets='http-request,path-parameters,http-response']
+operation::Users-checkUserExist-True[snippets='http-request,path-parameters,http-response']
 
 ---
 
-[[Users-checkNicknameExist-NicknameAlreadyExistException]]
-== Users-checkNicknameExist-NicknameAlreadyExistException
+[[Users-checkUserExist-False]]
+== Users-checkUserExist-False
 
-operation::Users-checkNicknameExist-NicknameAlreadyExistException[snippets='http-request,path-parameters,http-response,response-fields']
+operation::Users-checkUserExist-False[snippets='http-request,path-parameters,http-response,response-fields']
+
+[[Users-checkNicknameExist-True]]
+== Users-checkNicknameExist-True
+
+operation::Users-checkNicknameExist-True[snippets='http-request,path-parameters,http-response']
+
+---
+
+[[Users-checkNicknameExist-False]]
+== Users-checkNicknameExist-False
+
+operation::Users-checkNicknameExist-False[snippets='http-request,path-parameters,http-response,response-fields']
 
