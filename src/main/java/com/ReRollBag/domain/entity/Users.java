@@ -1,6 +1,5 @@
 package com.ReRollBag.domain.entity;
 
-import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.enums.UserRole;
 import com.sun.istack.NotNull;
 import lombok.*;
