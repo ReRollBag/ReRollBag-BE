@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.apache.catalina.realm.UserDatabaseRealm.getRoles;
@@ -20,6 +21,14 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String usersId) throws UsernameNotFoundException {
-        return usersRepository.findByUsersId(usersId);
+        Users users = usersRepository.findByUsersId(usersId);
+
+        return new org.springframework.security.core.userdetails.User(
+                users.getUsername(),
+                users.getPassword(),
+                users.getAuthorities()
+                        .stream()
+                        .map(role -> new SimpleGrantedAuthority(users.getUserRole().toString()))
+                        .collect(Collectors.toList()));
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Getter
@@ -38,6 +39,18 @@ public class Users implements UserDetails{
     @NotNull
     @Column(name = "userrole", nullable = false)
     private UserRole userRole;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "bagsId", fetch = FetchType.EAGER)
+    private List<Bags> rentingBagsList = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "bagsId", fetch = FetchType.EAGER)
+    private List<Bags> returningBagsList = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "bagsId", fetch = FetchType.EAGER)
+    private List<Bags> returnedBagsList = new ArrayList<>();
 
     @Transient
     private Collection<? extends GrantedAuthority> authorities;

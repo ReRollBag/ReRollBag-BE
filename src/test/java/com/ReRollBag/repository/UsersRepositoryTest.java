@@ -2,6 +2,7 @@ package com.ReRollBag.repository;
 
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,14 @@ public class UsersRepositoryTest {
     @Autowired
     UsersRepository usersRepository;
 
+    @BeforeEach
+    void teardown() {
+        usersRepository.deleteAllInBatch();
+    }
+
     @Test
     @DisplayName("[Repository] 회원 가입 테스트")
-    void Repository_회원가입_테스트 () {
+    void Repository_회원가입_테스트() {
         Users users = Users.builder()
                 .usersId("test@gmail.com")
                 .nickname("testNickname")
