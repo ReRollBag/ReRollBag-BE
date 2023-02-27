@@ -16,4 +16,10 @@ public class WebController {
     public String docs_auth() {
         return "auth.html";
     }
+
+    @GetMapping("docs/bags")
+    public String docs_bags() {
+        return "bags.html";
+    }
+
 }
