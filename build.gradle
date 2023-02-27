@@ -61,6 +61,10 @@ test {
 	outputs.dir snippetsDir
 }
 
+jar {
+	enabled = false
+}
+
 asciidoctor {
 	inputs.dir snippetsDir
 	configurations 'asciidoctorExt'
