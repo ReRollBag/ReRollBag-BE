@@ -13,6 +13,7 @@ import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
+import com.ReRollBag.service.CustomUserDetailService;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UsersController.class)
-//@AutoConfigureMockMvc in @WebMvcTest
 public class UsersControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -49,6 +49,9 @@ public class UsersControllerTest {
 
     @MockBean
     private AuthenticationManager authenticationManager;
+
+    @MockBean
+    private CustomUserDetailService customUserDetailService;
 
     @Test
     @DisplayName("[Controller] 회원 가입")

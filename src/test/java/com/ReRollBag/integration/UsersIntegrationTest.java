@@ -1,5 +1,8 @@
 package com.ReRollBag.integration;
 
+import com.ReRollBag.auth.ExceptionHandlerFilter;
+import com.ReRollBag.auth.JwtAuthenticationFilter;
+import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
@@ -29,14 +32,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.transaction.Transactional;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -44,7 +46,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@Transactional
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ExtendWith(RestDocumentationExtension.class)
@@ -60,15 +61,19 @@ public class UsersIntegrationTest {
     private UsersRepository usersRepository;
 
     @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUpForSpringRestDocs(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+        this.mockMvc = MockMvcBuilders
+                .webAppContextSetup(webApplicationContext)
                 .apply(documentationConfiguration(restDocumentation))
+                .apply(springSecurity())
                 .build();
     }
-
 
     @Test
     @Order(1)
@@ -396,7 +401,6 @@ public class UsersIntegrationTest {
 
     @Test
     @DisplayName("[Integration] 관리자 회원가입 후 즉시 로그인 및 토큰 리턴 테스트")
-    @Rollback(value = false)
     void Integration_관리자_회원가입후_즉시로그인및_발급된토큰으로_dummyMethod_성공() throws Exception {
         //given
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
@@ -442,6 +446,37 @@ public class UsersIntegrationTest {
                         .header("Token", accessToken))
                 //then
                 .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Integration] 일반 회원의 토큰으로 v3 메소드 실패 테스트")
+    void Integration_일반회원의토큰으로_dummyMethod_실패() throws Exception {
+        //given
+        UsersLoginRequestDto requestDto = new UsersLoginRequestDto(
+                "test@gmail.com",
+                "testPassword"
+        );
+
+        MvcResult loginResult = mockMvc.perform(post("/api/v2/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(requestDto))
+                )
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        String content = loginResult.getResponse().getContentAsString();
+        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
+
+        String accessToken = loginResponseDto.getAccessToken();
+
+        //when
+        mockMvc.perform(get("/api/v3/users/dummyMethod")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Token", accessToken))
+                //then
+                .andExpect(status().isForbidden())
                 .andDo(print());
     }
 }
