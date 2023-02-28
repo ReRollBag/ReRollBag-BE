@@ -6,6 +6,7 @@ import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.service.UsersService;
+import com.google.firebase.auth.FirebaseAuthException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class UsersController extends BaseController {
     private final UsersService usersService;
 
     @PostMapping("api/v2/users/save")
-    public ResponseEntity<?> save(@RequestBody UsersSaveRequestDto requestDto) throws UsersIdOrPasswordInvalidException {
+    public ResponseEntity<?> save(@RequestBody UsersSaveRequestDto requestDto) throws UsersIdOrPasswordInvalidException, FirebaseAuthException {
         return sendResponseHttpByJson(usersService.save(requestDto));
     }
 

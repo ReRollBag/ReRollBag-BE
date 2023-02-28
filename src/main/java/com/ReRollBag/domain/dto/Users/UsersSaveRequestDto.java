@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class UsersSaveRequestDto {
     private String usersId;
     private String nickname;
-    private String password;
+    private String idToken;
     private String userRole;
 
     public Users toEntity() {
@@ -23,7 +23,7 @@ public class UsersSaveRequestDto {
         return Users.builder()
                 .usersId(usersId)
                 .nickname(nickname)
-                .password(password)
+                .idToken(idToken)
                 .userRole(UserRole.valueOf(userRole))
                 .build();
     }

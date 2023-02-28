@@ -32,9 +32,8 @@ public class Users implements UserDetails{
     @Column(name = "nickname", nullable = false)
     private String nickname;
 
-    @NotNull
-    @Column(name = "password", nullable = false)
-    private String password;
+    @Column(name = "idToken")
+    private String idToken;
 
     @NotNull
     @Column(name = "userrole", nullable = false)
@@ -64,7 +63,7 @@ public class Users implements UserDetails{
 
     @Override
     public String getPassword() {
-        return password;
+        return idToken;
     }
 
     @Override

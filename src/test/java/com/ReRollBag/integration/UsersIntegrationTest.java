@@ -103,7 +103,7 @@ public class UsersIntegrationTest {
                         requestFields(
                                 fieldWithPath("usersId").description("usersID value to save.").type(JsonFieldType.STRING),
                                 fieldWithPath("nickname").description("nickname value to save.").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING),
+                                fieldWithPath("idToken").description("idToken value to save.").type(JsonFieldType.STRING),
                                 fieldWithPath("userRole").description("userRole value to save. If null will return default value.").type(JsonFieldType.NULL)
                         ),
                         responseFields(
@@ -156,7 +156,7 @@ public class UsersIntegrationTest {
                         requestFields(
                                 fieldWithPath("usersId").description("Duplicated usersID").type(JsonFieldType.STRING),
                                 fieldWithPath("nickname").description("Duplicated nickname").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING),
+                                fieldWithPath("idToken").description("idToken value to save.").type(JsonFieldType.STRING),
                                 fieldWithPath("userRole").description("userRole value to save. If null will return default value.").type(JsonFieldType.NULL)
                         ),
                         responseFields(
@@ -189,7 +189,7 @@ public class UsersIntegrationTest {
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                         requestFields(
                                 fieldWithPath("usersId").description("usersId value for login").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value for login").type(JsonFieldType.STRING)
+                                fieldWithPath("idToken").description("idToken value for login.").type(JsonFieldType.STRING)
                         ),
                         responseFields(
                                 fieldWithPath("accessToken").description("User's access token value").type(JsonFieldType.STRING),
@@ -235,7 +235,7 @@ public class UsersIntegrationTest {
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                         requestFields(
                                 fieldWithPath("usersId").description("usersId value for login").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value for login").type(JsonFieldType.STRING)
+                                fieldWithPath("idToken").description("idToken value for login.").type(JsonFieldType.STRING)
                         ),
                         responseFields(
                                 fieldWithPath("errorCode").description("errorCode of DuplicatedUserSaveException").type(JsonFieldType.NUMBER),
@@ -425,7 +425,7 @@ public class UsersIntegrationTest {
                         requestFields(
                                 fieldWithPath("usersId").description("usersID value to save.").type(JsonFieldType.STRING),
                                 fieldWithPath("nickname").description("nickname value to save.").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING),
+                                fieldWithPath("idToken").description("idToken value to save.").type(JsonFieldType.STRING),
                                 fieldWithPath("userRole").description("userRole value to save. ROLE_ADMIN for register new admin.").type(JsonFieldType.STRING)
                         ),
                         responseFields(

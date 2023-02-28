@@ -60,7 +60,7 @@ public class UsersControllerTest {
         Users users = Users.builder()
                 .usersId("test@gmail.com")
                 .nickname("testNickname")
-                .password("testPassword")
+                .idToken("testIdToken")
                 .userRole(UserRole.ROLE_USER)
                 .build();
 

@@ -28,7 +28,7 @@ public class UsersRepositoryTest {
         Users users = Users.builder()
                 .usersId("test@gmail.com")
                 .nickname("testNickname")
-                .password("testPassword")
+                .idToken("testIdToken")
                 .userRole(UserRole.ROLE_USER)
                 .build();
 
@@ -37,12 +37,12 @@ public class UsersRepositoryTest {
 
         String expectedUsersId = "test@gmail.com";
         String expectedNickname = "testNickname";
-        String expectedPassword = "testPassword";
+        String expectedIdToken = "testIdToken";
         UserRole expectedUserRole = UserRole.ROLE_USER;
 
         assertThat(target.getUsersId()).isEqualTo(expectedUsersId);
         assertThat(target.getNickname()).isEqualTo(expectedNickname);
-        assertThat(target.getPassword()).isEqualTo(expectedPassword);
+        assertThat(target.getIdToken()).isEqualTo(expectedIdToken);
         assertThat(target.getUserRole()).isEqualTo(expectedUserRole);
 
     }
@@ -53,7 +53,7 @@ public class UsersRepositoryTest {
         Users users = Users.builder()
                 .usersId("testAdmin@gmail.com")
                 .nickname("testAdmin")
-                .password("testAdminPassword")
+                .idToken("testAdminIdToken")
                 .userRole(UserRole.ROLE_ADMIN)
                 .build();
 
@@ -62,12 +62,12 @@ public class UsersRepositoryTest {
 
         String expectedUsersId = "testAdmin@gmail.com";
         String expectedNickname = "testAdmin";
-        String expectedPassword = "testAdminPassword";
+        String expectedIdToken = "testAdminIdToken";
         UserRole expectedUserRole = UserRole.ROLE_ADMIN;
 
         assertThat(target.getUsersId()).isEqualTo(expectedUsersId);
         assertThat(target.getNickname()).isEqualTo(expectedNickname);
-        assertThat(target.getPassword()).isEqualTo(expectedPassword);
+        assertThat(target.getPassword()).isEqualTo(expectedIdToken);
         assertThat(target.getUserRole()).isEqualTo(expectedUserRole);
 
     }

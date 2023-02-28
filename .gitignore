@@ -26,6 +26,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 *.properties
+src/main/resources/Firebase-Admin-SDK-Key.json
 
 ### NetBeans ###
 /nbproject/private/

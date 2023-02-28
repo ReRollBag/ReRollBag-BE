@@ -15,6 +15,7 @@ public enum ErrorCode {
     ReIssueBeforeAccessTokenExpiredException(2001),
     TokenIsNullException(2002),
     SignatureException(2003),
+    FirebaseAuthException(3000),
 
     UnknownException(5000);
 

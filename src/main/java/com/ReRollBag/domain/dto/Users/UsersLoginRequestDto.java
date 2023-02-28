@@ -7,5 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UsersLoginRequestDto {
     private String usersId;
-    private String password;
+    private String idToken;
 }

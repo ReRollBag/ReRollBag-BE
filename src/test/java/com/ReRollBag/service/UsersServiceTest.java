@@ -10,6 +10,7 @@ import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.repository.UsersRepository;
+import com.google.firebase.auth.FirebaseAuthException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,9 +33,6 @@ public class UsersServiceTest {
     @InjectMocks
     private UsersService usersService;
 
-    @Spy
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
     @Mock
     private UsersRepository usersRepository;
 
@@ -46,7 +44,7 @@ public class UsersServiceTest {
 
     @Test
     @DisplayName("[Service] 회원 가입")
-    public void Service_회원가입_테스트() throws UsersIdOrPasswordInvalidException {
+    public void Service_회원가입_테스트() throws UsersIdOrPasswordInvalidException, FirebaseAuthException {
         //given
 
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
@@ -101,20 +99,16 @@ public class UsersServiceTest {
     @DisplayName("[Service] 로그인 및 토큰 발급 테스트")
     public void Service_로그인_토큰발급_테스트() throws UsersIdOrPasswordInvalidException {
         //given
-        String rawPassword = "testPassword";
-        String encodedPassword = "encodedPassword";
-
-        UsersLoginRequestDto requestDto = new UsersLoginRequestDto("test@gmail.com", rawPassword);
+        String idToken = "testIdToken";
+        UsersLoginRequestDto requestDto = new UsersLoginRequestDto("test@gmail.com", idToken);
 
         Users users = Users.builder()
                 .usersId("test@gmail.com")
                 .nickname("testNickname")
-                .password(encodedPassword)
+                .idToken("testIdToken")
                 .userRole(UserRole.ROLE_USER)
                 .build();
         //mocking
-        given(passwordEncoder.matches(rawPassword, encodedPassword))
-                .willReturn(true);
         given(usersRepository.findByUsersId(any()))
                 .willReturn(users);
         given(jwtTokenProvider.createAccessToken(any()))
