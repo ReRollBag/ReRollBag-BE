@@ -11,9 +11,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UsersSaveRequestDto {
     private String usersId;
-    private String nickname;
-    private String password;
+    private String name;
+    private String idToken;
     private String userRole;
+
+    public UsersSaveRequestDto(String usersId, String username, String idToken) {
+        new UsersSaveRequestDto(
+                usersId,
+                username,
+                idToken,
+                null
+        );
+    }
 
     public Users toEntity() {
         //Setting Default Parameter
@@ -22,9 +31,10 @@ public class UsersSaveRequestDto {
 
         return Users.builder()
                 .usersId(usersId)
-                .nickname(nickname)
-                .password(password)
+                .name(name)
                 .userRole(UserRole.valueOf(userRole))
                 .build();
     }
 }
+
+

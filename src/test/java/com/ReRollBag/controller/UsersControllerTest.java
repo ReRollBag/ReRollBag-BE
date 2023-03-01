@@ -2,7 +2,6 @@ package com.ReRollBag.controller;
 
 import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.dto.MockResponseDto;
-import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
@@ -10,12 +9,12 @@ import com.ReRollBag.enums.ErrorCode;
 import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
-import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.service.CustomUserDetailService;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.auth.FirebaseAuthException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,16 +57,16 @@ public class UsersControllerTest {
     void Controller_회원가입_테스트() throws Exception {
         //given
         Users users = Users.builder()
+                .UID("testUID")
                 .usersId("test@gmail.com")
-                .nickname("testNickname")
-                .password("testPassword")
+                .name("testUsername")
                 .userRole(UserRole.ROLE_USER)
                 .build();
 
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
                 "testNickname",
-                "testPassword",
+                "testIdToken",
                 null
         );
 
@@ -125,42 +124,43 @@ public class UsersControllerTest {
     @DisplayName("[Controller] 로그인 및 토큰 발급")
     void Controller_로그인_토큰발급_테스트() throws Exception {
         //given
-        UsersLoginRequestDto requestDto = new UsersLoginRequestDto("test@gmail.com", "testPassword");
+        String idToken = "idToken";
         UsersLoginResponseDto responseDto = UsersLoginResponseDto.builder()
                 .accessToken("testAccessToken")
                 .refreshToken("testRefreshToken")
                 .build();
-        //mocking
+
+
         when(usersService.login(any())).thenReturn(responseDto);
-        //when
+
+        //then
         mockMvc.perform(post("/api/v2/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(requestDto))
+                        .header("Token", idToken)
                 )
-                //then
                 .andExpect(status().isOk())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(responseDto)))
                 .andDo(print());
     }
 
     @Test
-    @DisplayName("[Controller] 잘못된 ID 또는 PW로 로그인 시도 예외")
-    void Controller_잘못된IDPW_로그인_예외_테스트() throws Exception {
+    @DisplayName("[Controller] 잘못된 idToken으로 로그인 시도 시 예외")
+    void Controller_잘못된idToken_로그인_예외_테스트() throws Exception {
         //given
-        UsersLoginRequestDto requestDto = new UsersLoginRequestDto("test@gmail.com", "testPassword");
+        String invalidIdToken = "invalidIdToken";
 
         ErrorJson errorJson = ErrorJson.builder()
-                .errorCode(ErrorCode.UsersIdOrPasswordInvalidException.getErrorCode())
-                .message("UsersIdOrPasswordInvalidException")
+                .errorCode(ErrorCode.FirebaseAuthException.getErrorCode())
+                .message("FirebaseAuthException")
                 .build();
 
         //mocking
-        when(usersService.login(any())).thenThrow(UsersIdOrPasswordInvalidException.class);
+        when(usersService.login(any())).thenThrow(FirebaseAuthException.class);
 
         //when
         mockMvc.perform(post("/api/v2/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(requestDto))
+                        .header("Token", invalidIdToken)
                 )
                 //then
                 .andExpect(status().isForbidden())
@@ -217,49 +217,5 @@ public class UsersControllerTest {
                 .andExpect(status().isForbidden())
                 .andReturn();
     }
-
-    @Test
-    @DisplayName("[Controller] 닉네임 중복 검사 성공 case")
-    void Controller_닉네임_중복검사_성공() throws NicknameAlreadyExistException {
-        //given
-        String nickname = "nickname";
-        MockResponseDto responseDto = MockResponseDto.builder()
-                .data(true)
-                .build();
-        //mocking
-        when(usersService.checkNicknameExist(nickname)).thenReturn(responseDto);
-        //when
-        try {
-            mockMvc.perform(get("/api/v2/users/checkNicknameExist/" + nickname))
-                    //then
-                    .andExpect(status().isOk())
-                    .andReturn();
-        } catch (NicknameAlreadyExistException e) {
-            throw new NicknameAlreadyExistException();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Test
-    @DisplayName("[Controller] 닉네임 중복 검사 실패 case")
-    void Controller_닉네임_중복검사_실패() throws NicknameAlreadyExistException {
-        //given
-        String nickname = "nickname";
-        //mocking
-        when(usersService.checkNicknameExist(nickname)).thenThrow(NicknameAlreadyExistException.class);
-        //when
-        try {
-            mockMvc.perform(get("/api/v2/users/checkNicknameExist/" + nickname))
-                    //then
-                    .andExpect(status().isAccepted())
-                    .andReturn();
-        } catch (NicknameAlreadyExistException e) {
-            throw new NicknameAlreadyExistException();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
 }

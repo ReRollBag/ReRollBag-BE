@@ -8,59 +8,43 @@ Powered By Dongwhwan, https://github.com/wkazxf
 :sectlinks:
 
 
-[[Users-save]]
-== Users-save
-
-operation::Users-save[snippets='http-request,request-fields,http-response,response-fields']
-
----
-
-[[Users-save-admin]]
-== Users-save-admin
-
-operation::Users-save-admin[snippets='http-request,request-fields,http-response,response-fields']
----
-
-[[Users-save-DuplicatedUserSaveException]]
-== Users-save-DuplicatedUserSaveException
-
-operation::Users-save-DuplicatedUserSaveException[snippets='http-request,request-fields,http-response,response-fields']
-
-[[Users-login]]
-== Users-login
-
-operation::Users-login[snippets='http-request,request-fields,http-response,response-fields']
-
----
-
-[[Users-login-UsersIdOrPasswordInvalidException]]
-== Users-login-UsersIdOrPasswordInvalidException
-
-operation::Users-login-UsersIdOrPasswordInvalidException[snippets='http-request,request-fields,http-response,response-fields']
-
----
-
 [[Users-checkUserExist-True]]
 == Users-checkUserExist-True
 
-operation::Users-checkUserExist-True[snippets='http-request,path-parameters,http-response']
+operation::Users-checkUserExist-True[snippets='http-request,request-body,http-response,response-body']
 
 ---
 
 [[Users-checkUserExist-False]]
 == Users-checkUserExist-False
 
-operation::Users-checkUserExist-False[snippets='http-request,path-parameters,http-response,response-fields']
-
-[[Users-checkNicknameExist-True]]
-== Users-checkNicknameExist-True
-
-operation::Users-checkNicknameExist-True[snippets='http-request,path-parameters,http-response']
+operation::Users-checkUserExist-False[snippets='http-request,request-body,http-response,response-body']
 
 ---
 
-[[Users-checkNicknameExist-False]]
-== Users-checkNicknameExist-False
+[[Users-TestingToken-WithUserRole-Withv1Method]]
+== Users-TestingToken-WithUserRole-Withv1Method
 
-operation::Users-checkNicknameExist-False[snippets='http-request,path-parameters,http-response,response-fields']
+operation::Users-TestingToken-WithUserRole-Withv1Method[snippets='http-request,request-headers,request-body,http-response,response-body']
 
+
+---
+
+[[Users-TestingToken-WithUserRole-Withv3Method]]
+== Users-TestingToken-WithUserRole-Withv3Method
+
+operation::Users-TestingToken-WithUserRole-Withv3Method[snippets='http-request,request-headers,request-body,http-response,response-body']
+
+---
+
+[[Users-TestingToken-WithAdminRole-Withv1Method]]
+== Users-TestingToken-WithAdminRole-Withv1Method
+
+operation::Users-TestingToken-WithAdminRole-Withv1Method[snippets='http-request,request-headers,request-body,http-response,response-body']
+
+---
+
+[[Users-TestingToken-WithAdminRole-Withv3Method]]
+== Users-TestingToken-WithAdminRole-Withv3Method
+
+operation::Users-TestingToken-WithAdminRole-Withv3Method[snippets='http-request,request-headers,request-body,http-response,response-body']

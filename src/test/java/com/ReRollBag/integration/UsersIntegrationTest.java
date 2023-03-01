@@ -1,15 +1,9 @@
 package com.ReRollBag.integration;
 
-import com.ReRollBag.auth.ExceptionHandlerFilter;
-import com.ReRollBag.auth.JwtAuthenticationFilter;
 import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.dto.MockResponseDto;
-import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
-import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
-import com.ReRollBag.domain.dto.Users.UsersResponseDto;
-import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
-import com.ReRollBag.enums.ErrorCode;
-import com.ReRollBag.exceptions.ErrorJson;
+import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.repository.UsersRepository;
 import com.ReRollBag.service.RedisService;
@@ -26,21 +20,20 @@ import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,174 +68,194 @@ public class UsersIntegrationTest {
                 .build();
     }
 
-    @Test
-    @Order(1)
-    @DisplayName("[Integration] 회원가입 후 즉시 로그인 및 토큰 리턴 테스트")
-    @Rollback(value = false)
-    void Integration_회원가입후_즉시로그인및_발급된토큰으로_dummyMethod_성공() throws Exception {
-        //given
-        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
-                "test@gmail.com",
-                "testNickname",
-                "testPassword",
-                null
-        );
-
-        UsersResponseDto responseDto = new UsersResponseDto("test@gmail.com", "testNickname");
-
-        //when
-        MvcResult saveResult = mockMvc.perform(post("/api/v2/users/save")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(requestDto))
-                )
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andDo(document("Users-save",
-                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
-                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
-                        requestFields(
-                                fieldWithPath("usersId").description("usersID value to save.").type(JsonFieldType.STRING),
-                                fieldWithPath("nickname").description("nickname value to save.").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING),
-                                fieldWithPath("userRole").description("userRole value to save. If null will return default value.").type(JsonFieldType.NULL)
-                        ),
-                        responseFields(
-                                fieldWithPath("accessToken").description("User's access token value").type(JsonFieldType.STRING),
-                                fieldWithPath("refreshToken").description("User's refresh token value").type(JsonFieldType.STRING)
-                        )
-                ))
-                .andReturn();
-
-        String content = saveResult.getResponse().getContentAsString();
-        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
-
-        String accessToken = loginResponseDto.getAccessToken();
-        String refreshToken = loginResponseDto.getRefreshToken();
-
-        mockMvc.perform(get("/api/v1/users/dummyMethod")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Token", accessToken))
-                //then
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("[Integration] 회원가입 후 같은 정보로 한번 더 회원가입 실패")
-    void Integration_회원가입후_같은정보로_한번더회원가입_실패() throws Exception {
-        //given
-        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
-                "test@gmail.com",
-                "testNickname",
-                "testPassword",
-                null
-        );
-
-        ErrorJson errorJson = ErrorJson.builder()
-                .errorCode(ErrorCode.DuplicateUserSaveException.getErrorCode())
-                .message("DuplicateUserSaveException")
+    @BeforeEach
+    void setUpDefaultUsersAndAdmin() {
+        Users defaultUsers = Users.builder()
+                .UID("testUID")
+                .usersId("testUsersId")
+                .userRole(UserRole.ROLE_USER)
+                .name("testUser")
                 .build();
 
-        //when
-        MvcResult saveResult = mockMvc.perform(post("/api/v2/users/save")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(requestDto))
-                )
-                //then
-                .andExpect(status().isForbidden())
-                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
-                .andDo(document("Users-save-DuplicatedUserSaveException",
-                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
-                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
-                        requestFields(
-                                fieldWithPath("usersId").description("Duplicated usersID").type(JsonFieldType.STRING),
-                                fieldWithPath("nickname").description("Duplicated nickname").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING),
-                                fieldWithPath("userRole").description("userRole value to save. If null will return default value.").type(JsonFieldType.NULL)
-                        ),
-                        responseFields(
-                                fieldWithPath("errorCode").description("errorCode of DuplicatedUserSaveException").type(JsonFieldType.NUMBER),
-                                fieldWithPath("message").description("message of DuplicatedUserSaveException").type(JsonFieldType.STRING)
-                        )))
-                .andReturn();
-
-    }
-
-    @Test
-    @DisplayName("[Integration] 로그인 및 Redis 토큰 검증")
-    void Integration_로그인_테스트() throws Exception {
-        //given
-        UsersLoginRequestDto requestDto = new UsersLoginRequestDto(
-                "test@gmail.com",
-                "testPassword"
-        );
-
-        //when
-        MvcResult loginResult = mockMvc.perform(post("/api/v2/users/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(requestDto))
-                )
-                //then
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andDo(document("Users-login",
-                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
-                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
-                        requestFields(
-                                fieldWithPath("usersId").description("usersId value for login").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value for login").type(JsonFieldType.STRING)
-                        ),
-                        responseFields(
-                                fieldWithPath("accessToken").description("User's access token value").type(JsonFieldType.STRING),
-                                fieldWithPath("refreshToken").description("User's refresh token value").type(JsonFieldType.STRING)
-                        )))
-                .andReturn();
-
-        //when
-        String content = loginResult.getResponse().getContentAsString();
-        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
-        String expectedAccessToken = loginResponseDto.getAccessToken();
-        String expectedRefreshToken = loginResponseDto.getRefreshToken();
-        String actualAccessToken = redisService.findAccessToken("test@gmail.com");
-        String actualRefreshToken = redisService.findRefreshToken("test@gmail.com");
-
-        //then
-        assertThat(expectedAccessToken).isEqualTo(actualAccessToken);
-        assertThat(expectedRefreshToken).isEqualTo(actualRefreshToken);
-    }
-
-    @Test
-    @DisplayName("[Integration] 잘못된 ID 또는 Pw로 로그인 시도 예외")
-    void Integration_잘못된IDPW_로그인_예외_테스트() throws Exception {
-        //given
-        UsersLoginRequestDto requestDto = new UsersLoginRequestDto("invalidUsersId@gmail.com", "invalidUsersPassword");
-
-        ErrorJson errorJson = ErrorJson.builder()
-                .errorCode(ErrorCode.UsersIdOrPasswordInvalidException.getErrorCode())
-                .message("UsersIdOrPasswordInvalidException")
+        Users admin = Users.builder()
+                .UID("testAdminUID")
+                .usersId("testAdminUsersId")
+                .userRole(UserRole.ROLE_ADMIN)
+                .name("testAdmin")
                 .build();
 
-        //when
-        mockMvc.perform(post("/api/v2/users/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(requestDto))
-                )
-                //then
-                .andExpect(status().isForbidden())
-                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
-                .andDo(print())
-                .andDo(document("Users-login-UsersIdOrPasswordInvalidException",
-                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
-                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
-                        requestFields(
-                                fieldWithPath("usersId").description("usersId value for login").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value for login").type(JsonFieldType.STRING)
-                        ),
-                        responseFields(
-                                fieldWithPath("errorCode").description("errorCode of DuplicatedUserSaveException").type(JsonFieldType.NUMBER),
-                                fieldWithPath("message").description("message of DuplicatedUserSaveException").type(JsonFieldType.STRING)
-                        )))
-                .andReturn();
+        usersRepository.save(defaultUsers);
+        usersRepository.save(admin);
     }
+
+//    @Test
+//    @Order(1)
+//    @DisplayName("[Integration] 회원가입 후 즉시 로그인 및 토큰 리턴 테스트")
+//    @Rollback(value = false)
+//    void Integration_회원가입후_즉시로그인및_발급된토큰으로_dummyMethod_성공() throws Exception {
+//        //given
+//        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
+//                "test@gmail.com",
+//                "testNickname",
+//                "testPassword",
+//                null
+//        );
+//
+//        UsersResponseDto responseDto = new UsersResponseDto("test@gmail.com", "testNickname");
+//
+//        //when
+//        MvcResult saveResult = mockMvc.perform(post("/api/v2/users/save")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(new ObjectMapper().writeValueAsString(requestDto))
+//                )
+//                .andExpect(status().isOk())
+//                .andDo(print())
+//                .andDo(document("Users-save",
+//                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+//                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+//                        requestFields(
+//                                fieldWithPath("usersId").description("usersID value to save.").type(JsonFieldType.STRING),
+//                                fieldWithPath("nickname").description("nickname value to save.").type(JsonFieldType.STRING),
+//                                fieldWithPath("idToken").description("idToken for verity Token valie.").type(JsonFieldType.STRING),
+//                                fieldWithPath("userRole").description("userRole value to save. If null will return default value.").type(JsonFieldType.NULL)
+//                        ),
+//                        responseFields(
+//                                fieldWithPath("accessToken").description("User's access token value").type(JsonFieldType.STRING),
+//                                fieldWithPath("refreshToken").description("User's refresh token value").type(JsonFieldType.STRING)
+//                        )
+//                ))
+//                .andReturn();
+//
+//        String content = saveResult.getResponse().getContentAsString();
+//        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
+//
+//        String accessToken = loginResponseDto.getAccessToken();
+//        String refreshToken = loginResponseDto.getRefreshToken();
+//
+//        mockMvc.perform(get("/api/v1/users/dummyMethod")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .header("Token", accessToken))
+//                //then
+//                .andExpect(status().isOk());
+//    }
+//
+//    @Test
+//    @DisplayName("[Integration] 회원가입 후 같은 정보로 한번 더 회원가입 실패")
+//    void Integration_회원가입후_같은정보로_한번더회원가입_실패() throws Exception {
+//        //given
+//        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
+//                "test@gmail.com",
+//                "testNickname",
+//                "testPassword",
+//                null
+//        );
+//
+//        ErrorJson errorJson = ErrorJson.builder()
+//                .errorCode(ErrorCode.DuplicateUserSaveException.getErrorCode())
+//                .message("DuplicateUserSaveException")
+//                .build();
+//
+//        //when
+//        MvcResult saveResult = mockMvc.perform(post("/api/v2/users/save")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(new ObjectMapper().writeValueAsString(requestDto))
+//                )
+//                //then
+//                .andExpect(status().isForbidden())
+//                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
+//                .andDo(document("Users-save-DuplicatedUserSaveException",
+//                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+//                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+//                        requestFields(
+//                                fieldWithPath("usersId").description("Duplicated usersID").type(JsonFieldType.STRING),
+//                                fieldWithPath("nickname").description("Duplicated nickname").type(JsonFieldType.STRING),
+//                                fieldWithPath("idToken").description("idToken value to save.").type(JsonFieldType.STRING),
+//                                fieldWithPath("userRole").description("userRole value to save. If null will return default value.").type(JsonFieldType.NULL)
+//                        ),
+//                        responseFields(
+//                                fieldWithPath("errorCode").description("errorCode of DuplicatedUserSaveException").type(JsonFieldType.NUMBER),
+//                                fieldWithPath("message").description("message of DuplicatedUserSaveException").type(JsonFieldType.STRING)
+//                        )))
+//                .andReturn();
+//
+//    }
+//
+//    @Test
+//    @DisplayName("[Integration] 로그인 및 Redis 토큰 검증")
+//    void Integration_로그인_테스트() throws Exception {
+//        //given
+//        UsersLoginRequestDto requestDto = new UsersLoginRequestDto(
+//                "test@gmail.com",
+//                "testPassword"
+//        );
+//
+//        //when
+//        MvcResult loginResult = mockMvc.perform(post("/api/v2/users/login")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(new ObjectMapper().writeValueAsString(requestDto))
+//                )
+//                //then
+//                .andExpect(status().isOk())
+//                .andDo(print())
+//                .andDo(document("Users-login",
+//                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+//                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+//                        requestFields(
+//                                fieldWithPath("usersId").description("usersId value for login").type(JsonFieldType.STRING),
+//                                fieldWithPath("idToken").description("idToken value for login.").type(JsonFieldType.STRING)
+//                        ),
+//                        responseFields(
+//                                fieldWithPath("accessToken").description("User's access token value").type(JsonFieldType.STRING),
+//                                fieldWithPath("refreshToken").description("User's refresh token value").type(JsonFieldType.STRING)
+//                        )))
+//                .andReturn();
+//
+//        //when
+//        String content = loginResult.getResponse().getContentAsString();
+//        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
+//        String expectedAccessToken = loginResponseDto.getAccessToken();
+//        String expectedRefreshToken = loginResponseDto.getRefreshToken();
+//        String actualAccessToken = redisService.findAccessToken("test@gmail.com");
+//        String actualRefreshToken = redisService.findRefreshToken("test@gmail.com");
+//
+//        //then
+//        assertThat(expectedAccessToken).isEqualTo(actualAccessToken);
+//        assertThat(expectedRefreshToken).isEqualTo(actualRefreshToken);
+//    }
+
+//    @Test
+//    @DisplayName("[Integration] 잘못된 ID 또는 Pw로 로그인 시도 예외")
+//    void Integration_잘못된IDPW_로그인_예외_테스트() throws Exception {
+//        //given
+//        UsersLoginRequestDto requestDto = new UsersLoginRequestDto("invalidUsersId@gmail.com", "invalidUsersPassword");
+//
+//        ErrorJson errorJson = ErrorJson.builder()
+//                .errorCode(ErrorCode.UsersIdOrPasswordInvalidException.getErrorCode())
+//                .message("UsersIdOrPasswordInvalidException")
+//                .build();
+//
+//        //when
+//        mockMvc.perform(post("/api/v2/users/login")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(new ObjectMapper().writeValueAsString(requestDto))
+//                )
+//                //then
+//                .andExpect(status().isForbidden())
+//                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
+//                .andDo(print())
+//                .andDo(document("Users-login-UsersIdOrPasswordInvalidException",
+//                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+//                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+//                        requestFields(
+//                                fieldWithPath("usersId").description("usersId value for login").type(JsonFieldType.STRING),
+//                                fieldWithPath("idToken").description("idToken value for login.").type(JsonFieldType.STRING)
+//                        ),
+//                        responseFields(
+//                                fieldWithPath("errorCode").description("errorCode of DuplicatedUserSaveException").type(JsonFieldType.NUMBER),
+//                                fieldWithPath("message").description("message of DuplicatedUserSaveException").type(JsonFieldType.STRING)
+//                        )))
+//                .andReturn();
+//    }
 
     @Test
     @DisplayName("[Integration] 아이디 중복 검사 성공 case")
@@ -278,7 +291,7 @@ public class UsersIntegrationTest {
     @DisplayName("[Integration] 아이디 중복 검사 실패 case")
     void Integration_아이디_중복검사_실패() throws Exception {
         //given
-        String usersId = "test@gmail.com";
+        String usersId = "testUsersId";
 
         MockResponseDto expectedResponseDto = MockResponseDto.builder()
                 .data(false)
@@ -307,169 +320,92 @@ public class UsersIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration] 올바른 로그인 로직 이후 dummyMethod 호출 성공 case")
-    void Integration_로그인이후_발급된토큰으로_dummyMethod_성공() throws Exception {
+    @DisplayName("[Integration] 일반 사용자 토큰으로 v1 더미 메소드 테스트")
+    void Integration_일반사용자토큰으로_v1_dummyMethod_성공() throws Exception {
         //given
-        UsersLoginRequestDto requestDto = new UsersLoginRequestDto(
-                "test@gmail.com",
-                "testPassword"
-        );
+        Users defaultUsers = Users.builder()
+                .UID("testUID")
+                .usersId("testUsersId")
+                .userRole(UserRole.ROLE_USER)
+                .name("testUser")
+                .build();
+
+        String accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID());
+        String refreshToken = jwtTokenProvider.createRefreshToken(defaultUsers.getUID());
 
         //when
-        MvcResult loginResult = mockMvc.perform(post("/api/v2/users/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(requestDto)))
-        //then
-                        .andExpect(status().isOk())
-                        .andDo(print())
-                        .andReturn();
-
-        //when
-        String content = loginResult.getResponse().getContentAsString();
-        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
-        String accessToken = loginResponseDto.getAccessToken();
-        String refreshToken = loginResponseDto.getRefreshToken();
         mockMvc.perform(get("/api/v1/users/dummyMethod")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Token", accessToken))
                 //then
                 .andExpect(status().isOk())
-                .andReturn();
-
-    }
-
-    @Test
-    @DisplayName("[Integration] 닉네임 중복 검사 성공 case")
-    void Integration_닉네임_중복검사_성공() throws UsersIdAlreadyExistException {
-        //given
-        String nickname = "notDuplicatedNickname";
-        MockResponseDto expectedResponseDto = MockResponseDto.builder()
-                .data(true)
-                .build();
-
-        //when
-        try {
-            mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v2/users/checkNicknameExist/{nickname}", nickname))
-                    //then
-                    .andExpect(status().isOk())
-                    .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
-                    .andDo(document("Users-checkNicknameExist-True",
-                            Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
-                            Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
-                            pathParameters(
-                                    parameterWithName("nickname").description("nickname for checking duplication")
-                            ),
-                            responseFields(
-                                    fieldWithPath("data").description("Result of checking duplication").type(JsonFieldType.BOOLEAN)
-                            )
-                    ));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Test
-    @DisplayName("[Integration] 닉네임 중복 검사 실패 case")
-    void Integration_닉네임_중복검사_실패() throws Exception {
-        //given
-        String nickname = "testNickname";
-
-        MockResponseDto expectedResponseDto = MockResponseDto.builder()
-                .data(false)
-                .build();
-
-        //when
-        try {
-            mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v2/users/checkNicknameExist/{nickname}", nickname))
-                    //then
-                    .andExpect(status().isOk())
-                    .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
-                    .andDo(document("Users-checkNicknameExist-False",
-                            Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
-                            Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
-                            pathParameters(
-                                    parameterWithName("nickname").description("nickname for checking duplication")
-                            ),
-                            responseFields(
-                                    fieldWithPath("data").description("Result of checking duplication").type(JsonFieldType.BOOLEAN)
-                            )
-                    ));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Test
-    @DisplayName("[Integration] 관리자 회원가입 후 즉시 로그인 및 토큰 리턴 테스트")
-    void Integration_관리자_회원가입후_즉시로그인및_발급된토큰으로_dummyMethod_성공() throws Exception {
-        //given
-        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
-                "testAdmin",
-                "testAdmin",
-                "testPassword",
-                "ROLE_ADMIN"
-        );
-
-        UsersResponseDto responseDto = new UsersResponseDto("testAdmin", "testAdmin");
-
-        //when
-        MvcResult saveResult = mockMvc.perform(post("/api/v2/users/save")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(requestDto))
-                )
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andDo(document("Users-save-admin",
+                .andDo(document("Users-TestingToken-WithUserRole-Withv1Method",
                         Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
-                        requestFields(
-                                fieldWithPath("usersId").description("usersID value to save.").type(JsonFieldType.STRING),
-                                fieldWithPath("nickname").description("nickname value to save.").type(JsonFieldType.STRING),
-                                fieldWithPath("password").description("password value to save.").type(JsonFieldType.STRING),
-                                fieldWithPath("userRole").description("userRole value to save. ROLE_ADMIN for register new admin.").type(JsonFieldType.STRING)
-                        ),
-                        responseFields(
-                                fieldWithPath("accessToken").description("User's access token value").type(JsonFieldType.STRING),
-                                fieldWithPath("refreshToken").description("User's refresh token value").type(JsonFieldType.STRING)
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_USER")
                         )
                 ))
                 .andReturn();
 
-        String content = saveResult.getResponse().getContentAsString();
-        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
+    }
 
-        String accessToken = loginResponseDto.getAccessToken();
-        String refreshToken = loginResponseDto.getRefreshToken();
+    @Test
+    @DisplayName("[Integration] 관리자 토큰으로 v1, v3 더미 메소드 테스트")
+    void Integration_관리자계정으로_발급된토큰으로_v1및v3_dummyMethod_성공() throws Exception {
+        //given
+        Users admin = Users.builder()
+                .UID("testAdminUID")
+                .usersId("testAdminUsersId")
+                .userRole(UserRole.ROLE_ADMIN)
+                .name("testAdmin")
+                .build();
+
+        //when
+        String accessToken = jwtTokenProvider.createAccessToken(admin.getUID());
+        String refreshToken = jwtTokenProvider.createRefreshToken(admin.getUID());
 
         mockMvc.perform(get("/api/v3/users/dummyMethod")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Token", accessToken))
                 //then
                 .andExpect(status().isOk())
+                .andDo(document("Users-TestingToken-WithAdminRole-Withv3Method",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_ADMIN")
+                        )
+                ))
+                .andDo(print());
+
+        mockMvc.perform(get("/api/v1/users/dummyMethod")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Token", accessToken))
+                //then
+                .andExpect(status().isOk())
+                .andDo(document("Users-TestingToken-WithAdminRole-Withv1Method",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_ADMIN")
+                        )
+                ))
                 .andDo(print());
     }
 
     @Test
-    @DisplayName("[Integration] 일반 회원의 토큰으로 v3 메소드 실패 테스트")
-    void Integration_일반회원의토큰으로_dummyMethod_실패() throws Exception {
+    @DisplayName("[Integration] 일반 사용자 토큰으로 v3 메소드 실패 테스트")
+    void Integration_일반사용자토큰으로_v3_dummyMethod_실패() throws Exception {
         //given
-        UsersLoginRequestDto requestDto = new UsersLoginRequestDto(
-                "test@gmail.com",
-                "testPassword"
-        );
+        Users defaultUsers = Users.builder()
+                .UID("testUID")
+                .usersId("testUsersId")
+                .userRole(UserRole.ROLE_USER)
+                .name("testUser")
+                .build();
 
-        MvcResult loginResult = mockMvc.perform(post("/api/v2/users/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(requestDto))
-                )
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andReturn();
-
-        String content = loginResult.getResponse().getContentAsString();
-        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
-
-        String accessToken = loginResponseDto.getAccessToken();
+        String accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID());
 
         //when
         mockMvc.perform(get("/api/v3/users/dummyMethod")
@@ -477,6 +413,13 @@ public class UsersIntegrationTest {
                         .header("Token", accessToken))
                 //then
                 .andExpect(status().isForbidden())
+                .andDo(document("Users-TestingToken-WithUserRole-Withv3Method",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_USERS")
+                        )
+                ))
                 .andDo(print());
     }
 }

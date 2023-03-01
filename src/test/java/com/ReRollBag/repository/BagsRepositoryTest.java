@@ -32,9 +32,9 @@ public class BagsRepositoryTest {
     @DisplayName("Users 저장 이후 Bags 저장 테스트")
     void 테스트전_users저장_그리고_Bags저장_테스트() {
         Users users = Users.builder()
+                .UID("testUID")
                 .usersId("test@gmail.com")
-                .nickname("testNickname")
-                .password("testPassword")
+                .name("testName")
                 .userRole(UserRole.ROLE_USER)
                 .build();
 
