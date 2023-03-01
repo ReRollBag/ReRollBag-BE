@@ -1,10 +1,14 @@
 package com.ReRollBag.integration;
 
+import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
+import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.repository.BagsRepository;
+import com.ReRollBag.repository.UsersRepository;
 import com.ReRollBag.service.BagsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,13 +31,15 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -48,52 +54,48 @@ public class BagsIntegrationTest {
     private BagsRepository bagsRepository;
 
     @Autowired
+    private UsersRepository usersRepository;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
     private MockMvc mockMvc;
 
     private String usersToken;
     private String adminToken;
 
     @BeforeEach
-    void setUpForSpringRestDocs(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+    void setUpMockMvcForRestDocsAndSpringSecurity(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
+        this.mockMvc = MockMvcBuilders
+                .webAppContextSetup(webApplicationContext)
                 .apply(documentationConfiguration(restDocumentation))
+                .apply(springSecurity())
                 .build();
     }
 
     @BeforeEach
     void saveUsersAndAdminAndSetUpTokens() throws Exception {
-        UsersSaveRequestDto usersSaveRequestDto = new UsersSaveRequestDto(
-                "test@gmail.com",
-                "testNickname",
-                "testPassword",
-                null
-        );
+        Users defaultUsers = Users.builder()
+                .UID("testUID")
+                .usersId("testUsersId")
+                .userRole(UserRole.ROLE_USER)
+                .name("testUser")
+                .build();
 
-        UsersSaveRequestDto adminSaveRequestDto = new UsersSaveRequestDto(
-                "admin",
-                "admin",
-                "testPassword",
-                "ROLE_ADMIN"
-        );
+        Users admin = Users.builder()
+                .UID("testAdminUID")
+                .usersId("testAdminUsersId")
+                .userRole(UserRole.ROLE_ADMIN)
+                .name("testAdmin")
+                .build();
 
-        MvcResult usersSaveResult = mockMvc.perform(post("/api/v2/users/save")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(usersSaveRequestDto))
-                )
-                .andReturn();
+        usersRepository.save(defaultUsers);
+        usersRepository.save(admin);
 
-        String content = usersSaveResult.getResponse().getContentAsString();
-        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
-        usersToken = loginResponseDto.getAccessToken();
+        usersToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID());
+        adminToken = jwtTokenProvider.createAccessToken(admin.getUID());
 
-        content = usersSaveResult.getResponse().getContentAsString();
-        loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
-        adminToken = loginResponseDto.getAccessToken();
-
-        String.valueOf(mockMvc.perform(post("/api/v2/users/save")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(adminSaveRequestDto))
-        ));
     }
 
     @Test
@@ -116,6 +118,7 @@ public class BagsIntegrationTest {
         MvcResult saveResult = mockMvc.perform(post("/api/v3/bags/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
+                        .header("token", adminToken)
                 )
                 //then
                 .andExpect(status().isOk())
@@ -123,6 +126,9 @@ public class BagsIntegrationTest {
                 .andDo(document("Bags-save",
                         Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_ADMIN")
+                        ),
                         requestFields(
                                 fieldWithPath("countryCode").description("Code of country").type(JsonFieldType.STRING),
                                 fieldWithPath("regionCode").description("Code of region").type(JsonFieldType.STRING)
@@ -157,6 +163,7 @@ public class BagsIntegrationTest {
         MvcResult saveResult = mockMvc.perform(post("/api/v3/bags/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
+                        .header("token", adminToken)
                 )
                 //then
                 .andExpect(status().isOk())

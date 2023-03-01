@@ -7,6 +7,17 @@ Powered By Dongwhwan, https://github.com/wkazxf
 :toclevels: 1
 :sectlinks:
 
+[[Users-Save]]
+== Users-save
+
+operation::Users-Save[snippets='http-request,request-body,request-fields,http-response,response-body,response-fields']
+
+---
+
+[[Users-Login]]
+== Users-login
+
+operation::Users-Login[snippets='http-request,request-body,http-response,response-body,response-fields']
 
 [[Users-checkUserExist-True]]
 == Users-checkUserExist-True
