@@ -11,4 +11,4 @@ Powered By Dongwhwan, https://github.com/wkazxf
 [[Bags-save]]
 == Bags-save
 
-operation::Bags-save[snippets='http-request,http-response,response-fields']
+operation::Bags-save[snippets='http-request,request-headers,http-response,response-fields']
