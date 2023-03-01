@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -26,23 +27,23 @@ public class UsersRepositoryTest {
     @DisplayName("[Repository] 회원 가입 테스트")
     void Repository_회원가입_테스트() {
         Users users = Users.builder()
+                .UID("testUID")
                 .usersId("test@gmail.com")
-                .nickname("testNickname")
-                .idToken("testIdToken")
+                .name("testName")
                 .userRole(UserRole.ROLE_USER)
                 .build();
 
         usersRepository.save(users);
         Users target = usersRepository.findByUsersId("test@gmail.com");
 
+        String expectedUID = "testUID";
         String expectedUsersId = "test@gmail.com";
-        String expectedNickname = "testNickname";
-        String expectedIdToken = "testIdToken";
+        String expectedName = "testName";
         UserRole expectedUserRole = UserRole.ROLE_USER;
 
+        assertThat(target.getUID()).isEqualTo(expectedUID);
         assertThat(target.getUsersId()).isEqualTo(expectedUsersId);
-        assertThat(target.getNickname()).isEqualTo(expectedNickname);
-        assertThat(target.getIdToken()).isEqualTo(expectedIdToken);
+        assertThat(target.getName()).isEqualTo(expectedName);
         assertThat(target.getUserRole()).isEqualTo(expectedUserRole);
 
     }
@@ -51,23 +52,23 @@ public class UsersRepositoryTest {
     @DisplayName("[Repository] 관리자 계정 가입 테스트")
     void Repository_관리자회원가입_테스트() {
         Users users = Users.builder()
+                .UID("testAdminUID")
                 .usersId("testAdmin@gmail.com")
-                .nickname("testAdmin")
-                .idToken("testAdminIdToken")
+                .name("testAdminName")
                 .userRole(UserRole.ROLE_ADMIN)
                 .build();
 
         usersRepository.save(users);
         Users target = usersRepository.findByUsersId("testAdmin@gmail.com");
 
+        String expectedUID = "testAdminUID";
         String expectedUsersId = "testAdmin@gmail.com";
-        String expectedNickname = "testAdmin";
-        String expectedIdToken = "testAdminIdToken";
+        String expectedName = "testAdminName";
         UserRole expectedUserRole = UserRole.ROLE_ADMIN;
 
+        assertThat(target.getUID()).isEqualTo(expectedUID);
         assertThat(target.getUsersId()).isEqualTo(expectedUsersId);
-        assertThat(target.getNickname()).isEqualTo(expectedNickname);
-        assertThat(target.getPassword()).isEqualTo(expectedIdToken);
+        assertThat(target.getName()).isEqualTo(expectedName);
         assertThat(target.getUserRole()).isEqualTo(expectedUserRole);
 
     }

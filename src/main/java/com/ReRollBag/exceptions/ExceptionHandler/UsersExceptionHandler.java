@@ -7,6 +7,7 @@ import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
+import com.google.firebase.auth.FirebaseAuthException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
@@ -26,16 +27,6 @@ public class UsersExceptionHandler extends BaseController {
         ErrorJson errorJson = ErrorJson.builder()
                 .message("UsersIdAlreadyExistException")
                 .errorCode(ErrorCode.UsersIdAlreadyExistException.getErrorCode())
-                .build();
-        return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
-    }
-
-    @ExceptionHandler(NicknameAlreadyExistException.class)
-    public ResponseEntity<?> handleNicknameAlreadyExistException(NicknameAlreadyExistException e) {
-        log.error("NicknameAlreadyExistException");
-        ErrorJson errorJson = ErrorJson.builder()
-                .message("NicknameAlreadyExistException")
-                .errorCode(ErrorCode.NicknameAlreadyExistException.getErrorCode())
                 .build();
         return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
     }
@@ -86,6 +77,16 @@ public class UsersExceptionHandler extends BaseController {
         ErrorJson errorJson = ErrorJson.builder()
                 .message("DuplicateUserSaveException")
                 .errorCode(ErrorCode.DuplicateUserSaveException.getErrorCode())
+                .build();
+        return sendResponseHttpByJson(errorJson, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(FirebaseAuthException.class)
+    public ResponseEntity<?> handleFirebaseAuthException(FirebaseAuthException e) {
+        log.error("FirebaseAuthException");
+        ErrorJson errorJson = ErrorJson.builder()
+                .message("FirebaseAuthException")
+                .errorCode(ErrorCode.FirebaseAuthException.getErrorCode())
                 .build();
         return sendResponseHttpByJson(errorJson, HttpStatus.FORBIDDEN);
     }

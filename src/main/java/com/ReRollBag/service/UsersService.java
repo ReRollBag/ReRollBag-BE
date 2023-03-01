@@ -3,12 +3,10 @@ package com.ReRollBag.service;
 import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.dto.Tokens.AccessTokenResponseDto;
-import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
-import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.repository.UsersRepository;
@@ -34,18 +32,21 @@ public class UsersService {
         // 이미 저장되어 있는 회원인 경우, 바로 예외 처리
         if (usersRepository.existsByUsersId(requestDto.getUsersId())) throw new DuplicateUserSaveException();
 
-        // Id Token verity 가 실패하는 경우, 바로 예외 처리
-        // 현재는 Mock 로직으로 무조건 패스
-        verifyIdToken(requestDto.getIdToken());
+        // idToken 을 활용해서 UID 를 조회. 만약 idToken 이 올바르지 않다면 FirebaseAuthException Throw
+        String UID = getUID(requestDto.getIdToken());
+
+        // idToken 검증 및 UID 조회 성공 시, Users 객체 생성
+        Users users = requestDto.toEntity();
+
+        // 생성된 Users 객체의 PK 를 조회한 UID 로 Set
+        users.setUID(UID);
 
         // 주어진 정보 바탕으로 users 저장
-        Users users = requestDto.toEntity();
         usersRepository.save(users);
 
         // save 이후 login 까지 한 번에 처리
-        UsersLoginRequestDto usersLoginRequestDto = new UsersLoginRequestDto(users.getUsersId(), users.getPassword());
-        String accessToken = jwtTokenProvider.createAccessToken(requestDto.getUsersId());
-        String refreshToken = jwtTokenProvider.createRefreshToken(requestDto.getUsersId());
+        String accessToken = jwtTokenProvider.createAccessToken(UID);
+        String refreshToken = jwtTokenProvider.createRefreshToken(UID);
 
         return UsersLoginResponseDto.builder()
                 .accessToken(accessToken)
@@ -60,25 +61,12 @@ public class UsersService {
                 .build();
     }
 
-    public MockResponseDto checkNicknameExist(String nickname) throws NicknameAlreadyExistException {
-        boolean result = usersRepository.existsByNickname(nickname);
-        return MockResponseDto.builder()
-                .data(!result)
-                .build();
-    }
+    public UsersLoginResponseDto login(String idToken) throws UsersIdOrPasswordInvalidException, FirebaseAuthException {
+        // Verifying idToken and get UID from idToken
+        String targetUID = getUID(idToken);
 
-    public UsersLoginResponseDto login(UsersLoginRequestDto requestDto) throws UsersIdOrPasswordInvalidException {
-        String targetUsersId = requestDto.getUsersId();
-        Users targetUsers = usersRepository.findByUsersId(targetUsersId);
-
-        if (targetUsers == null)
-            throw new UsersIdOrPasswordInvalidException();
-
-//        if (!passwordEncoder.matches(requestDto.getPassword(), targetUsers.getPassword()))
-//            throw new UsersIdOrPasswordInvalidException();
-
-        String accessToken = jwtTokenProvider.createAccessToken(requestDto.getUsersId());
-        String refreshToken = jwtTokenProvider.createRefreshToken(requestDto.getUsersId());
+        String accessToken = jwtTokenProvider.createAccessToken(targetUID);
+        String refreshToken = jwtTokenProvider.createRefreshToken(targetUID);
 
         return UsersLoginResponseDto.builder()
                 .accessToken(accessToken)
@@ -95,13 +83,9 @@ public class UsersService {
         return true;
     }
 
-    private String getUID(String idToken) throws FirebaseAuthException {
+    public String getUID(String idToken) throws FirebaseAuthException {
         return "Hello12345";
 //        return FirebaseAuth.getInstance().verifyIdToken(idToken).getUid();
     }
 
-    private void verifyIdToken(String idToken) throws FirebaseAuthException {
-        return;
-//        FirebaseAuth.getInstance().verifyIdToken(idToken);
-    }
 }

@@ -4,10 +4,8 @@ import com.ReRollBag.auth.ExceptionHandlerFilter;
 import com.ReRollBag.auth.JwtAuthenticationFilter;
 import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.dto.Tokens.AccessTokenResponseDto;
-import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
-import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
-import com.ReRollBag.domain.dto.Users.UsersResponseDto;
-import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
+import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.repository.AccessTokenRepository;
 import com.ReRollBag.repository.RefreshTokenRepository;
@@ -93,37 +91,18 @@ public class AuthIntegrationTest {
         jwtTokenProvider.setAccessTokenValidTime(1L);
         jwtTokenProvider.setRefreshTokenValidTime(3L);
 
-        UsersSaveRequestDto usersSaveRequestDto = new UsersSaveRequestDto(
-                "test@gmail.com",
-                "testNickname",
-                "testPassword",
-                null
-        );
+        // Save default Users to Repository
+        Users defaultUsers = Users.builder()
+                .UID("testUID")
+                .usersId("testUsersId")
+                .userRole(UserRole.ROLE_USER)
+                .name("testUser")
+                .build();
+        usersRepository.save(defaultUsers);
 
-        UsersResponseDto responseDto = new UsersResponseDto("test@gmail.com", "testNickname");
-
-        mockMvc.perform(post("/api/v2/users/save")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(usersSaveRequestDto))
-                )
-                .andDo(print());
-
-        UsersLoginRequestDto usersLoginRequestDto = new UsersLoginRequestDto(
-                "test@gmail.com",
-                "testPassword"
-        );
-
-        MvcResult loginResult = mockMvc.perform(post("/api/v2/users/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(usersLoginRequestDto))
-                )
-                .andDo(print())
-                .andReturn();
-
-        String content = loginResult.getResponse().getContentAsString();
-        UsersLoginResponseDto loginResponseDto = new ObjectMapper().readValue(content, UsersLoginResponseDto.class);
-        accessToken = loginResponseDto.getAccessToken();
-        refreshToken = loginResponseDto.getRefreshToken();
+        // Save default accessToken and RefreshToken
+        accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID());
+        refreshToken = jwtTokenProvider.createRefreshToken(defaultUsers.getUID());
 
     }
 

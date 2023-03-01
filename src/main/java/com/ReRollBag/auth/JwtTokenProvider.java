@@ -50,38 +50,38 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    private String createToken(TokenType tokenType, String usersId) {
+    private String createToken(TokenType tokenType, String UID) {
 
         long tokenValidTime;
         if (tokenType == TokenType.AccessToken) tokenValidTime = accessTokenValidTime;
         else tokenValidTime = refreshTokenValidTime;
 
-        Claims claims = Jwts.claims().setSubject(usersId);
-        claims.put("usersId", usersId);
+        Claims claims = Jwts.claims().setSubject(UID);
+        claims.put("UID", UID);
         claims.put("tokenType", tokenType);
 
         Date now = new Date();
         return Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidTime * 1000L)).signWith(SignatureAlgorithm.HS256, secretKey).compact();
     }
 
-    public String createAccessToken(String usersId) {
-        String accessToken = createToken(TokenType.AccessToken, usersId);
-        redisService.saveAccessToken(usersId, accessToken, accessTokenValidTime);
+    public String createAccessToken(String UID) {
+        String accessToken = createToken(TokenType.AccessToken, UID);
+        redisService.saveAccessToken(UID, accessToken, accessTokenValidTime);
         return accessToken;
     }
 
-    public String createRefreshToken(String usersId) {
-        String refreshToken = createToken(TokenType.RefreshToken, usersId);
-        redisService.saveRefreshToken(usersId, refreshToken, refreshTokenValidTime);
+    public String createRefreshToken(String UID) {
+        String refreshToken = createToken(TokenType.RefreshToken, UID);
+        redisService.saveRefreshToken(UID, refreshToken, refreshTokenValidTime);
         return refreshToken;
     }
 
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailService.loadUserByUsername(getUsersId(token));
+        UserDetails userDetails = userDetailService.loadUserByUsername(getUID(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    private String getUsersId(String token) {
+    private String getUID(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
@@ -102,7 +102,7 @@ public class JwtTokenProvider {
     }
 
     private Boolean checkAccessTokenIsExpired(String token) {
-        String usersId = getUsersId(token);
+        String usersId = getUID(token);
         return redisService.findAccessToken(usersId) == null;
     }
 
@@ -115,7 +115,7 @@ public class JwtTokenProvider {
         }
         if (!checkAccessTokenIsExpired(refreshToken)) throw new ReIssueBeforeAccessTokenExpiredException();
 
-        String usersId = getUsersId(refreshToken);
+        String usersId = getUID(refreshToken);
         String newAccessToken = createAccessToken(usersId);
         return AccessTokenResponseDto.builder()
                 .accessToken(newAccessToken)

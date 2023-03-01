@@ -1,8 +1,6 @@
 package com.ReRollBag.controller;
 
-import com.ReRollBag.domain.dto.Users.UsersLoginRequestDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
-import com.ReRollBag.exceptions.usersExceptions.NicknameAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.service.UsersService;
@@ -24,18 +22,13 @@ public class UsersController extends BaseController {
     }
 
     @PostMapping("api/v2/users/login")
-    public ResponseEntity<?> login(@RequestBody UsersLoginRequestDto requestDto) throws UsersIdOrPasswordInvalidException {
-        return sendResponseHttpByJson(usersService.login(requestDto));
+    public ResponseEntity<?> login(@RequestHeader("token") String idToken) throws UsersIdOrPasswordInvalidException, FirebaseAuthException {
+        return sendResponseHttpByJson(usersService.login(idToken));
     }
 
     @GetMapping("api/v2/users/checkUserExist/{usersId}")
     public ResponseEntity<?> checkUserExist(@PathVariable String usersId) throws UsersIdAlreadyExistException {
         return sendResponseHttpByJson(usersService.checkUserExist(usersId));
-    }
-
-    @GetMapping("api/v2/users/checkNicknameExist/{nickname}")
-    public ResponseEntity<?> checkNicknameExist(@PathVariable String nickname) throws NicknameAlreadyExistException {
-        return sendResponseHttpByJson(usersService.checkNicknameExist(nickname));
     }
 
     @GetMapping("api/v1/users/dummyMethod")

@@ -1,7 +1,6 @@
 package com.ReRollBag.domain.entity;
 
 import com.ReRollBag.enums.UserRole;
-import com.sun.istack.NotNull;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,25 +17,23 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Users implements UserDetails{
+public class Users implements UserDetails {
 
-    @Id @Column
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long usersPk;
+    // Firebase UID Value for Entity PK
+    @Id
+    @Column
+    private String UID;
 
-    @NotNull
-    @Column(name = "usersId", nullable = false)
+    // Email Value for Entity
+    @Column(name = "usersId")
     private String usersId;
 
-    @NotNull
-    @Column(name = "nickname", nullable = false)
-    private String nickname;
+    // Name Value for Entity
+    @Column(name = "name")
+    private String name;
 
-    @Column(name = "idToken")
-    private String idToken;
-
-    @NotNull
-    @Column(name = "userrole", nullable = false)
+    // Users' role; Admin, Users, Blocked
+    @Column(name = "userRole")
     private UserRole userRole;
 
     @Builder.Default
@@ -63,7 +60,7 @@ public class Users implements UserDetails{
 
     @Override
     public String getPassword() {
-        return idToken;
+        return "";
     }
 
     @Override

@@ -20,8 +20,9 @@ public class CustomUserDetailService implements UserDetailsService {
     private final UsersRepository usersRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String usersId) throws UsernameNotFoundException {
-        Users users = usersRepository.findByUsersId(usersId);
+    public UserDetails loadUserByUsername(String UID) throws UsernameNotFoundException {
+        Users users = usersRepository.findById(UID)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Users with UID : " + UID));
 
         return new org.springframework.security.core.userdetails.User(
                 users.getUsername(),

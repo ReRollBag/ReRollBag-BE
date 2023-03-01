@@ -7,11 +7,11 @@ import lombok.Builder;
 @AllArgsConstructor
 public class UsersResponseDto {
     public String usersId;
-    public String nickname;
+    public String username;
 
     @Builder
     public UsersResponseDto(Users users) {
         this.usersId = users.getUsersId();
-        this.nickname = users.getNickname();
+        this.username = users.getUsername();
     }
 }
