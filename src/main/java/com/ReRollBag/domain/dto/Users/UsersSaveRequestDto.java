@@ -15,10 +15,10 @@ public class UsersSaveRequestDto {
     private String idToken;
     private String userRole;
 
-    public UsersSaveRequestDto(String usersId, String username, String idToken) {
+    public UsersSaveRequestDto(String usersId, String name, String idToken) {
         new UsersSaveRequestDto(
                 usersId,
-                username,
+                name,
                 idToken,
                 null
         );
