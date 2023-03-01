@@ -10,10 +10,10 @@ import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.repository.UsersRepository;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +24,6 @@ import javax.transaction.Transactional;
 @Service
 public class UsersService {
     private final UsersRepository usersRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
@@ -84,8 +83,12 @@ public class UsersService {
     }
 
     public String getUID(String idToken) throws FirebaseAuthException {
-        return "Hello12345";
-//        return FirebaseAuth.getInstance().verifyIdToken(idToken).getUid();
+        return FirebaseAuth.getInstance().verifyIdToken(idToken).getUid();
     }
 
+    public boolean deleteDummy(String usersId) {
+        Users users = usersRepository.findByUsersId(usersId);
+        usersRepository.deleteById(users.getUID());
+        return true;
+    }
 }

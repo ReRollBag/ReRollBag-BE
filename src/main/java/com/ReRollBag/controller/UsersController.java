@@ -45,4 +45,9 @@ public class UsersController extends BaseController {
     public ResponseEntity<?> reIssue(HttpServletRequest request) {
         return sendResponseHttpByJson(usersService.reIssue(request));
     }
+
+    @DeleteMapping("api/v2/users/delete/{usersId}")
+    public ResponseEntity<?> deleteDummy(@PathVariable String usersId) {
+        return sendResponseHttpByJson(usersService.deleteDummy(usersId));
+    }
 }
