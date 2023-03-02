@@ -14,6 +14,7 @@ import javax.annotation.PostConstruct;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 @Configuration
 @Log4j2
@@ -32,6 +33,7 @@ public class FirebaseConfig {
             serviceAccount = new FileInputStream(firebaseKeyLocation);
             //src/main/resources/Firebase-Admin-SDK-Key.json
         } catch (FileNotFoundException e) {
+            log.error("Firebase-Admin-SDK-Key.json is not able to find!");
             throw new RuntimeException("Firebase-Admin-SDK-Key.json is not able to find!", e);
         }
 
@@ -41,12 +43,24 @@ public class FirebaseConfig {
         try {
             options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setDatabaseUrl("https://ReRollbag.firebaseio.com/")
                     .build();
         } catch (IOException e) {
+            log.error("Firebase Key's credential is wrong!");
             throw new RuntimeException("Firebase Key's credential is wrong!", e);
         }
 
-        // Check If App is Initialized before initializing
-        if (!FirebaseApp.getApps().isEmpty()) FirebaseApp.initializeApp(options);
+        // Check if Firebase app has already been initialized
+        List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
+        FirebaseApp defaultApp = null;
+        for (FirebaseApp app : firebaseApps) {
+            if (app.getName().equals(FirebaseApp.DEFAULT_APP_NAME)) {
+                defaultApp = app;
+            }
+        }
+        if (defaultApp == null) {
+            defaultApp = FirebaseApp.initializeApp(options);
+        }
+        FirebaseAuth.getInstance(defaultApp);
     }
 }
