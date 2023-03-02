@@ -206,10 +206,10 @@ public class BagsIntegrationTest {
                         ),
                         requestFields(
                                 fieldWithPath("usersId").description("usersId who rent bags"),
-                                fieldWithPath("bagsId").description("bagsId for rent or return")
+                                fieldWithPath("bagsId").description("bagsId for rent")
                         ),
                         responseFields(
-                                fieldWithPath("data").description("result of rent or return")
+                                fieldWithPath("data").description("result of rent")
                         )))
                 .andDo(print());
     }

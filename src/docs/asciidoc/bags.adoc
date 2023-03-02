@@ -15,7 +15,7 @@ operation::Bags-save[snippets='http-request,request-headers,http-response,respon
 
 ---
 
-[[Bags-rentOrReturn]]
-== Bags-rentOrReturn
+[[Bags-rentOrReturn-WhenRenting]]
+== Bags-rentOrReturn-WhenRenting
 
 operation::Bags-RentOrReturn-WhenRenting[snippets='http-request,request-headers,request-fields,request-body,http-response,response-body,response-fields']
