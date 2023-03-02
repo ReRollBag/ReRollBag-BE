@@ -8,6 +8,7 @@ import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.repository.BagsRepository;
 import com.ReRollBag.repository.UsersRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -80,8 +81,8 @@ public class BagsServiceTest {
         UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
                 "test@gmail.com",
                 "testNickname",
-                "testPassword",
-                null
+                "testIdToken",
+                UserRole.ROLE_USER.toString()
         );
         Users users = requestDto.toEntity();
 
