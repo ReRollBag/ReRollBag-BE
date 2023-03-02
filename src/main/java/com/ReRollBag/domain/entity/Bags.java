@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Bags {
+public class Bags extends BaseTimeEntity {
 
     @Id
     @Column
