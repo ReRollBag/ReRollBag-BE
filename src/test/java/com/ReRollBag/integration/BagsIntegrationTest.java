@@ -1,8 +1,10 @@
 package com.ReRollBag.integration;
 
 import com.ReRollBag.auth.JwtTokenProvider;
+import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
+import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
@@ -23,6 +25,7 @@ import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -100,6 +103,7 @@ public class BagsIntegrationTest {
 
     @Test
     @DisplayName("[Integration] 가방 저장")
+    @Rollback(value = false)
     void Integration_관리자계정으로_가방저장() throws Exception {
         //given
         BagsSaveRequestDto bagsSaveRequestDto = new BagsSaveRequestDto(
@@ -176,11 +180,38 @@ public class BagsIntegrationTest {
     @DisplayName("[Integration] 가방 대여 테스트")
     void Integration_가방대여_테스트() throws Exception {
         //given
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
+                "testUsersId",
+                "KOR_SUWON_1"
+        );
 
+        MockResponseDto expectedResponseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
 
         //when
-
-
+        mockMvc.perform(post("/api/v2/bags/rentOrReturn")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto))
+                        .header("token", usersToken)
+                )
+                //then
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
+                .andDo(document("Bags-RentOrReturn-WhenRenting",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_USERS (ADMIN also can do)")
+                        ),
+                        requestFields(
+                                fieldWithPath("usersId").description("usersId who rent bags"),
+                                fieldWithPath("bagsId").description("bagsId for rent or return")
+                        ),
+                        responseFields(
+                                fieldWithPath("data").description("result of rent or return")
+                        )))
+                .andDo(print());
     }
 
 }

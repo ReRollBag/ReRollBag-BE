@@ -23,4 +23,5 @@ public class BagsController extends BaseController {
     public ResponseEntity<?> rentOrReturn(@RequestBody BagsRentOrReturnRequestDto requestDto) {
         return sendResponseHttpByJson(bagsService.rentOrReturn(requestDto));
     }
+
 }

@@ -12,3 +12,10 @@ Powered By Dongwhwan, https://github.com/wkazxf
 == Bags-save
 
 operation::Bags-save[snippets='http-request,request-headers,http-response,response-fields']
+
+---
+
+[[Bags-rentOrReturn]]
+== Bags-rentOrReturn
+
+operation::Bags-RentOrReturn-WhenRenting[snippets='http-request,request-headers,request-fields,request-body,http-response,response-body,response-fields']
