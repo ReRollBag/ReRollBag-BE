@@ -91,7 +91,7 @@ public class AuthIntegrationTest {
 
         // Set jwtToken Valid Time
         jwtTokenProvider.setAccessTokenValidTime(1L);
-        jwtTokenProvider.setRefreshTokenValidTime(3L);
+        jwtTokenProvider.setRefreshTokenValidTime(5L);
 
         // Save default Users to Repository
         Users defaultUsers = Users.builder()
@@ -248,7 +248,7 @@ public class AuthIntegrationTest {
     @DisplayName("[Integration] 올바르지 않은 RefreshToken 값 보낼 때 예외 (httpStatus : 403 / SignatureException) 테스트")
     void Integration_Invalid_RefreshToken_테스트() throws Exception {
         // Access Token 이 Expired 될 때 까지 대기
-        Thread.sleep(1 * 1000L);
+        Thread.sleep(5 * 1000L);
 
         String invalidRefreshToken = "invalidRefreshToken";
 
@@ -278,7 +278,7 @@ public class AuthIntegrationTest {
     @DisplayName("[Integration] Refresh Token 만료 이후 ReIssue 예외 (httpStatus : 202 / RefreshTokenExpiredException) 테스트")
     void Integration_Expired_RefreshToken_테스트() throws Exception {
         // Refresh Token 이 Expired 될 때 까지 대기
-        Thread.sleep(1 * 1000L);
+        Thread.sleep(5 * 1000L);
         ErrorJson errorJson = ErrorJson.builder()
                 .errorCode(2000)
                 .message("ExpiredJwtException")
