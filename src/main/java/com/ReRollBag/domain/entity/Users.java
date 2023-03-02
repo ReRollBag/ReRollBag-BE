@@ -17,7 +17,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Users implements UserDetails {
+public class Users extends BaseTimeEntity implements UserDetails {
 
     // Firebase UID Value for Entity PK
     @Id
