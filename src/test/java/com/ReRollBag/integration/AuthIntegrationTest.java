@@ -176,7 +176,7 @@ public class AuthIntegrationTest {
     @Order(3)
     @DisplayName("[Integration] Expired Access Token 보낼 때 예외 (httpStatus : 202 / AccessTokenExpiredException) 테스트")
     void Integration_Expired_AccessToken_테스트() throws Exception {
-        // Access Token 의 만료를 위해 2초 대기
+        // Access Token 의 만료를 위해 1초 대기
         Thread.sleep(1000L);
 
         ErrorJson errorJson = ErrorJson.builder()
@@ -248,7 +248,7 @@ public class AuthIntegrationTest {
     @DisplayName("[Integration] 올바르지 않은 RefreshToken 값 보낼 때 예외 (httpStatus : 403 / SignatureException) 테스트")
     void Integration_Invalid_RefreshToken_테스트() throws Exception {
         // Access Token 이 Expired 될 때 까지 대기
-        Thread.sleep(5 * 1000L);
+        Thread.sleep(1 * 1000L);
 
         String invalidRefreshToken = "invalidRefreshToken";
 
@@ -305,4 +305,34 @@ public class AuthIntegrationTest {
                 .andReturn();
     }
 
+//    @Test
+//    @Order(7)
+//    @DisplayName("[Integration] ReIssue 시도 시 RefreshToken 의 ExpireTime 연장 테스트")
+//    void Integration_RefreshToken_Automatically_Increase_ExpireTime() throws Exception {
+//        // Create New AccessToken and RefreshToken
+//        String UID = "testUID";
+//        accessToken = jwtTokenProvider.createAccessToken(UID);
+//        refreshToken = jwtTokenProvider.createRefreshToken(UID);
+//
+//        // Wait Until AccessToken Expire
+//        Thread.sleep(3*1000L);
+//
+//        // ReIssue
+//        mockMvc.perform(post("/api/v2/users/reIssue")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .header("Token", refreshToken)
+//        )
+//                .andReturn();
+//
+//        // Wait Until Old RefreshToken Expire
+//        Thread.sleep(2*1000L);
+//
+//        // Try ReIssue and Check If it is Able to use; not Expired
+//        mockMvc.perform(post("/api/v2/users/reIssue")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .header("Token", refreshToken)
+//                )
+//                .andExpect(status().isOk())
+//                .andReturn();
+//    }
 }
