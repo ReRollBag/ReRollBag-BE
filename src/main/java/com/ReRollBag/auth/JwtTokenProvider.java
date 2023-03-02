@@ -113,7 +113,12 @@ public class JwtTokenProvider {
         } catch (MalformedJwtException | SignatureException e) {
             throw e;
         }
-        if (!checkAccessTokenIsExpired(refreshToken)) throw new ReIssueBeforeAccessTokenExpiredException();
+
+        if (!checkAccessTokenIsExpired(refreshToken))
+            throw new ReIssueBeforeAccessTokenExpiredException();
+
+//        if (checkRefreshTokenExpirationBelowHalf(refreshToken))
+//            extendRefreshTokenExpiration(refreshToken);
 
         String usersId = getUID(refreshToken);
         String newAccessToken = createAccessToken(usersId);
@@ -122,4 +127,37 @@ public class JwtTokenProvider {
                 .build();
     }
 
+    private Boolean checkRefreshTokenExpirationBelowHalf(String refreshToken) {
+        log.info("checkRefreshTokenExpirationBelowHalf");
+
+        // Get Current Expiration Time of RefreshToken
+        Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(refreshToken);
+        Date currentExpirationTime = claims.getBody().getExpiration();
+
+        // Check currentExpirationTime is smaller than now + (refreshTokenValidTime/2) and return
+        Date now = new Date();
+        return currentExpirationTime.getTime() < refreshTokenValidTime * 1000L / 2 + now.getTime();
+    }
+
+    private String extendRefreshTokenExpiration(String refreshToken) {
+        log.info("extendRefreshTokenExpiration");
+
+        // Get UID from Token
+        String UID = getUID(refreshToken);
+
+        // Expand TokenValidTime in Redis
+        redisService.extendRefreshTokenValidTime(UID, refreshTokenValidTime);
+
+        // Expand TokenValidTime in Jwts
+        Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(refreshToken);
+        Date now = new Date();
+        claims.getBody().setExpiration(new Date(now.getTime() + refreshTokenValidTime * 1000L));
+
+        // Create new RefreshToken
+        return Jwts.builder()
+                .setClaims(claims.getBody())
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+
+    }
 }

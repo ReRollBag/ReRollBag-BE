@@ -49,6 +49,18 @@ public class RedisService {
     public void deleteRefreshToken(String key) {
         refreshTokenRepository.deleteById(key);
     }
-    public void deleteAccessToken (String key) { accessTokenRepository.deleteById(key);}
+
+    public void deleteAccessToken(String key) {
+        accessTokenRepository.deleteById(key);
+    }
+
+    public void extendRefreshTokenValidTime(String key, Long extendTime) {
+        // Find RefreshToken with Key
+        RefreshToken refreshToken = refreshTokenRepository.findById(key)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find RefreshToken with key : " + key));
+
+        // Extend RefreshToken's valid time
+        refreshToken.extendRefreshTokenValidTime(extendTime);
+    }
 
 }

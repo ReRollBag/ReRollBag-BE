@@ -20,4 +20,8 @@ public class RefreshToken {
 
     @TimeToLive
     private Long expiredTime;
+
+    public void extendRefreshTokenValidTime(Long time) {
+        this.expiredTime += time;
+    }
 }
