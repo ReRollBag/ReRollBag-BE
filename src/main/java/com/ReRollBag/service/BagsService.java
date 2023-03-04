@@ -7,6 +7,7 @@ import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.exceptions.bagsExceptions.ReturnRequestUserMismatchException;
 import com.ReRollBag.repository.BagsRepository;
 import com.ReRollBag.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +44,9 @@ public class BagsService {
         return new BagsResponseDto(saveTarget);
     }
 
-    public MockResponseDto rentOrReturn(BagsRentOrReturnRequestDto requestDto) {
+
+    @Transactional
+    public MockResponseDto renting(BagsRentOrReturnRequestDto requestDto) {
         String bagsId = requestDto.getBagsId();
         String usersId = requestDto.getUsersId();
 
@@ -51,12 +54,6 @@ public class BagsService {
         Bags bags = bagsRepository.findById(bagsId).orElseThrow(
                 () -> new IllegalArgumentException("IllegalArgumentException")
         );
-
-        if (!bags.isRented()) return renting(bags, users);
-        return returning(bags, users);
-    }
-
-    private MockResponseDto renting(Bags bags, Users users) {
 
         bags.setRentingUsers(users);
         bags.setRented(true);
@@ -67,19 +64,7 @@ public class BagsService {
         return successMockResponseDto;
     }
 
-    private MockResponseDto returning(Bags bags, Users users) {
-
-        bags.setWhenIsRented(LocalDateTime.MIN);
-        bags.setRentingUsers(null);
-        bags.setRented(false);
-
-        users.getReturningBagsList().remove(bags);
-        users.getReturnedBagsList().add(bags);
-
-        return successMockResponseDto;
-    }
-
-    public MockResponseDto requestReturning(BagsRentOrReturnRequestDto requestDto) {
+    public MockResponseDto requestReturning(BagsRentOrReturnRequestDto requestDto) throws ReturnRequestUserMismatchException {
         String bagsId = requestDto.getBagsId();
         String usersId = requestDto.getUsersId();
 
@@ -88,8 +73,28 @@ public class BagsService {
                 () -> new IllegalArgumentException("IllegalArgumentException")
         );
 
+        if (users.getUsersId() != bags.getRentingUsers().getUsersId())
+            throw new ReturnRequestUserMismatchException();
+
         users.getRentingBagsList().remove(bags);
         users.getReturningBagsList().add(bags);
+
+        return successMockResponseDto;
+    }
+
+    public MockResponseDto returning(String bagsId) {
+
+        Bags bags = bagsRepository.findById(bagsId).orElseThrow(
+                () -> new IllegalArgumentException("IllegalArgumentException")
+        );
+        Users users = bags.getRentingUsers();
+
+        bags.setWhenIsRented(LocalDateTime.MIN);
+        bags.setRentingUsers(null);
+        bags.setRented(false);
+
+        users.getReturningBagsList().remove(bags);
+        users.getReturnedBagsList().add(bags);
 
         return successMockResponseDto;
     }

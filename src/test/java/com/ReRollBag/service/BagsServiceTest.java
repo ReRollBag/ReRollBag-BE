@@ -9,6 +9,7 @@ import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
+import com.ReRollBag.exceptions.bagsExceptions.ReturnRequestUserMismatchException;
 import com.ReRollBag.repository.BagsRepository;
 import com.ReRollBag.repository.UsersRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -99,7 +100,7 @@ public class BagsServiceTest {
         when(usersRepository.findByUsersId(any())).thenReturn(users);
 
         //when
-        bagsService.rentOrReturn(rentOrReturnRequestDto);
+        bagsService.renting(rentOrReturnRequestDto);
 
         //then
         assertThat(bags.isRented()).isEqualTo(true);
@@ -110,7 +111,7 @@ public class BagsServiceTest {
 
     @Test
     @DisplayName("[Service] Bags Return Request 테스트")
-    public void Service_가방반납신청_테스트() {
+    public void Service_가방반납신청_테스트() throws ReturnRequestUserMismatchException {
         //given
         MockResponseDto responseDto = new MockResponseDto(true);
 
@@ -166,6 +167,7 @@ public class BagsServiceTest {
         );
         Users users = requestDto.toEntity();
 
+        String bagsId = "KOR_SUWON_1";
         Bags bags = Bags.builder()
                 .bagsId("KOR_SUWON_1")
                 .whenIsRented(LocalDateTime.now())
@@ -175,15 +177,9 @@ public class BagsServiceTest {
 
         users.getReturningBagsList().add(bags);
 
-        BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
-                users.getUsersId(),
-                bags.getBagsId()
-        );
-
         when(bagsRepository.findById(any())).thenReturn(Optional.of(bags));
-        when(usersRepository.findByUsersId(any())).thenReturn(users);
 
-        bagsService.rentOrReturn(rentOrReturnRequestDto);
+        bagsService.returning(bagsId);
 
         assertThat(bags.isRented()).isEqualTo(false);
         assertThat(bags.getWhenIsRented()).isEqualTo(LocalDateTime.MIN);
