@@ -17,13 +17,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.annotation.Rollback;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class BagsServiceTest {
@@ -42,6 +45,7 @@ public class BagsServiceTest {
 
     @Test
     @DisplayName("[Service] Bags 생성 테스트")
+    @Rollback(value = false)
     public void Service_가방생성_테스트() throws Exception {
         //given
         BagsSaveRequestDto bagsSaveRequestDto = new BagsSaveRequestDto(
@@ -91,8 +95,8 @@ public class BagsServiceTest {
                 bags.getBagsId()
         );
 
-        given(bagsRepository.findById(any())).willReturn(Optional.of(bags));
-        given(usersRepository.findByUsersId(any())).willReturn(users);
+        when(bagsRepository.findById(any())).thenReturn(Optional.of(bags));
+        when(usersRepository.findByUsersId(any())).thenReturn(users);
 
         //when
         bagsService.rentOrReturn(rentOrReturnRequestDto);
@@ -102,5 +106,45 @@ public class BagsServiceTest {
         assertThat(bags.getWhenIsRented()).isAfter(LocalDateTime.MIN);
         assertThat(bags.getRentingUsers().getUsersId()).isEqualTo(usersId);
         assertThat(users.getRentingBagsList().get(0)).isEqualTo(bags);
+    }
+
+    @Test
+    @DisplayName("[Service] Bags Return 테스트")
+    public void Service_가방반납_테스트() {
+        //given
+        MockResponseDto responseDto = new MockResponseDto(true);
+
+        String usersId = "test@gmail.com";
+        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
+                "test@gmail.com",
+                "testNickname",
+                "testIdToken",
+                UserRole.ROLE_USER.toString()
+        );
+        Users users = requestDto.toEntity();
+
+        Bags bags = Bags.builder()
+                .bagsId("KOR_SUWON_1")
+                .whenIsRented(LocalDateTime.now())
+                .isRented(true)
+                .rentingUsers(users)
+                .build();
+
+        users.getRentingBagsList().add(bags);
+
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
+                users.getUsersId(),
+                bags.getBagsId()
+        );
+
+        when(bagsRepository.findById(any())).thenReturn(Optional.of(bags));
+        when(usersRepository.findByUsersId(any())).thenReturn(users);
+
+        bagsService.rentOrReturn(rentOrReturnRequestDto);
+
+        assertThat(bags.isRented()).isEqualTo(false);
+        assertThat(bags.getWhenIsRented()).isEqualTo(LocalDateTime.MIN);
+        assertThat(bags.getRentingUsers()).isNull();
+        assertThat(users.getRentingBagsList().size()).isEqualTo(0);
     }
 }
