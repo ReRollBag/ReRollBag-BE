@@ -109,8 +109,8 @@ public class BagsServiceTest {
     }
 
     @Test
-    @DisplayName("[Service] Bags Return 테스트")
-    public void Service_가방반납_테스트() {
+    @DisplayName("[Service] Bags Return Request 테스트")
+    public void Service_가방반납신청_테스트() {
         //given
         MockResponseDto responseDto = new MockResponseDto(true);
 
@@ -140,6 +140,49 @@ public class BagsServiceTest {
         when(bagsRepository.findById(any())).thenReturn(Optional.of(bags));
         when(usersRepository.findByUsersId(any())).thenReturn(users);
 
+        //when
+        bagsService.requestReturning(rentOrReturnRequestDto);
+
+        //then
+        assertThat(users.getRentingBagsList().size()).isEqualTo(0);
+        assertThat(users.getReturningBagsList().get(0)).isEqualTo(bags);
+        assertThat(bags.getRentingUsers()).isEqualTo(users);
+        assertThat(bags.isRented()).isTrue();
+
+    }
+
+    @Test
+    @DisplayName("[Service] Bags Return 테스트")
+    public void Service_가방반납_테스트() {
+        //given
+        MockResponseDto responseDto = new MockResponseDto(true);
+
+        String usersId = "test@gmail.com";
+        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
+                "test@gmail.com",
+                "testNickname",
+                "testIdToken",
+                UserRole.ROLE_USER.toString()
+        );
+        Users users = requestDto.toEntity();
+
+        Bags bags = Bags.builder()
+                .bagsId("KOR_SUWON_1")
+                .whenIsRented(LocalDateTime.now())
+                .isRented(true)
+                .rentingUsers(users)
+                .build();
+
+        users.getReturningBagsList().add(bags);
+
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
+                users.getUsersId(),
+                bags.getBagsId()
+        );
+
+        when(bagsRepository.findById(any())).thenReturn(Optional.of(bags));
+        when(usersRepository.findByUsersId(any())).thenReturn(users);
+
         bagsService.rentOrReturn(rentOrReturnRequestDto);
 
         assertThat(bags.isRented()).isEqualTo(false);
@@ -148,4 +191,5 @@ public class BagsServiceTest {
         assertThat(users.getReturningBagsList().size()).isEqualTo(0);
         assertThat(users.getReturnedBagsList().get(0)).isEqualTo(bags);
     }
+
 }

@@ -23,6 +23,8 @@ public class BagsService {
     private final UsersRepository usersRepository;
     private final BagsCount bagsCount;
 
+    private static final MockResponseDto successMockResponseDto = new MockResponseDto(true);
+
     public BagsResponseDto save(BagsSaveRequestDto bagsSaveRequestDto) {
         Bags saveTarget = bagsSaveRequestDto.toEntity();
         String region = saveTarget.getBagsId();
@@ -56,24 +58,16 @@ public class BagsService {
 
     private MockResponseDto renting(Bags bags, Users users) {
 
-        MockResponseDto responseDto = MockResponseDto.builder()
-                .data(true)
-                .build();
-
         bags.setRentingUsers(users);
         bags.setRented(true);
         bags.setWhenIsRented(LocalDateTime.now());
 
         users.getRentingBagsList().add(bags);
 
-        return responseDto;
+        return successMockResponseDto;
     }
 
     private MockResponseDto returning(Bags bags, Users users) {
-
-        MockResponseDto responseDto = MockResponseDto.builder()
-                .data(true)
-                .build();
 
         bags.setWhenIsRented(LocalDateTime.MIN);
         bags.setRentingUsers(null);
@@ -82,7 +76,22 @@ public class BagsService {
         users.getReturningBagsList().remove(bags);
         users.getReturnedBagsList().add(bags);
 
-        return responseDto;
+        return successMockResponseDto;
+    }
+
+    public MockResponseDto requestReturning(BagsRentOrReturnRequestDto requestDto) {
+        String bagsId = requestDto.getBagsId();
+        String usersId = requestDto.getUsersId();
+
+        Users users = usersRepository.findByUsersId(usersId);
+        Bags bags = bagsRepository.findById(bagsId).orElseThrow(
+                () -> new IllegalArgumentException("IllegalArgumentException")
+        );
+
+        users.getRentingBagsList().remove(bags);
+        users.getReturningBagsList().add(bags);
+
+        return successMockResponseDto;
     }
 
 }
