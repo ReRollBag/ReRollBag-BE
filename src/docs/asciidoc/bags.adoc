@@ -15,7 +15,21 @@ operation::Bags-save[snippets='http-request,request-headers,http-response,respon
 
 ---
 
-[[Bags-rentOrReturn]]
-== Bags-rentOrReturn
+[[Bags-Renting]]
+== Bags-Renting
 
-operation::Bags-RentOrReturn-WhenRenting[snippets='http-request,request-headers,request-fields,request-body,http-response,response-body,response-fields']
+operation::Bags-Renting[snippets='http-request,request-headers,request-fields,request-body,http-response,response-body,response-fields']
+
+---
+
+[[Bags-RequestReturning]]
+== Bags-RequestReturning
+
+operation::Bags-RequestReturning[snippets='http-request,request-headers,request-fields,request-body,http-response,response-body,response-fields']
+
+---
+
+[[Bags-Returing]]
+== Bags-Returning
+
+operation::Bags-Returning[snippets='http-request,request-headers,path-parameters,request-body,http-response,response-body,response-fields']

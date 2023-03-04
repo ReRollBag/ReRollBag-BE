@@ -5,17 +5,13 @@ import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
-import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
-import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.repository.BagsRepository;
 import com.ReRollBag.repository.UsersRepository;
 import com.ReRollBag.service.BagsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.annotation.Rollback;
@@ -31,7 +28,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
@@ -39,15 +35,18 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
 @ExtendWith(RestDocumentationExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BagsIntegrationTest {
 
     @Autowired
@@ -104,6 +103,7 @@ public class BagsIntegrationTest {
     @Test
     @DisplayName("[Integration] 가방 저장")
     @Rollback(value = false)
+    @Order(value = 1)
     void Integration_관리자계정으로_가방저장() throws Exception {
         //given
         BagsSaveRequestDto bagsSaveRequestDto = new BagsSaveRequestDto(
@@ -149,6 +149,7 @@ public class BagsIntegrationTest {
 
     @Test
     @DisplayName("[Integration] 가방 한번 더 저장해서 index 증가 테스트")
+    @Order(value = 2)
     void Integration_관리자계정으로_가방한번더저장_index증가_테스트() throws Exception {
         //given
         BagsSaveRequestDto bagsSaveRequestDto = new BagsSaveRequestDto(
@@ -178,6 +179,8 @@ public class BagsIntegrationTest {
 
     @Test
     @DisplayName("[Integration] 가방 대여 테스트")
+    @Rollback(value = false)
+    @Order(value = 3)
     void Integration_가방대여_테스트() throws Exception {
         //given
         BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
@@ -190,7 +193,7 @@ public class BagsIntegrationTest {
                 .build();
 
         //when
-        mockMvc.perform(post("/api/v2/bags/rentOrReturn")
+        mockMvc.perform(post("/api/v2/bags/renting")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto))
                         .header("token", usersToken)
@@ -198,7 +201,7 @@ public class BagsIntegrationTest {
                 //then
                 .andExpect(status().isOk())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
-                .andDo(document("Bags-RentOrReturn-WhenRenting",
+                .andDo(document("Bags-Renting",
                         Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                         requestHeaders(
@@ -206,10 +209,83 @@ public class BagsIntegrationTest {
                         ),
                         requestFields(
                                 fieldWithPath("usersId").description("usersId who rent bags"),
-                                fieldWithPath("bagsId").description("bagsId for rent or return")
+                                fieldWithPath("bagsId").description("bagsId for renting")
                         ),
                         responseFields(
-                                fieldWithPath("data").description("result of rent or return")
+                                fieldWithPath("data").description("result of renting")
+                        )))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Integration] 가방 반납 신청 테스트")
+    @Order(value = 4)
+    void Integration_가방반납신청_테스트() throws Exception {
+        //given
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
+                "testUsersId",
+                "KOR_SUWON_1"
+        );
+
+        MockResponseDto expectedResponseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
+
+        //when
+        mockMvc.perform(post("/api/v2/bags/requestReturning")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto))
+                        .header("token", usersToken)
+                )
+                //then
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
+                .andDo(document("Bags-RequestReturning",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_USERS (ADMIN also can do)")
+                        ),
+                        requestFields(
+                                fieldWithPath("usersId").description("usersId who rent bags"),
+                                fieldWithPath("bagsId").description("bagsId for rent")
+                        ),
+                        responseFields(
+                                fieldWithPath("data").description("result of rent")
+                        )))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Integration] 가방 반납 테스트")
+    @Order(value = 5)
+    void Integration_가방반납_테스트() throws Exception {
+        //given
+        String bagsId = "KOR_SUWON_1";
+
+        MockResponseDto expectedResponseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
+
+        //when
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v3/bags/returning/{bagsId}", bagsId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("token", adminToken)
+                )
+                //then
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
+                .andDo(document("Bags-Returning",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_ADMIN (ADMIN only can do)")
+                        ),
+                        pathParameters(
+                                parameterWithName("bagsId").description("BagsId for returning")
+                        ),
+                        responseFields(
+                                fieldWithPath("data").description("result of rent")
                         )))
                 .andDo(print());
     }
