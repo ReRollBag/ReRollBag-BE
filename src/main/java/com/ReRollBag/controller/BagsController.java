@@ -19,9 +19,15 @@ public class BagsController extends BaseController {
         return sendResponseHttpByJson(bagsService.save(requestDto));
     }
 
-    @PostMapping("api/v2/bags/rentOrReturn")
-    public ResponseEntity<?> rentOrReturn(@RequestBody BagsRentOrReturnRequestDto requestDto) {
+    @PostMapping("api/v2/bags/renting")
+    public ResponseEntity<?> renting(@RequestBody BagsRentOrReturnRequestDto requestDto) {
         return sendResponseHttpByJson(bagsService.rentOrReturn(requestDto));
     }
+
+    @PostMapping("api/v3/bags/returning")
+    public ResponseEntity<?> returning(@RequestBody BagsRentOrReturnRequestDto requestDto) {
+        return sendResponseHttpByJson(bagsService.rentOrReturn(requestDto));
+    }
+
 
 }
