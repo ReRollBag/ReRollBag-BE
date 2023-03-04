@@ -7,6 +7,7 @@ import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
+import com.ReRollBag.exceptions.ErrorJson;
 import com.ReRollBag.repository.BagsRepository;
 import com.ReRollBag.repository.UsersRepository;
 import com.ReRollBag.service.BagsService;
@@ -218,8 +219,94 @@ public class BagsIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration] 가방 반납 신청 테스트")
+    @DisplayName("[Integration] 가방 중복 대여 시도 시 예외 (httpStatus : 400 / AlreadyRentedException) 테스트")
     @Order(value = 4)
+    void Integration_가방중복대여_테스트() throws Exception {
+        //given
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
+                "testUsersId",
+                "KOR_SUWON_1"
+        );
+
+        ErrorJson errorJson = ErrorJson.builder()
+                .errorCode(4001)
+                .message("AlreadyRentedException")
+                .build();
+
+        MockResponseDto expectedResponseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
+
+        //when
+        mockMvc.perform(post("/api/v2/bags/renting")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto))
+                        .header("token", usersToken)
+                )
+                //then
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
+                .andDo(document("Bags-Renting-AlreadyRentedException",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_USERS (ADMIN also can do)")
+                        ),
+                        requestFields(
+                                fieldWithPath("usersId").description("usersId who rent bags"),
+                                fieldWithPath("bagsId").description("bagsId for renting")
+                        ),
+                        responseFields(
+                                fieldWithPath("errorCode").description("errorCode of AlreadyRentedException").type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("message of AlreadyRentedException").type(JsonFieldType.STRING)
+                        )))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Integration] 가방 대여 반납 불일치 예외 (httpStatus : 400 / ReturnRequestUserMismatchException) 테스트")
+    @Order(value = 5)
+    void Integration_가방반납신청_대여반납불일치_테스트() throws Exception {
+        //given
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
+                "testAdminUsersId",
+                "KOR_SUWON_1"
+        );
+
+        ErrorJson errorJson = ErrorJson.builder()
+                .errorCode(4000)
+                .message("ReturnRequestUserMismatchException")
+                .build();
+
+        //when
+        mockMvc.perform(post("/api/v2/bags/requestReturning")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto))
+                        .header("token", usersToken)
+                )
+                //then
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
+                .andDo(document("Bags-RequestReturning-ReturnRequestUserMismatchException",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_USERS (ADMIN also can do)")
+                        ),
+                        requestFields(
+                                fieldWithPath("usersId").description("usersId with inconsistent renting users' id"),
+                                fieldWithPath("bagsId").description("bagsId for rent")
+                        ),
+                        responseFields(
+                                fieldWithPath("errorCode").description("errorCode of ReturnRequestUserMismatchException").type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("message of ReturnRequestUserMismatchException").type(JsonFieldType.STRING)
+                        )))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Integration] 가방 반납 신청 테스트")
+    @Order(value = 6)
     void Integration_가방반납신청_테스트() throws Exception {
         //given
         BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
@@ -258,7 +345,7 @@ public class BagsIntegrationTest {
 
     @Test
     @DisplayName("[Integration] 가방 반납 테스트")
-    @Order(value = 5)
+    @Order(value = 7)
     void Integration_가방반납_테스트() throws Exception {
         //given
         String bagsId = "KOR_SUWON_1";

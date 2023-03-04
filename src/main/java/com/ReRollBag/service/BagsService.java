@@ -7,6 +7,7 @@ import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.exceptions.bagsExceptions.AlreadyRentedException;
 import com.ReRollBag.exceptions.bagsExceptions.ReturnRequestUserMismatchException;
 import com.ReRollBag.repository.BagsRepository;
 import com.ReRollBag.repository.UsersRepository;
@@ -46,7 +47,7 @@ public class BagsService {
 
 
     @Transactional
-    public MockResponseDto renting(BagsRentOrReturnRequestDto requestDto) {
+    public MockResponseDto renting(BagsRentOrReturnRequestDto requestDto) throws AlreadyRentedException {
         String bagsId = requestDto.getBagsId();
         String usersId = requestDto.getUsersId();
 
@@ -54,6 +55,9 @@ public class BagsService {
         Bags bags = bagsRepository.findById(bagsId).orElseThrow(
                 () -> new IllegalArgumentException("IllegalArgumentException")
         );
+
+        if (bags.isRented())
+            throw new AlreadyRentedException();
 
         bags.setRentingUsers(users);
         bags.setRented(true);

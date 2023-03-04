@@ -9,6 +9,7 @@ import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
+import com.ReRollBag.exceptions.bagsExceptions.AlreadyRentedException;
 import com.ReRollBag.exceptions.bagsExceptions.ReturnRequestUserMismatchException;
 import com.ReRollBag.repository.BagsRepository;
 import com.ReRollBag.repository.UsersRepository;
@@ -71,7 +72,7 @@ public class BagsServiceTest {
 
     @Test
     @DisplayName("[Service] Bags Rent 테스트")
-    public void Service_가방렌트_테스트() {
+    public void Service_가방렌트_테스트() throws AlreadyRentedException {
         //given
         MockResponseDto responseDto = new MockResponseDto(true);
 

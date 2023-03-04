@@ -2,6 +2,7 @@ package com.ReRollBag.controller;
 
 import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
+import com.ReRollBag.exceptions.bagsExceptions.AlreadyRentedException;
 import com.ReRollBag.exceptions.bagsExceptions.ReturnRequestUserMismatchException;
 import com.ReRollBag.service.BagsService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class BagsController extends BaseController {
     }
 
     @PostMapping("api/v2/bags/renting")
-    public ResponseEntity<?> renting(@RequestBody BagsRentOrReturnRequestDto requestDto) {
+    public ResponseEntity<?> renting(@RequestBody BagsRentOrReturnRequestDto requestDto) throws AlreadyRentedException {
         return sendResponseHttpByJson(bagsService.renting(requestDto));
     }
 
