@@ -17,9 +17,9 @@ public class BagsExceptionHandler extends BaseController {
 
     @ExceptionHandler(ReturnRequestUserMismatchException.class)
     public ResponseEntity<?> handleBagsExceptionHandler(ReturnRequestUserMismatchException e) {
-        log.error("ReturnRequestUserMismachException");
+        log.error("ReturnRequestUserMismatchException");
         ErrorJson errorJson = ErrorJson.builder()
-                .message("ReturnRequestUserMismachException")
+                .message("ReturnRequestUserMismatchException")
                 .errorCode(ErrorCode.ReturnRequestUserMismatchException.getErrorCode())
                 .build();
         return sendResponseHttpByJson(errorJson, HttpStatus.BAD_REQUEST);

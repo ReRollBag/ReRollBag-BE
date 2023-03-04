@@ -264,8 +264,49 @@ public class BagsIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration] 가방 반납 신청 테스트")
+    @DisplayName("[Integration] 가방 대여 반납 불일치 예외 (httpStatus : 400 / ReturnRequestUserMismatchException) 테스트")
     @Order(value = 5)
+    void Integration_가방반납신청_대여반납불일치_테스트() throws Exception {
+        //given
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
+                "testAdminUsersId",
+                "KOR_SUWON_1"
+        );
+
+        ErrorJson errorJson = ErrorJson.builder()
+                .errorCode(4000)
+                .message("ReturnRequestUserMismatchException")
+                .build();
+
+        //when
+        mockMvc.perform(post("/api/v2/bags/requestReturning")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto))
+                        .header("token", usersToken)
+                )
+                //then
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
+                .andDo(document("Bags-RequestReturning",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_USERS (ADMIN also can do)")
+                        ),
+                        requestFields(
+                                fieldWithPath("usersId").description("usersId who rent bags"),
+                                fieldWithPath("bagsId").description("bagsId for rent")
+                        ),
+                        responseFields(
+                                fieldWithPath("errorCode").description("errorCode of ReturnRequestUserMismatchException").type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("message of ReturnRequestUserMismatchException").type(JsonFieldType.STRING)
+                        )))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Integration] 가방 반납 신청 테스트")
+    @Order(value = 6)
     void Integration_가방반납신청_테스트() throws Exception {
         //given
         BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
@@ -304,7 +345,7 @@ public class BagsIntegrationTest {
 
     @Test
     @DisplayName("[Integration] 가방 반납 테스트")
-    @Order(value = 6)
+    @Order(value = 7)
     void Integration_가방반납_테스트() throws Exception {
         //given
         String bagsId = "KOR_SUWON_1";
