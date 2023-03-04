@@ -22,6 +22,7 @@ public enum ErrorCode {
 
     // Bags ErrorCode
     ReturnRequestUserMismatchException(4000),
+    AlreadyRentedException(4001),
 
     UnknownException(5000);
 

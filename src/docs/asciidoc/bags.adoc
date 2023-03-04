@@ -22,6 +22,13 @@ operation::Bags-Renting[snippets='http-request,request-headers,request-fields,re
 
 ---
 
+[[Bags-Renting-AlreadyRentedException]]
+== Bags-Renting-AlreadyRentedException
+
+operation::Bags-Renting-AlreadyRentedException[snippets='http-request,request-headers,request-fields,request-body,http-response,response-body,response-fields']
+
+---
+
 [[Bags-RequestReturning]]
 == Bags-RequestReturning
 
