@@ -36,6 +36,13 @@ operation::Bags-RequestReturning[snippets='http-request,request-headers,request-
 
 ---
 
+[[Bags-RequestReturning-ReturnRequestUserMismatchException]]
+== Bags-RequestReturning-ReturnRequestUserMismatchException
+
+operation::Bags-RequestReturning-ReturnRequestUserMismatchException[snippets='http-request,request-headers,request-fields,request-body,http-response,response-body,response-fields']
+
+---
+
 [[Bags-Returing]]
 == Bags-Returning
 

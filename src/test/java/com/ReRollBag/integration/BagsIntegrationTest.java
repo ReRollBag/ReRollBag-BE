@@ -287,14 +287,14 @@ public class BagsIntegrationTest {
                 //then
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(errorJson)))
-                .andDo(document("Bags-RequestReturning",
+                .andDo(document("Bags-RequestReturning-ReturnRequestUserMismatchException",
                         Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                         requestHeaders(
                                 headerWithName("Token").description("AccessToken Value for ROLE_USERS (ADMIN also can do)")
                         ),
                         requestFields(
-                                fieldWithPath("usersId").description("usersId who rent bags"),
+                                fieldWithPath("usersId").description("usersId with inconsistent renting users' id"),
                                 fieldWithPath("bagsId").description("bagsId for rent")
                         ),
                         responseFields(
