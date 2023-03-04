@@ -12,6 +12,7 @@ import com.ReRollBag.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
 @Service
@@ -74,7 +75,7 @@ public class BagsService {
                 .data(true)
                 .build();
 
-        bags.setWhenIsRented(LocalDateTime.now());
+        bags.setWhenIsRented(LocalDateTime.MIN);
         bags.setRentingUsers(null);
         bags.setRented(false);
 

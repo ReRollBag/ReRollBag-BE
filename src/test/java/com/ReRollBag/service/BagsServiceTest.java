@@ -145,6 +145,7 @@ public class BagsServiceTest {
         assertThat(bags.isRented()).isEqualTo(false);
         assertThat(bags.getWhenIsRented()).isEqualTo(LocalDateTime.MIN);
         assertThat(bags.getRentingUsers()).isNull();
-        assertThat(users.getRentingBagsList().size()).isEqualTo(0);
+        assertThat(users.getReturningBagsList().size()).isEqualTo(0);
+        assertThat(users.getReturnedBagsList().get(0)).isEqualTo(bags);
     }
 }
