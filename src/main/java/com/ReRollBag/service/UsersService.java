@@ -108,6 +108,8 @@ public class UsersService {
             rentingBagsList.add(responseDto);
         }
         Collections.sort(rentingBagsList);
+        System.out.println("getRentingBagsList() called for usersId: " + usersId);
+        System.out.println("rentingBagsList size: " + rentingBagsList.size());
         return rentingBagsList;
     }
 

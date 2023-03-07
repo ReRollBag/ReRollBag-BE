@@ -50,4 +50,9 @@ public class UsersController extends BaseController {
     public ResponseEntity<?> deleteDummy(@PathVariable String usersId) {
         return sendResponseHttpByJson(usersService.deleteDummy(usersId));
     }
+
+    @GetMapping("api/v1/users/getRentingBagsList/{usersId}")
+    public ResponseEntity<?> getRentingBagsList(@PathVariable String usersId) {
+        return sendResponseHttpByJson(usersService.getRentingBagsList(usersId));
+    }
 }
