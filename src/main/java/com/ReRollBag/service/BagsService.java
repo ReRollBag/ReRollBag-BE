@@ -89,8 +89,8 @@ public class BagsService {
         users.getRentingBagsList().remove(bags);
         users.getReturningBagsList().add(bags);
 
-        usersRepository.save(users);
-        bagsRepository.save(bags);
+        bags.setRentingUsers(null);
+        bags.setReturningUsers(users);
 
         return successMockResponseDto;
     }
@@ -108,6 +108,9 @@ public class BagsService {
 
         users.getReturningBagsList().remove(bags);
         users.getReturnedBagsList().add(bags);
+
+        bags.setReturningUsers(null);
+        bags.setReturnedUsers(users);
 
         return successMockResponseDto;
     }
