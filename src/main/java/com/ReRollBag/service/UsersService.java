@@ -102,6 +102,7 @@ public class UsersService {
     public List<BagsResponseDto> getRentingBagsList(String usersId) {
         Users users = usersRepository.findByUsersId(usersId);
         List<BagsResponseDto> rentingBagsList = new ArrayList<>();
+        System.out.println("users.getRentingBagsList size : " + users.getRentingBagsList().size());
         for (Bags bags : users.getRentingBagsList()) {
             BagsResponseDto responseDto = new BagsResponseDto(bags);
             rentingBagsList.add(responseDto);

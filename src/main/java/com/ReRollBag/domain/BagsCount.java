@@ -26,4 +26,8 @@ public class BagsCount {
     public void saveNewRegion(String region) {
         bagsCountMap.put(region, 0L);
     }
+
+    public void tearDownMap() {
+        bagsCountMap.clear();
+    }
 }

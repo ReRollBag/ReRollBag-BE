@@ -21,7 +21,7 @@ public class Users extends BaseTimeEntity implements UserDetails {
 
     // Firebase UID Value for Entity PK
     @Id
-    @Column
+    @Column(unique = true)
     private String UID;
 
     // Email Value for Entity
@@ -37,15 +37,15 @@ public class Users extends BaseTimeEntity implements UserDetails {
     private UserRole userRole;
 
     @Builder.Default
-    @OneToMany(mappedBy = "bagsId", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "rentingUsers", fetch = FetchType.EAGER)
     private List<Bags> rentingBagsList = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "bagsId", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "rentingUsers", fetch = FetchType.EAGER)
     private List<Bags> returningBagsList = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "bagsId", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "rentingUsers", fetch = FetchType.EAGER)
     private List<Bags> returnedBagsList = new ArrayList<>();
 
     @Transient

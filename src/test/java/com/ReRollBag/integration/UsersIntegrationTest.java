@@ -1,11 +1,11 @@
 package com.ReRollBag.integration;
 
 import com.ReRollBag.auth.JwtTokenProvider;
+import com.ReRollBag.domain.BagsCount;
 import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
-import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
@@ -26,14 +26,12 @@ import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.time.LocalDateTime;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
@@ -54,6 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ExtendWith(RestDocumentationExtension.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UsersIntegrationTest {
 
     @Autowired
@@ -76,6 +75,16 @@ public class UsersIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private BagsCount bagsCount;
+
+    @BeforeAll
+    void tearDown() {
+        bagsRepository.deleteAll();
+        usersRepository.deleteAll();
+        bagsCount.tearDownMap();
+    }
 
     @BeforeEach
     void setUpMockMvcForRestDocsAndSpringSecurity(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
@@ -443,6 +452,7 @@ public class UsersIntegrationTest {
 
     @Test
     @DisplayName("[Integration] getRentingBagsList 테스트")
+    @Rollback(value = false)
     void Integration_getRentingBagsList_테스트() throws Exception {
         //given
         Users users = Users.builder()
@@ -452,12 +462,16 @@ public class UsersIntegrationTest {
                 .name("testUser")
                 .build();
 
+        usersRepository.save(users);
+
         Users admin = Users.builder()
                 .UID("testAdminUID")
                 .usersId("testAdminUsersId")
                 .userRole(UserRole.ROLE_ADMIN)
                 .name("testAdmin")
                 .build();
+
+        usersRepository.save(admin);
 
         String accessToken = jwtTokenProvider.createAccessToken(users.getUID());
         String adminToken = jwtTokenProvider.createAccessToken(admin.getUID());
@@ -467,13 +481,28 @@ public class UsersIntegrationTest {
                 "SUWON"
         );
 
+        BagsResponseDto bagsResponseDto1 = new BagsResponseDto(
+                "KOR_SUWON_1",
+                false,
+                LocalDateTime.MIN.toString(),
+                ""
+        );
+
+        BagsResponseDto bagsResponseDto2 = new BagsResponseDto(
+                "KOR_SUWON_2",
+                false,
+                LocalDateTime.MIN.toString(),
+                ""
+        );
+
         // Save Bags first time
         mockMvc.perform(post("/api/v3/bags/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
                         .header("token", adminToken)
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(bagsResponseDto1)));
 
         // Save Bags second time
         mockMvc.perform(post("/api/v3/bags/save")
@@ -481,7 +510,9 @@ public class UsersIntegrationTest {
                         .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
                         .header("token", adminToken)
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(bagsResponseDto2)));
+        ;
 
         BagsRentOrReturnRequestDto rentOrReturnRequestDto1 = new BagsRentOrReturnRequestDto(
                 "testUsersId",
@@ -493,12 +524,17 @@ public class UsersIntegrationTest {
                 "KOR_SUWON_2"
         );
 
+        MockResponseDto expectedResponseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
+
         mockMvc.perform(post("/api/v2/bags/renting")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto1))
                         .header("token", accessToken)
                 )
                 .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
                 .andReturn();
 
         mockMvc.perform(post("/api/v2/bags/renting")
@@ -507,6 +543,7 @@ public class UsersIntegrationTest {
                         .header("token", accessToken)
                 )
                 .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
                 .andReturn();
 
 

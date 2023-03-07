@@ -42,11 +42,11 @@ public class BagsService {
         saveTarget.setWhenIsRented(LocalDateTime.MIN);
 
         bagsRepository.save(saveTarget);
+
         return new BagsResponseDto(saveTarget);
     }
 
 
-    @Transactional
     public MockResponseDto renting(BagsRentOrReturnRequestDto requestDto) throws AlreadyRentedException {
         String bagsId = requestDto.getBagsId();
         String usersId = requestDto.getUsersId();
@@ -56,6 +56,9 @@ public class BagsService {
                 () -> new IllegalArgumentException("IllegalArgumentException")
         );
 
+        if (users.getRentingBagsList().contains(bags))
+            System.out.println("User already have bags!");
+
         if (bags.isRented())
             throw new AlreadyRentedException();
 
@@ -64,6 +67,9 @@ public class BagsService {
         bags.setWhenIsRented(LocalDateTime.now());
 
         users.getRentingBagsList().add(bags);
+
+        usersRepository.save(users);
+        bagsRepository.save(bags);
 
         return successMockResponseDto;
     }
@@ -82,6 +88,9 @@ public class BagsService {
 
         users.getRentingBagsList().remove(bags);
         users.getReturningBagsList().add(bags);
+
+        usersRepository.save(users);
+        bagsRepository.save(bags);
 
         return successMockResponseDto;
     }

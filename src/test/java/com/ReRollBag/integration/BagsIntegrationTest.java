@@ -1,6 +1,7 @@
 package com.ReRollBag.integration;
 
 import com.ReRollBag.auth.JwtTokenProvider;
+import com.ReRollBag.domain.BagsCount;
 import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
@@ -48,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ExtendWith(RestDocumentationExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BagsIntegrationTest {
 
     @Autowired
@@ -63,10 +65,20 @@ public class BagsIntegrationTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
+    private BagsCount bagsCount;
+
+    @Autowired
     private MockMvc mockMvc;
 
     private String usersToken;
     private String adminToken;
+
+    @BeforeAll
+    void teardown() {
+        bagsRepository.deleteAll();
+        usersRepository.deleteAll();
+        bagsCount.tearDownMap();
+    }
 
     @BeforeEach
     void setUpMockMvcForRestDocsAndSpringSecurity(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
