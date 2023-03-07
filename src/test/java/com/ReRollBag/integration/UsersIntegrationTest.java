@@ -1,11 +1,17 @@
 package com.ReRollBag.integration;
 
 import com.ReRollBag.auth.JwtTokenProvider;
+import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
+import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
+import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
+import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
+import com.ReRollBag.repository.BagsRepository;
 import com.ReRollBag.repository.UsersRepository;
+import com.ReRollBag.service.BagsService;
 import com.ReRollBag.service.RedisService;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,8 +27,13 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
@@ -34,6 +45,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -52,6 +64,12 @@ public class UsersIntegrationTest {
 
     @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private BagsRepository bagsRepository;
+
+    @Autowired
+    private BagsService bagsService;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -418,6 +436,102 @@ public class UsersIntegrationTest {
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                         requestHeaders(
                                 headerWithName("Token").description("AccessToken Value for ROLE_USERS")
+                        )
+                ))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Integration] getRentingBagsList 테스트")
+    void Integration_getRentingBagsList_테스트() throws Exception {
+        //given
+        Users users = Users.builder()
+                .UID("testUID")
+                .usersId("testUsersId")
+                .userRole(UserRole.ROLE_USER)
+                .name("testUser")
+                .build();
+
+        Users admin = Users.builder()
+                .UID("testAdminUID")
+                .usersId("testAdminUsersId")
+                .userRole(UserRole.ROLE_ADMIN)
+                .name("testAdmin")
+                .build();
+
+        String accessToken = jwtTokenProvider.createAccessToken(users.getUID());
+        String adminToken = jwtTokenProvider.createAccessToken(admin.getUID());
+
+        BagsSaveRequestDto bagsSaveRequestDto = new BagsSaveRequestDto(
+                "KOR",
+                "SUWON"
+        );
+
+        // Save Bags first time
+        mockMvc.perform(post("/api/v3/bags/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
+                        .header("token", adminToken)
+                )
+                .andExpect(status().isOk());
+
+        // Save Bags second time
+        mockMvc.perform(post("/api/v3/bags/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
+                        .header("token", adminToken)
+                )
+                .andExpect(status().isOk());
+
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto1 = new BagsRentOrReturnRequestDto(
+                "testUsersId",
+                "KOR_SUWON_1"
+        );
+
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto2 = new BagsRentOrReturnRequestDto(
+                "testUsersId",
+                "KOR_SUWON_2"
+        );
+
+        mockMvc.perform(post("/api/v2/bags/renting")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto1))
+                        .header("token", accessToken)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        mockMvc.perform(post("/api/v2/bags/renting")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto2))
+                        .header("token", accessToken)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+
+//        List<BagsResponseDto> expectedList = new ArrayList<>();
+//        Bags bags1 = bagsRepository.findById("KOR_SUWON_1").get();
+//        Bags bags2 = bagsRepository.findById("KOR_SUWON_2").get();
+//        expectedList.add(new BagsResponseDto(bags1));
+//        expectedList.add(new BagsResponseDto(bags2));
+//        Collections.sort(expectedList);
+
+        //when
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/users/getRentingBagsList/{usersId}", users.getUsersId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Token", accessToken))
+                //then
+                .andExpect(status().isOk())
+                //.andExpect(content().json(new ObjectMapper().writeValueAsString(expectedList)))
+                .andDo(document("Users-getRentingBagsList",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_USERS")
+                        ),
+                        pathParameters(
+                                parameterWithName("usersId").description("usersId for getRentingBagsList")
                         )
                 ))
                 .andDo(print());

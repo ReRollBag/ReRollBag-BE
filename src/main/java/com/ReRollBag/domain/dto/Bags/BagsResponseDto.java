@@ -6,11 +6,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 
 @Getter
 @Setter
 @AllArgsConstructor
-public class BagsResponseDto {
+public class BagsResponseDto implements Comparable<BagsResponseDto> {
     private String bagsId;
     private boolean isRented;
     private String whenIsRented;
@@ -23,5 +25,13 @@ public class BagsResponseDto {
         this.rentingUsersId = "";
         if (bags.isRented())
             this.rentingUsersId = bags.getRentingUsers().getUsersId();
+    }
+
+    @Override
+    public int compareTo(BagsResponseDto other) {
+        LocalDateTime thisTime = LocalDateTime.parse(this.getWhenIsRented());
+        LocalDateTime otherTime = LocalDateTime.parse(other.getWhenIsRented());
+        if (thisTime.isBefore(otherTime)) return -1;
+        return 1;
     }
 }
