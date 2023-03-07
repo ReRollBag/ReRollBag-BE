@@ -59,3 +59,10 @@ operation::Users-TestingToken-WithAdminRole-Withv1Method[snippets='http-request,
 == Users-TestingToken-WithAdminRole-Withv3Method
 
 operation::Users-TestingToken-WithAdminRole-Withv3Method[snippets='http-request,request-headers,request-body,http-response,response-body']
+
+---
+
+[[Users-getRentingBagsList]]
+== Users-getRentingBagsList
+
+operation::Users-getRentingBagsList[snippets='http-request,request-headers,path-parameters,http-response,response-body,response-fields']

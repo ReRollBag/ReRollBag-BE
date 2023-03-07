@@ -6,6 +6,7 @@ import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
+import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
@@ -32,6 +33,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
@@ -547,12 +551,12 @@ public class UsersIntegrationTest {
                 .andReturn();
 
 
-//        List<BagsResponseDto> expectedList = new ArrayList<>();
-//        Bags bags1 = bagsRepository.findById("KOR_SUWON_1").get();
-//        Bags bags2 = bagsRepository.findById("KOR_SUWON_2").get();
-//        expectedList.add(new BagsResponseDto(bags1));
-//        expectedList.add(new BagsResponseDto(bags2));
-//        Collections.sort(expectedList);
+        List<BagsResponseDto> expectedList = new ArrayList<>();
+        Bags bags1 = bagsRepository.findById("KOR_SUWON_1").get();
+        Bags bags2 = bagsRepository.findById("KOR_SUWON_2").get();
+        expectedList.add(new BagsResponseDto(bags1));
+        expectedList.add(new BagsResponseDto(bags2));
+        Collections.sort(expectedList);
 
         //when
         mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/users/getRentingBagsList/{usersId}", users.getUsersId())
@@ -560,7 +564,7 @@ public class UsersIntegrationTest {
                         .header("Token", accessToken))
                 //then
                 .andExpect(status().isOk())
-                //.andExpect(content().json(new ObjectMapper().writeValueAsString(expectedList)))
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedList)))
                 .andDo(document("Users-getRentingBagsList",
                         Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
@@ -569,6 +573,12 @@ public class UsersIntegrationTest {
                         ),
                         pathParameters(
                                 parameterWithName("usersId").description("usersId for getRentingBagsList")
+                        ),
+                        responseFields(
+                                fieldWithPath("[].bagsId").description("Bag's Id"),
+                                fieldWithPath("[].whenIsRented").description("LocalDateTime's String when is rented"),
+                                fieldWithPath("[].rentingUsersId").description("User's Id who rented"),
+                                fieldWithPath("[].rented").description("True/False if rented or not")
                         )
                 ))
                 .andDo(print());
