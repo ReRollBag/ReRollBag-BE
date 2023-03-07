@@ -1,10 +1,12 @@
 package com.ReRollBag.service;
 
 import com.ReRollBag.auth.JwtTokenProvider;
+import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.dto.Tokens.AccessTokenResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
+import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
@@ -19,6 +21,11 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -92,4 +99,16 @@ public class UsersService {
         usersRepository.deleteById(users.getUID());
         return true;
     }
+
+    public List<BagsResponseDto> getRentingBagsList(String usersId) {
+        Users users = usersRepository.findByUsersId(usersId);
+        List<BagsResponseDto> rentingBagsList = new ArrayList<>();
+        for (Bags bags : users.getRentingBagsList()) {
+            BagsResponseDto responseDto = new BagsResponseDto(bags);
+            rentingBagsList.add(responseDto);
+        }
+        Collections.sort(rentingBagsList);
+        return rentingBagsList;
+    }
+
 }
