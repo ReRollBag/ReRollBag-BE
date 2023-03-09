@@ -5,6 +5,7 @@ import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.dto.Tokens.AccessTokenResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
@@ -142,6 +143,12 @@ public class UsersService {
         Collections.sort(responseDtoList);
 
         return responseDtoList;
+    }
+
+    public UsersResponseDto getUsersInfo(String token) {
+        String usersId = jwtTokenProvider.getUsersId(token);
+        Users targetUsers = usersRepository.findByUsersId(usersId);
+        return new UsersResponseDto(targetUsers);
     }
 
 }

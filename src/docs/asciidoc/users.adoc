@@ -80,3 +80,10 @@ operation::Users-getReturningBagsList[snippets='http-request,request-headers,htt
 == Users-getReturnedBagsList
 
 operation::Users-getReturnedBagsList[snippets='http-request,request-headers,http-response,response-body,response-fields']
+
+---
+
+[[Users-getUsersInfo]]
+== Users-getUsersInfo
+
+operation::Users-getUsersInfo[snippets='http-request,request-headers,http-response,response-body,response-fields']

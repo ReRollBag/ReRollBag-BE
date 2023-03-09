@@ -2,6 +2,7 @@ package com.ReRollBag.service;
 
 import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
@@ -249,6 +250,30 @@ public class UsersServiceTest {
         //then
         assertThat(responseDtoList.get(0).getBagsId()).isEqualTo(bags1.getBagsId());
         assertThat(responseDtoList.get(1).getBagsId()).isEqualTo(bags2.getBagsId());
+    }
+
+    @Test
+    @DisplayName("[Service] getUsersInfo 테스트")
+    public void Service_getUsersInfo() throws Exception {
+        //given
+        Users users = Users.builder()
+                .UID("testUID")
+                .usersId("test@gmail.com")
+                .name("testUsername")
+                .userRole(UserRole.ROLE_USER)
+                .build();
+
+        UsersResponseDto expectedResponseDto = new UsersResponseDto(users);
+        String accessToken = jwtTokenProvider.createAccessToken(users.getUID(), users.getUsersId());
+
+        //when
+        when(usersRepository.findByUsersId(any())).thenReturn(users);
+        UsersResponseDto responseDto = usersService.getUsersInfo(accessToken);
+
+        //then
+        assertThat(responseDto.usersId).isEqualTo(expectedResponseDto.usersId);
+        assertThat(responseDto.name).isEqualTo(expectedResponseDto.name);
+
     }
 
 }

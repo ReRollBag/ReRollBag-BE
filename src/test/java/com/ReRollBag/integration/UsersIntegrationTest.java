@@ -6,6 +6,7 @@ import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersResponseDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
@@ -16,6 +17,7 @@ import com.ReRollBag.service.BagsService;
 import com.ReRollBag.service.RedisService;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.json.Json;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +51,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -855,5 +856,42 @@ public class UsersIntegrationTest {
                         )
                 ))
                 .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Integration] getUsersInfo 테스트")
+    void Integration_getUsersInfo_테스트() throws Exception {
+        //given
+        Users users = Users.builder()
+                .UID("testUID")
+                .usersId("testUsersId")
+                .userRole(UserRole.ROLE_USER)
+                .name("testUser")
+                .build();
+
+        usersRepository.save(users);
+
+        String accessToken = jwtTokenProvider.createAccessToken(users.getUID(), users.getUsersId());
+
+        UsersResponseDto expectedResponseDto = new UsersResponseDto(users);
+
+        //when
+        mockMvc.perform(get("/api/v1/users/getUsersInfo")
+                        .header("token", accessToken))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
+                .andDo(document("Users-getUsersInfo",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("token").description("users Token for load usersInfo")
+                        ),
+                        responseFields(
+                                fieldWithPath("usersId").description("usersId with token value").type(JsonFieldType.STRING),
+                                fieldWithPath("name").description("name with token value").type(JsonFieldType.STRING)
+                        )
+                ));
+
     }
 }

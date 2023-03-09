@@ -66,4 +66,10 @@ public class UsersController extends BaseController {
     public ResponseEntity<?> getReturnedBagsList(@RequestHeader("token") String token) {
         return sendResponseHttpByJson(usersService.getBagsList(token, BagsListType.ReturnedBagsList));
     }
+
+    @GetMapping("api/v1/users/getUsersInfo")
+    public ResponseEntity<?> getUsersInfo(@RequestHeader("token") String token) {
+        return sendResponseHttpByJson(usersService.getUsersInfo(token));
+
+    }
 }
