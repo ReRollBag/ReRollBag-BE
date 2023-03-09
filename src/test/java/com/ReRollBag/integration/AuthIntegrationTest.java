@@ -103,8 +103,8 @@ public class AuthIntegrationTest {
         usersRepository.save(defaultUsers);
 
         // Save default accessToken and RefreshToken
-        accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID());
-        refreshToken = jwtTokenProvider.createRefreshToken(defaultUsers.getUID());
+        accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID(), defaultUsers.getUsersId());
+        refreshToken = jwtTokenProvider.createRefreshToken(defaultUsers.getUID(), defaultUsers.getUsersId());
 
     }
 

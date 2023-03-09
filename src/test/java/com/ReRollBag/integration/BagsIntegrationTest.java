@@ -108,8 +108,8 @@ public class BagsIntegrationTest {
         usersRepository.save(defaultUsers);
         usersRepository.save(admin);
 
-        usersToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID());
-        adminToken = jwtTokenProvider.createAccessToken(admin.getUID());
+        usersToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID(), defaultUsers.getUsersId());
+        adminToken = jwtTokenProvider.createAccessToken(admin.getUID(), admin.getUsersId());
 
     }
 

@@ -361,8 +361,8 @@ public class UsersIntegrationTest {
                 .name("testUser")
                 .build();
 
-        String accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID());
-        String refreshToken = jwtTokenProvider.createRefreshToken(defaultUsers.getUID());
+        String accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID(), defaultUsers.getUsersId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(defaultUsers.getUID(), defaultUsers.getUsersId());
 
         //when
         mockMvc.perform(get("/api/v1/users/dummyMethod")
@@ -393,8 +393,8 @@ public class UsersIntegrationTest {
                 .build();
 
         //when
-        String accessToken = jwtTokenProvider.createAccessToken(admin.getUID());
-        String refreshToken = jwtTokenProvider.createRefreshToken(admin.getUID());
+        String accessToken = jwtTokenProvider.createAccessToken(admin.getUID(), admin.getUsersId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(admin.getUID(), admin.getUsersId());
 
         mockMvc.perform(get("/api/v3/users/dummyMethod")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -436,7 +436,7 @@ public class UsersIntegrationTest {
                 .name("testUser")
                 .build();
 
-        String accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID());
+        String accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID(), defaultUsers.getUsersId());
 
         //when
         mockMvc.perform(get("/api/v3/users/dummyMethod")
@@ -477,8 +477,8 @@ public class UsersIntegrationTest {
 
         usersRepository.save(admin);
 
-        String accessToken = jwtTokenProvider.createAccessToken(users.getUID());
-        String adminToken = jwtTokenProvider.createAccessToken(admin.getUID());
+        String accessToken = jwtTokenProvider.createAccessToken(users.getUID(), users.getUsersId());
+        String adminToken = jwtTokenProvider.createAccessToken(admin.getUID(), users.getUsersId());
 
         BagsSaveRequestDto bagsSaveRequestDto = new BagsSaveRequestDto(
                 "KOR",
@@ -559,7 +559,7 @@ public class UsersIntegrationTest {
         Collections.sort(expectedList);
 
         //when
-        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/users/getRentingBagsList/{usersId}", users.getUsersId())
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/users/getRentingBagsList")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Token", accessToken))
                 //then
@@ -570,9 +570,6 @@ public class UsersIntegrationTest {
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                         requestHeaders(
                                 headerWithName("Token").description("AccessToken Value for ROLE_USERS")
-                        ),
-                        pathParameters(
-                                parameterWithName("usersId").description("usersId for getRentingBagsList")
                         ),
                         responseFields(
                                 fieldWithPath("[].bagsId").description("Bag's Id"),

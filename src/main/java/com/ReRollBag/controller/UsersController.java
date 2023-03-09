@@ -51,8 +51,8 @@ public class UsersController extends BaseController {
         return sendResponseHttpByJson(usersService.deleteDummy(usersId));
     }
 
-    @GetMapping("api/v1/users/getRentingBagsList/{usersId}")
-    public ResponseEntity<?> getRentingBagsList(@PathVariable String usersId) {
-        return sendResponseHttpByJson(usersService.getRentingBagsList(usersId));
+    @GetMapping("api/v1/users/getRentingBagsList")
+    public ResponseEntity<?> getRentingBagsList(@RequestHeader("token") String token) {
+        return sendResponseHttpByJson(usersService.getRentingBagsList(token));
     }
 }

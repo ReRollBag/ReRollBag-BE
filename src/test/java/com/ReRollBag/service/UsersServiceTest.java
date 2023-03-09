@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -149,17 +150,18 @@ public class UsersServiceTest {
         users.getRentingBagsList().add(bags2);
 
         String usersId = "test@gmail.com";
+        String UID = "testUID";
+        String mockToken = "mockToken";
 
         //when
-        when(usersRepository.findByUsersId(usersId)).thenReturn(users);
-        List<BagsResponseDto> responseDtoList = usersService.getRentingBagsList(usersId);
+        when(jwtTokenProvider.getUID(any())).thenReturn(UID);
+        when(usersRepository.findById(any())).thenReturn(Optional.of(users));
+
+        List<BagsResponseDto> responseDtoList = usersService.getRentingBagsList(mockToken);
 
         //then
         assertThat(responseDtoList.get(0).getBagsId()).isEqualTo(bags1.getBagsId());
         assertThat(responseDtoList.get(1).getBagsId()).isEqualTo(bags2.getBagsId());
-
-        System.out.println("first : " + responseDtoList.get(0).getBagsId());
-        System.out.println("second : " + responseDtoList.get(1).getBagsId());
 
     }
 

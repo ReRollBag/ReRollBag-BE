@@ -65,4 +65,4 @@ operation::Users-TestingToken-WithAdminRole-Withv3Method[snippets='http-request,
 [[Users-getRentingBagsList]]
 == Users-getRentingBagsList
 
-operation::Users-getRentingBagsList[snippets='http-request,request-headers,path-parameters,http-response,response-body,response-fields']
+operation::Users-getRentingBagsList[snippets='http-request,request-headers,http-response,response-body,response-fields']
