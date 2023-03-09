@@ -66,3 +66,17 @@ operation::Users-TestingToken-WithAdminRole-Withv3Method[snippets='http-request,
 == Users-getRentingBagsList
 
 operation::Users-getRentingBagsList[snippets='http-request,request-headers,http-response,response-body,response-fields']
+
+---
+
+[[Users-getReturningBagsList]]
+== Users-getReturningBagsList
+
+operation::Users-getReturningBagsList[snippets='http-request,request-headers,http-response,response-body,response-fields']
+
+---
+
+[[Users-getReturnedBagsList]]
+== Users-getReturnedBagsList
+
+operation::Users-getReturnedBagsList[snippets='http-request,request-headers,http-response,response-body,response-fields']

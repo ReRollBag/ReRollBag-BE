@@ -75,6 +75,7 @@ public class BagsService {
     }
 
     public MockResponseDto requestReturning(BagsRentOrReturnRequestDto requestDto) throws ReturnRequestUserMismatchException {
+
         String bagsId = requestDto.getBagsId();
         String usersId = requestDto.getUsersId();
 
@@ -92,6 +93,11 @@ public class BagsService {
         bags.setRentingUsers(null);
         bags.setReturningUsers(users);
 
+        usersRepository.save(users);
+        bagsRepository.save(bags);
+
+        System.out.println("users.getReturningBagsList() size : " + users.getReturningBagsList().size());
+
         return successMockResponseDto;
     }
 
@@ -100,7 +106,7 @@ public class BagsService {
         Bags bags = bagsRepository.findById(bagsId).orElseThrow(
                 () -> new IllegalArgumentException("IllegalArgumentException")
         );
-        Users users = bags.getRentingUsers();
+        Users users = bags.getReturningUsers();
 
         bags.setWhenIsRented(LocalDateTime.MIN);
         bags.setRentingUsers(null);
@@ -111,6 +117,9 @@ public class BagsService {
 
         bags.setReturningUsers(null);
         bags.setReturnedUsers(users);
+
+        usersRepository.save(users);
+        bagsRepository.save(bags);
 
         return successMockResponseDto;
     }

@@ -172,10 +172,11 @@ public class BagsServiceTest {
                 .bagsId("KOR_SUWON_1")
                 .whenIsRented(LocalDateTime.now())
                 .isRented(true)
-                .rentingUsers(users)
+                .returningUsers(users)
                 .build();
 
         users.getReturningBagsList().add(bags);
+
 
         when(bagsRepository.findById(any())).thenReturn(Optional.of(bags));
 

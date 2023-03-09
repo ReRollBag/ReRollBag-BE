@@ -5,6 +5,7 @@ import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.enums.BagsListType;
 import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
@@ -155,14 +156,99 @@ public class UsersServiceTest {
 
         //when
         when(jwtTokenProvider.getUID(any())).thenReturn(UID);
-        when(usersRepository.findById(any())).thenReturn(Optional.of(users));
+        when(usersRepository.findByUsersId(any())).thenReturn(users);
 
-        List<BagsResponseDto> responseDtoList = usersService.getRentingBagsList(mockToken);
+        List<BagsResponseDto> responseDtoList = usersService.getBagsList(mockToken, BagsListType.RentingBagsList);
 
         //then
         assertThat(responseDtoList.get(0).getBagsId()).isEqualTo(bags1.getBagsId());
         assertThat(responseDtoList.get(1).getBagsId()).isEqualTo(bags2.getBagsId());
+    }
 
+    @Test
+    @DisplayName("[Service] getReturningBagsList 테스트")
+    public void Service_getReturningBagsList_테스트() throws Exception {
+        //given
+        Users users = Users.builder()
+                .UID("testUID")
+                .usersId("test@gmail.com")
+                .name("testUsername")
+                .userRole(UserRole.ROLE_USER)
+                .build();
+
+        Bags bags1 = Bags.builder()
+                .bagsId("KOR_SUWON_1")
+                .isRented(true)
+                .whenIsRented(LocalDateTime.MIN)
+                .rentingUsers(users)
+                .build();
+
+        Bags bags2 = Bags.builder()
+                .bagsId("KOR_SUWON_2")
+                .isRented(true)
+                .whenIsRented(LocalDateTime.now())
+                .rentingUsers(users)
+                .build();
+
+        users.getReturningBagsList().add(bags1);
+        users.getReturningBagsList().add(bags2);
+
+        String usersId = "test@gmail.com";
+        String UID = "testUID";
+        String mockToken = "mockToken";
+
+        //when
+        when(jwtTokenProvider.getUID(any())).thenReturn(UID);
+        when(usersRepository.findByUsersId(any())).thenReturn(users);
+
+        List<BagsResponseDto> responseDtoList = usersService.getBagsList(mockToken, BagsListType.ReturningBagsList);
+
+        //then
+        assertThat(responseDtoList.get(0).getBagsId()).isEqualTo(bags1.getBagsId());
+        assertThat(responseDtoList.get(1).getBagsId()).isEqualTo(bags2.getBagsId());
+    }
+
+    @Test
+    @DisplayName("[Service] getReturnedBagsList 테스트")
+    public void Service_getReturnedBagsList_테스트() throws Exception {
+        //given
+        Users users = Users.builder()
+                .UID("testUID")
+                .usersId("test@gmail.com")
+                .name("testUsername")
+                .userRole(UserRole.ROLE_USER)
+                .build();
+
+        Bags bags1 = Bags.builder()
+                .bagsId("KOR_SUWON_1")
+                .isRented(true)
+                .whenIsRented(LocalDateTime.MIN)
+                .rentingUsers(users)
+                .build();
+
+        Bags bags2 = Bags.builder()
+                .bagsId("KOR_SUWON_2")
+                .isRented(true)
+                .whenIsRented(LocalDateTime.now())
+                .rentingUsers(users)
+                .build();
+
+        users.getReturnedBagsList().add(bags1);
+        users.getReturnedBagsList().add(bags2);
+
+        String usersId = "test@gmail.com";
+        String UID = "testUID";
+        String mockToken = "mockToken";
+
+        //when
+        when(jwtTokenProvider.getUID(any())).thenReturn(UID);
+        when(usersRepository.findByUsersId(any())).thenReturn(users);
+
+        List<BagsResponseDto> responseDtoList = usersService.getBagsList(mockToken, BagsListType.ReturnedBagsList);
+
+        //then
+        assertThat(responseDtoList.get(0).getBagsId()).isEqualTo(bags1.getBagsId());
+        assertThat(responseDtoList.get(1).getBagsId()).isEqualTo(bags2.getBagsId());
     }
 
 }

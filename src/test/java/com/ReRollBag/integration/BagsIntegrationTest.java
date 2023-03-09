@@ -78,6 +78,7 @@ public class BagsIntegrationTest {
         bagsRepository.deleteAll();
         usersRepository.deleteAll();
         bagsCount.tearDownMap();
+        jwtTokenProvider.setAccessTokenValidTime(100000L);
     }
 
     @BeforeEach

@@ -8,6 +8,7 @@ import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.enums.BagsListType;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
@@ -106,24 +107,41 @@ public class UsersService {
         return true;
     }
 
-    public List<BagsResponseDto> getRentingBagsList(String token) {
+    public List<BagsResponseDto> getBagsList(String token, BagsListType type) {
         // get UID and Users Entity from Token
         String UID = jwtTokenProvider.getUID(token);
-        Users users = usersRepository.findById(UID).orElseThrow(
-                () -> new IllegalArgumentException()
-        );
+        String usersId = jwtTokenProvider.getUsersId(token);
+        Users users = usersRepository.findByUsersId(usersId);
+
+        // get Each Bags List by BagsListType parameter
+        List<Bags> bagsListInUsersEntity;
+        switch (type) {
+            case RentingBagsList:
+                bagsListInUsersEntity = users.getRentingBagsList();
+                break;
+            case ReturningBagsList:
+                bagsListInUsersEntity = users.getReturningBagsList();
+                break;
+            case ReturnedBagsList:
+                bagsListInUsersEntity = users.getReturnedBagsList();
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + type);
+        }
 
         // Make new BagsResponseDto ArrayList
-        List<BagsResponseDto> rentingBagsList = new ArrayList<>();
+        List<BagsResponseDto> responseDtoList = new ArrayList<>();
 
-        // Insert 
-        for (Bags bags : users.getRentingBagsList()) {
+        // Make each dto with bags in bagsListInUsersEntity
+        for (Bags bags : bagsListInUsersEntity) {
             BagsResponseDto responseDto = new BagsResponseDto(bags);
-            rentingBagsList.add(responseDto);
+            responseDtoList.add(responseDto);
         }
-        Collections.sort(rentingBagsList);
 
-        return rentingBagsList;
+        // Sort responseDtoList with time
+        Collections.sort(responseDtoList);
+
+        return responseDtoList;
     }
 
 }
