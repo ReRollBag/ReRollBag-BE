@@ -23,8 +23,10 @@ public class BagsResponseDto implements Comparable<BagsResponseDto> {
         this.isRented = bags.isRented();
         this.whenIsRented = bags.getWhenIsRented().toString();
         this.rentingUsersId = "";
-        if (bags.isRented())
+        if (bags.isRented() && bags.getRentingUsers() != null)
             this.rentingUsersId = bags.getRentingUsers().getUsersId();
+        if (bags.isRented() && bags.getReturningUsers() != null)
+            this.rentingUsersId = bags.getReturningUsers().getUsersId();
     }
 
     @Override

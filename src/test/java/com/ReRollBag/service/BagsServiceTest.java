@@ -147,7 +147,7 @@ public class BagsServiceTest {
         //then
         assertThat(users.getRentingBagsList().size()).isEqualTo(0);
         assertThat(users.getReturningBagsList().get(0)).isEqualTo(bags);
-        assertThat(bags.getRentingUsers()).isEqualTo(users);
+        assertThat(bags.getReturningUsers()).isEqualTo(users);
         assertThat(bags.isRented()).isTrue();
 
     }
@@ -172,10 +172,11 @@ public class BagsServiceTest {
                 .bagsId("KOR_SUWON_1")
                 .whenIsRented(LocalDateTime.now())
                 .isRented(true)
-                .rentingUsers(users)
+                .returningUsers(users)
                 .build();
 
         users.getReturningBagsList().add(bags);
+
 
         when(bagsRepository.findById(any())).thenReturn(Optional.of(bags));
 
@@ -183,7 +184,7 @@ public class BagsServiceTest {
 
         assertThat(bags.isRented()).isEqualTo(false);
         assertThat(bags.getWhenIsRented()).isEqualTo(LocalDateTime.MIN);
-        assertThat(bags.getRentingUsers()).isNull();
+        assertThat(bags.getReturnedUsers()).isEqualTo(users);
         assertThat(users.getReturningBagsList().size()).isEqualTo(0);
         assertThat(users.getReturnedBagsList().get(0)).isEqualTo(bags);
     }

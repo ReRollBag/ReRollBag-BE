@@ -1,6 +1,7 @@
 package com.ReRollBag.controller;
 
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
+import com.ReRollBag.enums.BagsListType;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
 import com.ReRollBag.service.UsersService;
@@ -51,8 +52,24 @@ public class UsersController extends BaseController {
         return sendResponseHttpByJson(usersService.deleteDummy(usersId));
     }
 
-    @GetMapping("api/v1/users/getRentingBagsList/{usersId}")
-    public ResponseEntity<?> getRentingBagsList(@PathVariable String usersId) {
-        return sendResponseHttpByJson(usersService.getRentingBagsList(usersId));
+    @GetMapping("api/v1/users/getRentingBagsList")
+    public ResponseEntity<?> getRentingBagsList(@RequestHeader("token") String token) {
+        return sendResponseHttpByJson(usersService.getBagsList(token, BagsListType.RentingBagsList));
+    }
+
+    @GetMapping("api/v1/users/getReturningBagsList")
+    public ResponseEntity<?> getReturningBagsList(@RequestHeader("token") String token) {
+        return sendResponseHttpByJson(usersService.getBagsList(token, BagsListType.ReturningBagsList));
+    }
+
+    @GetMapping("api/v1/users/getReturnedBagsList")
+    public ResponseEntity<?> getReturnedBagsList(@RequestHeader("token") String token) {
+        return sendResponseHttpByJson(usersService.getBagsList(token, BagsListType.ReturnedBagsList));
+    }
+
+    @GetMapping("api/v1/users/getUsersInfo")
+    public ResponseEntity<?> getUsersInfo(@RequestHeader("token") String token) {
+        return sendResponseHttpByJson(usersService.getUsersInfo(token));
+
     }
 }

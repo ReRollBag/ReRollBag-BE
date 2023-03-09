@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -50,28 +52,27 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    private String createToken(TokenType tokenType, String UID) {
+    // Jwt Token 의 Subject 는 UID, Id 는 usersId 가 저장
+    private String createToken(TokenType tokenType, String UID, String usersId) {
 
         long tokenValidTime;
         if (tokenType == TokenType.AccessToken) tokenValidTime = accessTokenValidTime;
         else tokenValidTime = refreshTokenValidTime;
 
         Claims claims = Jwts.claims().setSubject(UID);
-        claims.put("UID", UID);
-        claims.put("tokenType", tokenType);
-
+        claims.setId(usersId);
         Date now = new Date();
         return Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(new Date(now.getTime() + tokenValidTime * 1000L)).signWith(SignatureAlgorithm.HS256, secretKey).compact();
     }
 
-    public String createAccessToken(String UID) {
-        String accessToken = createToken(TokenType.AccessToken, UID);
+    public String createAccessToken(String UID, String usersId) {
+        String accessToken = createToken(TokenType.AccessToken, UID, usersId);
         redisService.saveAccessToken(UID, accessToken, accessTokenValidTime);
         return accessToken;
     }
 
-    public String createRefreshToken(String UID) {
-        String refreshToken = createToken(TokenType.RefreshToken, UID);
+    public String createRefreshToken(String UID, String usersId) {
+        String refreshToken = createToken(TokenType.RefreshToken, UID, usersId);
         redisService.saveRefreshToken(UID, refreshToken, refreshTokenValidTime);
         return refreshToken;
     }
@@ -83,6 +84,10 @@ public class JwtTokenProvider {
 
     public String getUID(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public String getUsersId(String token) {
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getId();
     }
 
     public String resolveToken(HttpServletRequest request) throws TokenIsNullException {
@@ -117,11 +122,10 @@ public class JwtTokenProvider {
         if (!checkAccessTokenIsExpired(refreshToken))
             throw new ReIssueBeforeAccessTokenExpiredException();
 
-//        if (checkRefreshTokenExpirationBelowHalf(refreshToken))
-//            extendRefreshTokenExpiration(refreshToken);
+        String UID = getUID(refreshToken);
+        String usersId = getUsersId(refreshToken);
 
-        String usersId = getUID(refreshToken);
-        String newAccessToken = createAccessToken(usersId);
+        String newAccessToken = createAccessToken(UID, usersId);
         return AccessTokenResponseDto.builder()
                 .accessToken(newAccessToken)
                 .build();

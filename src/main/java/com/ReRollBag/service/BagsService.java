@@ -42,11 +42,11 @@ public class BagsService {
         saveTarget.setWhenIsRented(LocalDateTime.MIN);
 
         bagsRepository.save(saveTarget);
+
         return new BagsResponseDto(saveTarget);
     }
 
 
-    @Transactional
     public MockResponseDto renting(BagsRentOrReturnRequestDto requestDto) throws AlreadyRentedException {
         String bagsId = requestDto.getBagsId();
         String usersId = requestDto.getUsersId();
@@ -55,6 +55,9 @@ public class BagsService {
         Bags bags = bagsRepository.findById(bagsId).orElseThrow(
                 () -> new IllegalArgumentException("IllegalArgumentException")
         );
+
+        if (users.getRentingBagsList().contains(bags))
+            System.out.println("User already have bags!");
 
         if (bags.isRented())
             throw new AlreadyRentedException();
@@ -65,10 +68,14 @@ public class BagsService {
 
         users.getRentingBagsList().add(bags);
 
+        usersRepository.save(users);
+        bagsRepository.save(bags);
+
         return successMockResponseDto;
     }
 
     public MockResponseDto requestReturning(BagsRentOrReturnRequestDto requestDto) throws ReturnRequestUserMismatchException {
+
         String bagsId = requestDto.getBagsId();
         String usersId = requestDto.getUsersId();
 
@@ -83,6 +90,14 @@ public class BagsService {
         users.getRentingBagsList().remove(bags);
         users.getReturningBagsList().add(bags);
 
+        bags.setRentingUsers(null);
+        bags.setReturningUsers(users);
+
+        usersRepository.save(users);
+        bagsRepository.save(bags);
+
+        System.out.println("users.getReturningBagsList() size : " + users.getReturningBagsList().size());
+
         return successMockResponseDto;
     }
 
@@ -91,7 +106,7 @@ public class BagsService {
         Bags bags = bagsRepository.findById(bagsId).orElseThrow(
                 () -> new IllegalArgumentException("IllegalArgumentException")
         );
-        Users users = bags.getRentingUsers();
+        Users users = bags.getReturningUsers();
 
         bags.setWhenIsRented(LocalDateTime.MIN);
         bags.setRentingUsers(null);
@@ -99,6 +114,12 @@ public class BagsService {
 
         users.getReturningBagsList().remove(bags);
         users.getReturnedBagsList().add(bags);
+
+        bags.setReturningUsers(null);
+        bags.setReturnedUsers(users);
+
+        usersRepository.save(users);
+        bagsRepository.save(bags);
 
         return successMockResponseDto;
     }

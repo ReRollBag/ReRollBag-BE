@@ -1,10 +1,12 @@
 package com.ReRollBag.integration;
 
 import com.ReRollBag.auth.JwtTokenProvider;
+import com.ReRollBag.domain.BagsCount;
 import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
+import com.ReRollBag.domain.dto.Users.UsersResponseDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
@@ -15,6 +17,7 @@ import com.ReRollBag.service.BagsService;
 import com.ReRollBag.service.RedisService;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.json.Json;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +29,12 @@ import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,13 +51,13 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ExtendWith(RestDocumentationExtension.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UsersIntegrationTest {
 
     @Autowired
@@ -76,6 +80,9 @@ public class UsersIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private BagsCount bagsCount;
 
     @BeforeEach
     void setUpMockMvcForRestDocsAndSpringSecurity(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
@@ -104,6 +111,13 @@ public class UsersIntegrationTest {
 
         usersRepository.save(defaultUsers);
         usersRepository.save(admin);
+    }
+
+    @AfterEach
+    void tearDown() {
+        bagsRepository.deleteAll();
+        usersRepository.deleteAll();
+        bagsCount.tearDownMap();
     }
 
 //    @Test
@@ -348,8 +362,8 @@ public class UsersIntegrationTest {
                 .name("testUser")
                 .build();
 
-        String accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID());
-        String refreshToken = jwtTokenProvider.createRefreshToken(defaultUsers.getUID());
+        String accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID(), defaultUsers.getUsersId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(defaultUsers.getUID(), defaultUsers.getUsersId());
 
         //when
         mockMvc.perform(get("/api/v1/users/dummyMethod")
@@ -380,8 +394,8 @@ public class UsersIntegrationTest {
                 .build();
 
         //when
-        String accessToken = jwtTokenProvider.createAccessToken(admin.getUID());
-        String refreshToken = jwtTokenProvider.createRefreshToken(admin.getUID());
+        String accessToken = jwtTokenProvider.createAccessToken(admin.getUID(), admin.getUsersId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(admin.getUID(), admin.getUsersId());
 
         mockMvc.perform(get("/api/v3/users/dummyMethod")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -423,7 +437,7 @@ public class UsersIntegrationTest {
                 .name("testUser")
                 .build();
 
-        String accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID());
+        String accessToken = jwtTokenProvider.createAccessToken(defaultUsers.getUID(), defaultUsers.getUsersId());
 
         //when
         mockMvc.perform(get("/api/v3/users/dummyMethod")
@@ -452,6 +466,8 @@ public class UsersIntegrationTest {
                 .name("testUser")
                 .build();
 
+        usersRepository.save(users);
+
         Users admin = Users.builder()
                 .UID("testAdminUID")
                 .usersId("testAdminUsersId")
@@ -459,12 +475,28 @@ public class UsersIntegrationTest {
                 .name("testAdmin")
                 .build();
 
-        String accessToken = jwtTokenProvider.createAccessToken(users.getUID());
-        String adminToken = jwtTokenProvider.createAccessToken(admin.getUID());
+        usersRepository.save(admin);
+
+        String accessToken = jwtTokenProvider.createAccessToken(users.getUID(), users.getUsersId());
+        String adminToken = jwtTokenProvider.createAccessToken(admin.getUID(), users.getUsersId());
 
         BagsSaveRequestDto bagsSaveRequestDto = new BagsSaveRequestDto(
                 "KOR",
                 "SUWON"
+        );
+
+        BagsResponseDto bagsResponseDto1 = new BagsResponseDto(
+                "KOR_SUWON_1",
+                false,
+                LocalDateTime.MIN.toString(),
+                ""
+        );
+
+        BagsResponseDto bagsResponseDto2 = new BagsResponseDto(
+                "KOR_SUWON_2",
+                false,
+                LocalDateTime.MIN.toString(),
+                ""
         );
 
         // Save Bags first time
@@ -473,7 +505,8 @@ public class UsersIntegrationTest {
                         .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
                         .header("token", adminToken)
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(bagsResponseDto1)));
 
         // Save Bags second time
         mockMvc.perform(post("/api/v3/bags/save")
@@ -481,7 +514,9 @@ public class UsersIntegrationTest {
                         .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
                         .header("token", adminToken)
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(bagsResponseDto2)));
+        ;
 
         BagsRentOrReturnRequestDto rentOrReturnRequestDto1 = new BagsRentOrReturnRequestDto(
                 "testUsersId",
@@ -493,12 +528,17 @@ public class UsersIntegrationTest {
                 "KOR_SUWON_2"
         );
 
+        MockResponseDto expectedResponseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
+
         mockMvc.perform(post("/api/v2/bags/renting")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto1))
                         .header("token", accessToken)
                 )
                 .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
                 .andReturn();
 
         mockMvc.perform(post("/api/v2/bags/renting")
@@ -507,33 +547,351 @@ public class UsersIntegrationTest {
                         .header("token", accessToken)
                 )
                 .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
                 .andReturn();
 
 
-//        List<BagsResponseDto> expectedList = new ArrayList<>();
-//        Bags bags1 = bagsRepository.findById("KOR_SUWON_1").get();
-//        Bags bags2 = bagsRepository.findById("KOR_SUWON_2").get();
-//        expectedList.add(new BagsResponseDto(bags1));
-//        expectedList.add(new BagsResponseDto(bags2));
-//        Collections.sort(expectedList);
+        List<BagsResponseDto> expectedList = new ArrayList<>();
+        Bags bags1 = bagsRepository.findById("KOR_SUWON_1").get();
+        Bags bags2 = bagsRepository.findById("KOR_SUWON_2").get();
+        expectedList.add(new BagsResponseDto(bags1));
+        expectedList.add(new BagsResponseDto(bags2));
+        Collections.sort(expectedList);
 
         //when
-        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/users/getRentingBagsList/{usersId}", users.getUsersId())
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/users/getRentingBagsList")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Token", accessToken))
                 //then
                 .andExpect(status().isOk())
-                //.andExpect(content().json(new ObjectMapper().writeValueAsString(expectedList)))
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedList)))
                 .andDo(document("Users-getRentingBagsList",
                         Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                         requestHeaders(
                                 headerWithName("Token").description("AccessToken Value for ROLE_USERS")
                         ),
-                        pathParameters(
-                                parameterWithName("usersId").description("usersId for getRentingBagsList")
+                        responseFields(
+                                fieldWithPath("[].bagsId").description("Bag's Id"),
+                                fieldWithPath("[].whenIsRented").description("LocalDateTime's String when is rented"),
+                                fieldWithPath("[].rentingUsersId").description("User's Id who rented"),
+                                fieldWithPath("[].rented").description("True/False if rented or not")
                         )
                 ))
                 .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Integration] getReturningBagsList 테스트")
+    void Integration_getReturningBagsList_테스트() throws Exception {
+        //given
+        Users users = Users.builder()
+                .UID("testUID")
+                .usersId("testUsersId")
+                .userRole(UserRole.ROLE_USER)
+                .name("testUser")
+                .build();
+
+        usersRepository.save(users);
+
+        Users admin = Users.builder()
+                .UID("testAdminUID")
+                .usersId("testAdminUsersId")
+                .userRole(UserRole.ROLE_ADMIN)
+                .name("testAdmin")
+                .build();
+
+        usersRepository.save(admin);
+
+        String accessToken = jwtTokenProvider.createAccessToken(users.getUID(), users.getUsersId());
+        String adminToken = jwtTokenProvider.createAccessToken(admin.getUID(), users.getUsersId());
+
+        BagsSaveRequestDto bagsSaveRequestDto = new BagsSaveRequestDto(
+                "KOR",
+                "SUWON"
+        );
+
+        BagsResponseDto bagsResponseDto1 = new BagsResponseDto(
+                "KOR_SUWON_1",
+                false,
+                LocalDateTime.MIN.toString(),
+                ""
+        );
+
+        BagsResponseDto bagsResponseDto2 = new BagsResponseDto(
+                "KOR_SUWON_2",
+                false,
+                LocalDateTime.MIN.toString(),
+                ""
+        );
+
+        // Save Bags first time
+        mockMvc.perform(post("/api/v3/bags/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
+                        .header("token", adminToken)
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(bagsResponseDto1)));
+
+        // Save Bags second time
+        mockMvc.perform(post("/api/v3/bags/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
+                        .header("token", adminToken)
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(bagsResponseDto2)));
+        ;
+
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto1 = new BagsRentOrReturnRequestDto(
+                "testUsersId",
+                "KOR_SUWON_1"
+        );
+
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto2 = new BagsRentOrReturnRequestDto(
+                "testUsersId",
+                "KOR_SUWON_2"
+        );
+
+        MockResponseDto expectedResponseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
+
+        mockMvc.perform(post("/api/v2/bags/renting")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto1))
+                .header("token", accessToken)
+        );
+
+        mockMvc.perform(post("/api/v2/bags/renting")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto2))
+                .header("token", accessToken)
+        );
+
+        mockMvc.perform(post("/api/v2/bags/requestReturning")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto1))
+                        .header("token", accessToken)
+                )
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v2/bags/requestReturning")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto2))
+                .header("token", accessToken)
+        ).andExpect(status().isOk());
+
+        List<BagsResponseDto> expectedList = new ArrayList<>();
+
+        Bags bags1 = bagsRepository.findById("KOR_SUWON_1").get();
+        Bags bags2 = bagsRepository.findById("KOR_SUWON_2").get();
+        expectedList.add(new BagsResponseDto(bags1));
+        expectedList.add(new BagsResponseDto(bags2));
+        Collections.sort(expectedList);
+
+        //when
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/users/getReturningBagsList")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Token", accessToken))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedList)))
+                .andDo(document("Users-getReturningBagsList",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_USERS")
+                        ),
+                        responseFields(
+                                fieldWithPath("[].bagsId").description("Bag's Id"),
+                                fieldWithPath("[].whenIsRented").description("LocalDateTime's String when is rented"),
+                                fieldWithPath("[].rentingUsersId").description("User's Id who rented"),
+                                fieldWithPath("[].rented").description("True/False if rented or not")
+                        )
+                ))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Integration] getReturnedBagsList 테스트")
+    void Integration_getReturnedBagsList_테스트() throws Exception {
+        //given
+        Users users = Users.builder()
+                .UID("testUID")
+                .usersId("testUsersId")
+                .userRole(UserRole.ROLE_USER)
+                .name("testUser")
+                .build();
+
+        usersRepository.save(users);
+
+        Users admin = Users.builder()
+                .UID("testAdminUID")
+                .usersId("testAdminUsersId")
+                .userRole(UserRole.ROLE_ADMIN)
+                .name("testAdmin")
+                .build();
+
+        usersRepository.save(admin);
+
+        String accessToken = jwtTokenProvider.createAccessToken(users.getUID(), users.getUsersId());
+        String adminToken = jwtTokenProvider.createAccessToken(admin.getUID(), users.getUsersId());
+
+        BagsSaveRequestDto bagsSaveRequestDto = new BagsSaveRequestDto(
+                "KOR",
+                "SUWON"
+        );
+
+        BagsResponseDto bagsResponseDto1 = new BagsResponseDto(
+                "KOR_SUWON_1",
+                false,
+                LocalDateTime.MIN.toString(),
+                ""
+        );
+
+        BagsResponseDto bagsResponseDto2 = new BagsResponseDto(
+                "KOR_SUWON_2",
+                false,
+                LocalDateTime.MIN.toString(),
+                ""
+        );
+
+        // Save Bags first time
+        mockMvc.perform(post("/api/v3/bags/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
+                        .header("token", adminToken)
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(bagsResponseDto1)));
+
+        // Save Bags second time
+        mockMvc.perform(post("/api/v3/bags/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(bagsSaveRequestDto))
+                        .header("token", adminToken)
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(bagsResponseDto2)));
+        ;
+
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto1 = new BagsRentOrReturnRequestDto(
+                "testUsersId",
+                "KOR_SUWON_1"
+        );
+
+        BagsRentOrReturnRequestDto rentOrReturnRequestDto2 = new BagsRentOrReturnRequestDto(
+                "testUsersId",
+                "KOR_SUWON_2"
+        );
+
+        MockResponseDto expectedResponseDto = MockResponseDto.builder()
+                .data(true)
+                .build();
+
+        mockMvc.perform(post("/api/v2/bags/renting")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto1))
+                .header("token", accessToken)
+        );
+
+        mockMvc.perform(post("/api/v2/bags/renting")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto2))
+                .header("token", accessToken)
+        );
+
+        mockMvc.perform(post("/api/v2/bags/requestReturning")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto1))
+                        .header("token", accessToken)
+                )
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v2/bags/requestReturning")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(rentOrReturnRequestDto2))
+                        .header("token", accessToken)
+                )
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v3/bags/returning/{bagsId}", rentOrReturnRequestDto1.getBagsId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", adminToken)
+        ).andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v3/bags/returning/{bagsId}", rentOrReturnRequestDto2.getBagsId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", adminToken)
+        ).andExpect(status().isOk());
+
+        List<BagsResponseDto> expectedList = new ArrayList<>();
+
+        Bags bags1 = bagsRepository.findById("KOR_SUWON_1").get();
+        Bags bags2 = bagsRepository.findById("KOR_SUWON_2").get();
+        expectedList.add(new BagsResponseDto(bags1));
+        expectedList.add(new BagsResponseDto(bags2));
+        Collections.sort(expectedList);
+
+        //when
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/users/getReturnedBagsList")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Token", accessToken))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedList)))
+                .andDo(document("Users-getReturnedBagsList",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_USERS")
+                        ),
+                        responseFields(
+                                fieldWithPath("[].bagsId").description("Bag's Id"),
+                                fieldWithPath("[].whenIsRented").description("LocalDateTime's String when is rented"),
+                                fieldWithPath("[].rentingUsersId").description("User's Id who rented"),
+                                fieldWithPath("[].rented").description("True/False if rented or not")
+                        )
+                ))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[Integration] getUsersInfo 테스트")
+    void Integration_getUsersInfo_테스트() throws Exception {
+        //given
+        Users users = Users.builder()
+                .UID("testUID")
+                .usersId("testUsersId")
+                .userRole(UserRole.ROLE_USER)
+                .name("testUser")
+                .build();
+
+        usersRepository.save(users);
+
+        String accessToken = jwtTokenProvider.createAccessToken(users.getUID(), users.getUsersId());
+
+        UsersResponseDto expectedResponseDto = new UsersResponseDto(users);
+
+        //when
+        mockMvc.perform(get("/api/v1/users/getUsersInfo")
+                        .header("token", accessToken))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponseDto)))
+                .andDo(document("Users-getUsersInfo",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("token").description("users Token for load usersInfo")
+                        ),
+                        responseFields(
+                                fieldWithPath("usersId").description("usersId with token value").type(JsonFieldType.STRING),
+                                fieldWithPath("name").description("name with token value").type(JsonFieldType.STRING)
+                        )
+                ));
+
     }
 }
