@@ -3,6 +3,7 @@ package com.ReRollBag.service;
 import com.ReRollBag.domain.dto.Markers.MarkersResponseDto;
 import com.ReRollBag.domain.dto.Markers.MarkersSaveRequestDto;
 import com.ReRollBag.domain.entity.Markers;
+import com.ReRollBag.enums.MarkerType;
 import com.ReRollBag.repository.MarkersRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,9 +29,10 @@ public class MarkersServiceTest {
     public void Service_마커생성_테스트() throws Exception {
         //given
         MarkersSaveRequestDto requestDto = MarkersSaveRequestDto.builder()
-                .latitude("12345.54321")
-                .longitude("54321.12345")
+                .latitude(12345.54321)
+                .longitude(54321.12345)
                 .name("testMarker")
+                .markerType("Rent")
                 .build();
         Markers markers = requestDto.toEntity();
         markers.setMarkersId(1L);
@@ -41,8 +43,9 @@ public class MarkersServiceTest {
 
         //then
         assertThat(responseDto.getMarkersId()).isEqualTo(1L);
-        assertThat(responseDto.getLatitude()).isEqualTo("12345.54321");
-        assertThat(responseDto.getLongitude()).isEqualTo("54321.12345");
+        assertThat(responseDto.getLatitude()).isEqualTo(12345.54321);
+        assertThat(responseDto.getLongitude()).isEqualTo(54321.12345);
         assertThat(responseDto.getName()).isEqualTo("testMarker");
+        assertThat(responseDto.getMarkerType()).isEqualTo("Rent");
     }
 }

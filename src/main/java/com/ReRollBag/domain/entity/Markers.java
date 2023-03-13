@@ -1,6 +1,8 @@
 package com.ReRollBag.domain.entity;
 
+import com.ReRollBag.enums.MarkerType;
 import lombok.*;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.persistence.*;
 
@@ -20,9 +22,11 @@ public class Markers {
     private String name;
 
     @Column(name = "latitude")
-    private String latitude;
+    private double latitude;
 
     @Column(name = "longitude")
-    private String longitude;
+    private double longitude;
 
+    @Column(name = "markerType")
+    private MarkerType markerType;
 }
