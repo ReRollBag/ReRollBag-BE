@@ -68,7 +68,7 @@ public class UsersExceptionHandler extends BaseController {
                 .message("ExpiredJwtException")
                 .errorCode(ErrorCode.ExpiredJwtException.getErrorCode())
                 .build();
-        return sendResponseHttpByJson(errorJson, HttpStatus.ACCEPTED);
+        return sendResponseHttpByJson(errorJson, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(DuplicateUserSaveException.class)

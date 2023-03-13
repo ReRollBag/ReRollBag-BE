@@ -174,7 +174,7 @@ public class AuthIntegrationTest {
 
     @Test
     @Order(3)
-    @DisplayName("[Integration] Expired Access Token 보낼 때 예외 (httpStatus : 202 / AccessTokenExpiredException) 테스트")
+    @DisplayName("[Integration] Expired Access Token 보낼 때 예외 (httpStatus : 401 / AccessTokenExpiredException) 테스트")
     void Integration_Expired_AccessToken_테스트() throws Exception {
         // Access Token 의 만료를 위해 1초 대기
         Thread.sleep(1000L);
@@ -188,7 +188,7 @@ public class AuthIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Token", accessToken)
                 )
-                .andExpect(status().isAccepted())
+                .andExpect(status().isUnauthorized())
                 .andExpect(content().json(objectMapper.writeValueAsString(errorJson)))
                 .andDo(print())
                 .andDo(document("Auth-accessToken-ExpiredJwtException",
@@ -288,7 +288,7 @@ public class AuthIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Token", refreshToken)
                 )
-                .andExpect(status().isAccepted())
+                .andExpect(status().isUnauthorized())
                 .andExpect(content().json(objectMapper.writeValueAsString(errorJson)))
                 .andDo(print())
                 .andDo(document("Auth-reIssue-ExpiredJwtException",

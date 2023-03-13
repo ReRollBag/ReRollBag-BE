@@ -32,7 +32,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             setErrorResponse(HttpStatus.FORBIDDEN, response, "SignatureException", ErrorCode.SignatureException);
         } catch (ExpiredJwtException e) {
             e.printStackTrace();
-            setErrorResponse(HttpStatus.ACCEPTED, response, "ExpiredJwtException", ErrorCode.ExpiredJwtException);
+            setErrorResponse(HttpStatus.UNAUTHORIZED, response, "ExpiredJwtException", ErrorCode.ExpiredJwtException);
         } catch (ReIssueBeforeAccessTokenExpiredException e) {
             e.printStackTrace();
             setErrorResponse(HttpStatus.FORBIDDEN, response, "ReIssueBeforeAccessTokenExpiredException", ErrorCode.ReIssueBeforeAccessTokenExpiredException);
