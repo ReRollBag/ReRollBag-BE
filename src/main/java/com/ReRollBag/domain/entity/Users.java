@@ -44,10 +44,6 @@ public class Users extends BaseTimeEntity implements UserDetails {
     @OneToMany(mappedBy = "returningUsers", fetch = FetchType.EAGER)
     private List<Bags> returningBagsList = new ArrayList<>();
 
-    @Builder.Default
-    @OneToMany(mappedBy = "returnedUsers", fetch = FetchType.EAGER)
-    private List<Bags> returnedBagsList = new ArrayList<>();
-
     @Transient
     private Collection<? extends GrantedAuthority> authorities;
 

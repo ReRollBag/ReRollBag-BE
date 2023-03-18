@@ -31,7 +31,4 @@ public class Bags extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     private Users returningUsers;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Users returnedUsers;
-
 }

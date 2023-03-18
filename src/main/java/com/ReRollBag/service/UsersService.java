@@ -1,6 +1,7 @@
 package com.ReRollBag.service;
 
 import com.ReRollBag.auth.JwtTokenProvider;
+import com.ReRollBag.domain.dto.Bags.BagsRentingHistoryDto;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.dto.Tokens.AccessTokenResponseDto;
@@ -9,10 +10,12 @@ import com.ReRollBag.domain.dto.Users.UsersResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.domain.entity.UsersBagsRentingHistory;
 import com.ReRollBag.enums.BagsListType;
 import com.ReRollBag.exceptions.usersExceptions.DuplicateUserSaveException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdOrPasswordInvalidException;
+import com.ReRollBag.repository.UsersBagsRentingHistoryRepository;
 import com.ReRollBag.repository.UsersRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -32,6 +35,7 @@ import java.util.List;
 public class UsersService {
     private final UsersRepository usersRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UsersBagsRentingHistoryRepository usersBagsRentingHistoryRepository;
 
     @Transactional
     public UsersLoginResponseDto save(UsersSaveRequestDto requestDto) throws UsersIdOrPasswordInvalidException, FirebaseAuthException {
@@ -123,9 +127,6 @@ public class UsersService {
             case ReturningBagsList:
                 bagsListInUsersEntity = users.getReturningBagsList();
                 break;
-            case ReturnedBagsList:
-                bagsListInUsersEntity = users.getReturnedBagsList();
-                break;
             default:
                 throw new IllegalStateException("Unexpected value: " + type);
         }
@@ -143,6 +144,19 @@ public class UsersService {
         Collections.sort(responseDtoList);
 
         return responseDtoList;
+    }
+
+    public List<BagsRentingHistoryDto> getReturnedHistoryList(String token) {
+        // get UID from Token
+        String UID = jwtTokenProvider.getUID(token);
+
+        UsersBagsRentingHistory history = usersBagsRentingHistoryRepository.findById(UID).orElseThrow(
+                () -> new IllegalArgumentException("IllegalArgumentException")
+        );
+
+        log.info("!!getReturnedHistoryList!!");
+        log.info(history.getUsersBagsRentingHistory().size());
+        return history.getUsersBagsRentingHistory();
     }
 
     public UsersResponseDto getUsersInfo(String token) {
