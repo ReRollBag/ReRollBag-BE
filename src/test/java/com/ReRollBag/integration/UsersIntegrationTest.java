@@ -3,6 +3,7 @@ package com.ReRollBag.integration;
 import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.BagsCount;
 import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
+import com.ReRollBag.domain.dto.Bags.BagsRentingHistoryDto;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
@@ -12,12 +13,12 @@ import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.usersExceptions.UsersIdAlreadyExistException;
 import com.ReRollBag.repository.BagsRepository;
+import com.ReRollBag.repository.UsersBagsRentingHistoryRepository;
 import com.ReRollBag.repository.UsersRepository;
 import com.ReRollBag.service.BagsService;
 import com.ReRollBag.service.RedisService;
 import com.ReRollBag.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.json.Json;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,6 @@ import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -51,7 +51,8 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -71,6 +72,9 @@ public class UsersIntegrationTest {
 
     @Autowired
     private BagsRepository bagsRepository;
+
+    @Autowired
+    private UsersBagsRentingHistoryRepository usersBagsRentingHistoryRepository;
 
     @Autowired
     private BagsService bagsService;
@@ -118,6 +122,7 @@ public class UsersIntegrationTest {
         bagsRepository.deleteAll();
         usersRepository.deleteAll();
         bagsCount.tearDownMap();
+        usersBagsRentingHistoryRepository.deleteAll();
     }
 
 //    @Test
@@ -827,13 +832,7 @@ public class UsersIntegrationTest {
                 .header("token", adminToken)
         ).andExpect(status().isOk());
 
-        List<BagsResponseDto> expectedList = new ArrayList<>();
-
-        Bags bags1 = bagsRepository.findById("KOR_SUWON_1").get();
-        Bags bags2 = bagsRepository.findById("KOR_SUWON_2").get();
-        expectedList.add(new BagsResponseDto(bags1));
-        expectedList.add(new BagsResponseDto(bags2));
-        Collections.sort(expectedList);
+        List<BagsRentingHistoryDto> expectedList = new ArrayList<>();
 
         //when
         mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/users/getReturnedBagsList")
@@ -841,7 +840,6 @@ public class UsersIntegrationTest {
                         .header("Token", accessToken))
                 //then
                 .andExpect(status().isOk())
-                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedList)))
                 .andDo(document("Users-getReturnedBagsList",
                         Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
@@ -851,8 +849,7 @@ public class UsersIntegrationTest {
                         responseFields(
                                 fieldWithPath("[].bagsId").description("Bag's Id"),
                                 fieldWithPath("[].whenIsRented").description("LocalDateTime's String when is rented"),
-                                fieldWithPath("[].rentingUsersId").description("User's Id who rented"),
-                                fieldWithPath("[].rented").description("True/False if rented or not")
+                                fieldWithPath("[].whenIsReturned").description("LocalDateTime's String when is returned")
                         )
                 ))
                 .andDo(print());

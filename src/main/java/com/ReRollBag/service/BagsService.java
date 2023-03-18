@@ -2,19 +2,21 @@ package com.ReRollBag.service;
 
 import com.ReRollBag.domain.BagsCount;
 import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
+import com.ReRollBag.domain.dto.Bags.BagsRentingHistoryDto;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.domain.entity.UsersBagsRentingHistory;
 import com.ReRollBag.exceptions.bagsExceptions.AlreadyRentedException;
 import com.ReRollBag.exceptions.bagsExceptions.ReturnRequestUserMismatchException;
 import com.ReRollBag.repository.BagsRepository;
+import com.ReRollBag.repository.UsersBagsRentingHistoryRepository;
 import com.ReRollBag.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
 @Service
@@ -23,6 +25,7 @@ public class BagsService {
 
     private final BagsRepository bagsRepository;
     private final UsersRepository usersRepository;
+    private final UsersBagsRentingHistoryRepository usersBagsRentingHistoryRepository;
     private final BagsCount bagsCount;
 
     private static final MockResponseDto successMockResponseDto = new MockResponseDto(true);
@@ -102,26 +105,46 @@ public class BagsService {
     }
 
     public MockResponseDto returning(String bagsId) {
-
+        //Find Bags and Returning Users
         Bags bags = bagsRepository.findById(bagsId).orElseThrow(
                 () -> new IllegalArgumentException("IllegalArgumentException")
         );
-        Users users = bags.getReturningUsers();
+        Users returningUsers = bags.getReturningUsers();
 
-        bags.setWhenIsRented(LocalDateTime.MIN);
-        bags.setRentingUsers(null);
-        bags.setRented(false);
+        //Get UID from Users
+        String UID = returningUsers.getUID();
 
-        users.getReturningBagsList().remove(bags);
-        users.getReturnedBagsList().add(bags);
+        //Check if there is UsersBagsRentingHistory.
+        if (!usersBagsRentingHistoryRepository.existsById(UID))
+            saveUsersBagsRentingHistory(UID);
 
+        //Find UsersBagsRentingHistory
+        UsersBagsRentingHistory usersBagsRentingHistory = usersBagsRentingHistoryRepository.findById(UID).orElseThrow(
+                () -> new IllegalArgumentException("IllegalArgumentException")
+        );
+
+        //Add RentingHistory
+        BagsResponseDto responseDto = new BagsResponseDto(bags);
+        responseDto.setRentingUsersId(usersRepository.findById(UID).get().getUsersId());
+        usersBagsRentingHistory.getUsersBagsRentingHistory().add(new BagsRentingHistoryDto(bags));
+
+        //Disconnect Bags and Users, Change Bags Info
         bags.setReturningUsers(null);
-        bags.setReturnedUsers(users);
+        returningUsers.getReturningBagsList().remove(bags);
+        bags.setRented(false);
+        bags.setWhenIsRented(LocalDateTime.MIN);
 
-        usersRepository.save(users);
+        //Save Entity for Update
+        usersRepository.save(returningUsers);
         bagsRepository.save(bags);
+        usersBagsRentingHistoryRepository.save(usersBagsRentingHistory);
 
         return successMockResponseDto;
+    }
+
+    private void saveUsersBagsRentingHistory(String UID) {
+        UsersBagsRentingHistory usersBagsRentingHistory = new UsersBagsRentingHistory(UID);
+        usersBagsRentingHistoryRepository.save(usersBagsRentingHistory);
     }
 
 }

@@ -1,21 +1,28 @@
 package com.ReRollBag.domain.entity;
 
-import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
+import com.ReRollBag.domain.dto.Bags.BagsRentingHistoryDto;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.Id;
 import java.util.ArrayList;
 import java.util.List;
 
-@Document(collation = "UsersBagsRentingHistory")
+@NoArgsConstructor
+@Getter
+@Setter
+@Document(collection = "UsersBagsRentingHistory")
 public class UsersBagsRentingHistory {
     @Id
-    public String UID;
+    private String UID;
 
-    public List<BagsResponseDto> usersBagsRentingHistory = new ArrayList<>();
+    private List<BagsRentingHistoryDto> usersBagsRentingHistory = new ArrayList<>();
 
-    public void addRentingHistory(BagsResponseDto responseDto) {
-        usersBagsRentingHistory.add(responseDto);
+    public UsersBagsRentingHistory(String UID) {
+        this.UID = UID;
+        usersBagsRentingHistory = new ArrayList<>();
     }
 }
 

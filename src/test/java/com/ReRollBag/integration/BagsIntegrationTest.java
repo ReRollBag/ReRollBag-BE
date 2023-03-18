@@ -389,6 +389,5 @@ public class BagsIntegrationTest {
                         )))
                 .andDo(print());
     }
-
 }
 

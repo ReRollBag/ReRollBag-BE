@@ -2,16 +2,19 @@ package com.ReRollBag.service;
 
 import com.ReRollBag.domain.BagsCount;
 import com.ReRollBag.domain.dto.Bags.BagsRentOrReturnRequestDto;
+import com.ReRollBag.domain.dto.Bags.BagsRentingHistoryDto;
 import com.ReRollBag.domain.dto.Bags.BagsResponseDto;
 import com.ReRollBag.domain.dto.Bags.BagsSaveRequestDto;
 import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersSaveRequestDto;
 import com.ReRollBag.domain.entity.Bags;
 import com.ReRollBag.domain.entity.Users;
+import com.ReRollBag.domain.entity.UsersBagsRentingHistory;
 import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.bagsExceptions.AlreadyRentedException;
 import com.ReRollBag.exceptions.bagsExceptions.ReturnRequestUserMismatchException;
 import com.ReRollBag.repository.BagsRepository;
+import com.ReRollBag.repository.UsersBagsRentingHistoryRepository;
 import com.ReRollBag.repository.UsersRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +43,9 @@ public class BagsServiceTest {
 
     @Mock
     private UsersRepository usersRepository;
+
+    @Mock
+    private UsersBagsRentingHistoryRepository usersBagsRentingHistoryRepository;
 
     @Mock
     private BagsCount bagsCount;
@@ -154,7 +160,7 @@ public class BagsServiceTest {
 
     @Test
     @DisplayName("[Service] Bags Return 테스트")
-    public void Service_가방반납_테스트() {
+    public void Service_가방반납_테스트() throws InterruptedException {
         //given
         MockResponseDto responseDto = new MockResponseDto(true);
 
@@ -176,17 +182,30 @@ public class BagsServiceTest {
                 .build();
 
         users.getReturningBagsList().add(bags);
+        LocalDateTime whenIsRented = bags.getWhenIsRented();
 
+        UsersBagsRentingHistory usersBagsRentingHistory = new UsersBagsRentingHistory("testUID");
 
+        //when
         when(bagsRepository.findById(any())).thenReturn(Optional.of(bags));
+        when(usersBagsRentingHistoryRepository.findById(any())).thenReturn(Optional.of(usersBagsRentingHistory));
+        when(usersRepository.findById(any())).thenReturn(Optional.of(users));
 
+        Thread.sleep(1000L);
         bagsService.returning(bagsId);
 
+        //then
         assertThat(bags.isRented()).isEqualTo(false);
         assertThat(bags.getWhenIsRented()).isEqualTo(LocalDateTime.MIN);
-        assertThat(bags.getReturnedUsers()).isEqualTo(users);
         assertThat(users.getReturningBagsList().size()).isEqualTo(0);
-        assertThat(users.getReturnedBagsList().get(0)).isEqualTo(bags);
+        assertThat(usersBagsRentingHistory.getUsersBagsRentingHistory().size()).isEqualTo(1);
+
+        BagsRentingHistoryDto history = usersBagsRentingHistory.getUsersBagsRentingHistory().get(0);
+
+        assertThat(history.getBagsId()).isEqualTo("KOR_SUWON_1");
+        assertThat(history.getWhenIsRented()).isEqualTo(whenIsRented);
+        assertThat(history.getWhenIsReturned()).isAfter(whenIsRented);
+
     }
 
 }

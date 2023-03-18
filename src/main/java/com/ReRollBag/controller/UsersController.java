@@ -64,7 +64,7 @@ public class UsersController extends BaseController {
 
     @GetMapping("api/v1/users/getReturnedBagsList")
     public ResponseEntity<?> getReturnedBagsList(@RequestHeader("token") String token) {
-        return sendResponseHttpByJson(usersService.getBagsList(token, BagsListType.ReturnedBagsList));
+        return sendResponseHttpByJson(usersService.getReturnedHistoryList(token));
     }
 
     @GetMapping("api/v1/users/getUsersInfo")
