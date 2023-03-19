@@ -1,6 +1,5 @@
 package com.ReRollBag.controller;
 
-import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -20,6 +19,11 @@ public class WebController {
     @GetMapping("docs/bags")
     public String docs_bags() {
         return "bags.html";
+    }
+
+    @GetMapping("docs/markers")
+    public String docs_markers() {
+        return "markers.html";
     }
 
 }
