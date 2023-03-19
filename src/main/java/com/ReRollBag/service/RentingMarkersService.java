@@ -19,5 +19,12 @@ public class RentingMarkersService {
         rentingMarkersRepository.save(rentingMarkers);
         return new RentingMarkersResponseDto(rentingMarkers);
     }
-    
+
+    public void decreaseCurrentBagsNum(Long rentingMarkersId) {
+        RentingMarkers rentingMarkers = rentingMarkersRepository.findById(rentingMarkersId).orElseThrow(
+                () -> new IllegalArgumentException("IllegalArgumentException")
+        );
+        rentingMarkers.setCurrentBagsNum(rentingMarkers.getCurrentBagsNum() - 1);
+        rentingMarkersRepository.save(rentingMarkers);
+    }
 }

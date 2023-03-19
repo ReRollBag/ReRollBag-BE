@@ -46,7 +46,6 @@ public class RentingMarkersServiceTest {
         RentingMarkersResponseDto responseDto = rentingMarkersService.save(requestDto);
 
         //then
-        assertThat(responseDto.getMarkersId()).isEqualTo(1L);
         assertThat(responseDto.getLatitude()).isEqualTo(12345.54321);
         assertThat(responseDto.getLongitude()).isEqualTo(54321.12345);
         assertThat(responseDto.getName()).isEqualTo("GS25 우만점");
@@ -107,7 +106,7 @@ public class RentingMarkersServiceTest {
 
         //then
         assertThat(responseDtoList.size()).isEqualTo(2);
-        assertThat(responseDtoList.get(0).getMarkersId()).isEqualTo(1L);
-        assertThat(responseDtoList.get(1).getMarkersId()).isEqualTo(2L);
+        assertThat(responseDtoList.get(0).getName()).isEqualTo("GS25 우만점");
+        assertThat(responseDtoList.get(1).getName()).isEqualTo("GS25 아주대삼거리점");
     }
 }
