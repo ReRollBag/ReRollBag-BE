@@ -15,11 +15,14 @@ public class RentingMarkersResponseDto {
     private int maxBagsNum;
     private int currentBagsNum;
 
+    private String imageUrl;
+
     public RentingMarkersResponseDto(RentingMarkers rentingMarkers) {
         this.latitude = rentingMarkers.getLatitude();
         this.longitude = rentingMarkers.getLongitude();
         this.name = rentingMarkers.getName();
         this.maxBagsNum = rentingMarkers.getMaxBagsNum();
         this.currentBagsNum = rentingMarkers.getCurrentBagsNum();
+        this.imageUrl = rentingMarkers.getImageUrl();
     }
 }

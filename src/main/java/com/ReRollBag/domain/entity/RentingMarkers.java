@@ -30,4 +30,7 @@ public class RentingMarkers {
 
     @Column(name = "currentBagsNum")
     private int currentBagsNum;
+
+    @Column(name = "imageUrl")
+    private String imageUrl;
 }

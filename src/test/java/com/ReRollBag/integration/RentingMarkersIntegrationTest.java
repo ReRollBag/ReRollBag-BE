@@ -116,6 +116,7 @@ public class RentingMarkersIntegrationTest {
                 .name("GS25 우만점")
                 .maxBagsNum(5)
                 .currentBagsNum(5)
+                .imageUrl("testImageUrl.com")
                 .build();
 
         RentingMarkers rentingMarkers = requestDto.toEntity();
@@ -141,14 +142,16 @@ public class RentingMarkersIntegrationTest {
                                 fieldWithPath("longitude").description("Value of longitude (float)").type(JsonFieldType.NUMBER),
                                 fieldWithPath("name").description("Name of renting place").type(JsonFieldType.STRING),
                                 fieldWithPath("maxBagsNum").description("Max value of place's bags").type(JsonFieldType.NUMBER),
-                                fieldWithPath("currentBagsNum").description("Current value of place's bags").type(JsonFieldType.NUMBER)
+                                fieldWithPath("currentBagsNum").description("Current value of place's bags").type(JsonFieldType.NUMBER),
+                                fieldWithPath("imageUrl").description("Image Url for rentingMarkers").type(JsonFieldType.STRING)
                         ),
                         responseFields(
                                 fieldWithPath("latitude").description("Value of latitude (float)").type(JsonFieldType.NUMBER),
                                 fieldWithPath("longitude").description("Value of longitude (float)").type(JsonFieldType.NUMBER),
                                 fieldWithPath("name").description("Name of renting place").type(JsonFieldType.STRING),
                                 fieldWithPath("maxBagsNum").description("Max value of place's bags").type(JsonFieldType.NUMBER),
-                                fieldWithPath("currentBagsNum").description("Current value of place's bags").type(JsonFieldType.NUMBER)
+                                fieldWithPath("currentBagsNum").description("Current value of place's bags").type(JsonFieldType.NUMBER),
+                                fieldWithPath("imageUrl").description("Image Url for rentingMarkers").type(JsonFieldType.STRING)
                         )))
                 .andDo(print())
                 .andReturn();
@@ -164,6 +167,7 @@ public class RentingMarkersIntegrationTest {
                 .name("GS25 우만점")
                 .maxBagsNum(5)
                 .currentBagsNum(5)
+                .imageUrl("testImageUrl.com")
                 .build();
         RentingMarkers rentingMarkers1 = requestDto1.toEntity();
         RentingMarkersResponseDto responseDto1 = new RentingMarkersResponseDto(rentingMarkers1);
@@ -175,6 +179,7 @@ public class RentingMarkersIntegrationTest {
                 .name("GS25 아주대삼거리점")
                 .maxBagsNum(5)
                 .currentBagsNum(5)
+                .imageUrl("testImageUrl.com")
                 .build();
         RentingMarkers rentingMarkers2 = requestDto2.toEntity();
         RentingMarkersResponseDto responseDto2 = new RentingMarkersResponseDto(rentingMarkers2);
@@ -216,7 +221,8 @@ public class RentingMarkersIntegrationTest {
                                 fieldWithPath("[].longitude").description("Value of longitude (float)").type(JsonFieldType.NUMBER),
                                 fieldWithPath("[].name").description("Name of renting place").type(JsonFieldType.STRING),
                                 fieldWithPath("[].maxBagsNum").description("Max value of place's bags").type(JsonFieldType.NUMBER),
-                                fieldWithPath("[].currentBagsNum").description("Current value of place's bags").type(JsonFieldType.NUMBER)
+                                fieldWithPath("[].currentBagsNum").description("Current value of place's bags").type(JsonFieldType.NUMBER),
+                                fieldWithPath("[].imageUrl").description("Image Url for rentingMarkers").type(JsonFieldType.STRING)
                         )))
                 .andDo(print())
                 .andReturn();
