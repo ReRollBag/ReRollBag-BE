@@ -21,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -197,7 +198,7 @@ public class RentingMarkersIntegrationTest {
         responseDtoList.add(responseDto2);
 
         //when
-        mockMvc.perform(post("/api/v1/markers/renting/findAll")
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/markers/renting/findAll")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("token", usersToken)
                 )
