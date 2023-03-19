@@ -38,6 +38,7 @@ public class RentingMarkersServiceTest {
                 .name("GS25 우만점")
                 .maxBagsNum(5)
                 .currentBagsNum(5)
+                .imageUrl("testImageUrl.com")
                 .build();
         RentingMarkers rentingMarkers = requestDto.toEntity();
         rentingMarkers.setMarkersId(1L);
@@ -52,6 +53,7 @@ public class RentingMarkersServiceTest {
         assertThat(responseDto.getName()).isEqualTo("GS25 우만점");
         assertThat(responseDto.getMaxBagsNum()).isEqualTo(5);
         assertThat(responseDto.getCurrentBagsNum()).isEqualTo(5);
+        assertThat(responseDto.getImageUrl()).isEqualTo("testImageUrl.com");
     }
 
     @Test
@@ -65,6 +67,7 @@ public class RentingMarkersServiceTest {
                 .name("GS25 우만점")
                 .maxBagsNum(5)
                 .currentBagsNum(5)
+                .imageUrl("testImageUrl.com")
                 .build();
 
         //when
@@ -86,6 +89,7 @@ public class RentingMarkersServiceTest {
                 .name("GS25 우만점")
                 .maxBagsNum(5)
                 .currentBagsNum(5)
+                .imageUrl("testImageUrl.com")
                 .build();
 
         RentingMarkers rentingMarkers2 = RentingMarkers.builder()
@@ -95,6 +99,7 @@ public class RentingMarkersServiceTest {
                 .name("GS25 아주대삼거리점")
                 .maxBagsNum(8)
                 .currentBagsNum(8)
+                .imageUrl("testImageUrl.com")
                 .build();
 
         List<RentingMarkers> rentingMarkersList = new ArrayList<>();

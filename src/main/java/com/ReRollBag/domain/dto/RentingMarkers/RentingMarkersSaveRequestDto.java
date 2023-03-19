@@ -15,6 +15,8 @@ public class RentingMarkersSaveRequestDto {
     private int maxBagsNum;
     private int currentBagsNum;
 
+    private String imageUrl;
+
     public RentingMarkers toEntity() {
         return RentingMarkers.builder()
                 .latitude(latitude)
@@ -22,6 +24,7 @@ public class RentingMarkersSaveRequestDto {
                 .name(name)
                 .maxBagsNum(maxBagsNum)
                 .currentBagsNum(currentBagsNum)
+                .imageUrl(imageUrl)
                 .build();
     }
 }
