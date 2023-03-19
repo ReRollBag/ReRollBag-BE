@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Log4j2
 @RequiredArgsConstructor
 @Service
@@ -26,5 +29,15 @@ public class RentingMarkersService {
         );
         rentingMarkers.setCurrentBagsNum(rentingMarkers.getCurrentBagsNum() - 1);
         rentingMarkersRepository.save(rentingMarkers);
+    }
+
+    public List<RentingMarkersResponseDto> findAll() {
+        List<RentingMarkersResponseDto> responseDtoList = new ArrayList<>();
+        List<RentingMarkers> markersList = rentingMarkersRepository.findAll();
+
+        for (RentingMarkers markers : markersList)
+            responseDtoList.add(new RentingMarkersResponseDto(markers));
+
+        return responseDtoList;
     }
 }

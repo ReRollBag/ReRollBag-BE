@@ -178,7 +178,6 @@ public class RentingMarkersIntegrationTest {
         RentingMarkers rentingMarkers2 = requestDto2.toEntity();
         RentingMarkersResponseDto responseDto2 = new RentingMarkersResponseDto(rentingMarkers2);
 
-        RentingMarkers rentingMarkers = requestDto.toEntity();
         mockMvc.perform(post("/api/v3/markers/renting/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(requestDto1))
@@ -186,7 +185,6 @@ public class RentingMarkersIntegrationTest {
                 )
                 .andExpect(status().isOk());
 
-        RentingMarkers rentingMarkers = requestDto.toEntity();
         mockMvc.perform(post("/api/v3/markers/renting/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(requestDto2))

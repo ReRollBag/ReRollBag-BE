@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -67,7 +68,7 @@ public class RentingMarkersServiceTest {
                 .build();
 
         //when
-        when(rentingMarkersRepository.findById(1L)).thenReturn(rentingMarkers);
+        when(rentingMarkersRepository.findById(1L)).thenReturn(Optional.ofNullable(rentingMarkers));
         rentingMarkersService.decreaseCurrentBagsNum(1L);
 
         //then
