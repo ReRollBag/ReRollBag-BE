@@ -1,6 +1,7 @@
 package com.ReRollBag.service;
 
 import com.ReRollBag.domain.entity.ReturningMarkers;
+import com.ReRollBag.repository.ReturningMarkersRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

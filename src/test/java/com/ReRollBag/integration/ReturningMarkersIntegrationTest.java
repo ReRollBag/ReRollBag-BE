@@ -4,6 +4,7 @@ import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.entity.ReturningMarkers;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
+import com.ReRollBag.repository.ReturningMarkersRepository;
 import com.ReRollBag.repository.UsersRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
