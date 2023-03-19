@@ -1,5 +1,7 @@
 package com.ReRollBag.service;
 
+import com.ReRollBag.domain.dto.RentingMarkers.RentingMarkersResponseDto;
+import com.ReRollBag.domain.dto.RentingMarkers.RentingMarkersSaveRequestDto;
 import com.ReRollBag.domain.entity.RentingMarkers;
 import com.ReRollBag.repository.RentingMarkersRepository;
 import org.junit.jupiter.api.DisplayName;
