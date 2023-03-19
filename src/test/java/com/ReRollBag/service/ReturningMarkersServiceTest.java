@@ -31,7 +31,7 @@ public class ReturningMarkersServiceTest {
     @DisplayName("[Service] 반납소 생성 테스트")
     public void Service_반납소생성_테스트() throws Exception {
         //given
-        ReturningMarkersSaveRequestDto requestDto = ReturningMarkers.builder()
+        ReturningMarkersSaveRequestDto requestDto = ReturningMarkersSaveRequestDto.builder()
                 .latitude(12345.54321)
                 .longitude(54321.12345)
                 .name("GS25 우만점")

@@ -8,6 +8,7 @@ import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.repository.ReturningMarkersRepository;
 import com.ReRollBag.repository.UsersRepository;
+import com.ReRollBag.service.ReturningMarkersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
