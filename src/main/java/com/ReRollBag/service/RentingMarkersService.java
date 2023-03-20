@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
 public class RentingMarkersService {
     private final RentingMarkersRepository rentingMarkersRepository;
 
+    @Transactional
     public RentingMarkersResponseDto save(RentingMarkersSaveRequestDto requestDto) {
         RentingMarkers rentingMarkers = requestDto.toEntity();
         rentingMarkersRepository.save(rentingMarkers);

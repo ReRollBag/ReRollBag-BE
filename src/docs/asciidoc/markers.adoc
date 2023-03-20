@@ -18,3 +18,17 @@ operation::RentingMarkers-save[snippets='http-request,request-headers,request-bo
 == RentingMarkers-findAll
 
 operation::RentingMarkers-findAll[snippets='http-request,request-headers,http-response,response-body,response-fields']
+
+---
+
+[[ReturningMarkers-save]]
+== ReturningMarkers-save
+
+operation::ReturningMarkers-save[snippets='http-request,request-headers,request-body,http-response,response-body,response-fields']
+
+---
+
+[[ReturningMarkers-findAll]]
+== ReturningMarkers-findAll
+
+operation::ReturningMarkers-findAll[snippets='http-request,request-headers,request-body,http-response,response-body,response-fields']

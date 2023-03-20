@@ -1,14 +1,14 @@
 package com.ReRollBag.integration;
 
 import com.ReRollBag.auth.JwtTokenProvider;
-import com.ReRollBag.domain.dto.RentingMarkers.RentingMarkersResponseDto;
-import com.ReRollBag.domain.dto.RentingMarkers.RentingMarkersSaveRequestDto;
-import com.ReRollBag.domain.entity.RentingMarkers;
+import com.ReRollBag.domain.dto.ReturningMarkers.ReturningMarkersResponseDto;
+import com.ReRollBag.domain.dto.ReturningMarkers.ReturningMarkersSaveRequestDto;
+import com.ReRollBag.domain.entity.ReturningMarkers;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
-import com.ReRollBag.repository.RentingMarkersRepository;
+import com.ReRollBag.repository.ReturningMarkersRepository;
 import com.ReRollBag.repository.UsersRepository;
-import com.ReRollBag.service.RentingMarkersService;
+import com.ReRollBag.service.ReturningMarkersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,13 +45,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(RestDocumentationExtension.class)
-public class RentingMarkersIntegrationTest {
+public class ReturningMarkersIntegrationTest {
 
     @Autowired
-    private RentingMarkersService rentingMarkersService;
+    private ReturningMarkersService returningMarkersService;
 
     @Autowired
-    private RentingMarkersRepository rentingMarkersRepository;
+    private ReturningMarkersRepository returningMarkersRepository;
 
     @Autowired
     private UsersRepository usersRepository;
@@ -69,7 +69,7 @@ public class RentingMarkersIntegrationTest {
 
     @AfterEach
     void teardown() {
-        rentingMarkersRepository.deleteAll();
+        returningMarkersRepository.deleteAll();
         usersRepository.deleteAll();
     }
 
@@ -107,23 +107,21 @@ public class RentingMarkersIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration] 대여소 저장")
-    void Integration_관리자계정으로_대여소저장() throws Exception {
+    @DisplayName("[Integration] 반납소 저장")
+    void Integration_관리자계정으로_반납소저장() throws Exception {
         //given
-        RentingMarkersSaveRequestDto requestDto = RentingMarkersSaveRequestDto.builder()
+        ReturningMarkersSaveRequestDto requestDto = ReturningMarkersSaveRequestDto.builder()
                 .latitude(12345.54321)
                 .longitude(54321.12345)
                 .name("GS25 우만점")
-                .maxBagsNum(5)
-                .currentBagsNum(5)
                 .imageUrl("testImageUrl.com")
                 .build();
 
-        RentingMarkers rentingMarkers = requestDto.toEntity();
-        RentingMarkersResponseDto responseDto = new RentingMarkersResponseDto(rentingMarkers);
+        ReturningMarkers returningMarkers = requestDto.toEntity();
+        ReturningMarkersResponseDto responseDto = new ReturningMarkersResponseDto(returningMarkers);
 
         //when
-        mockMvc.perform(post("/api/v3/markers/renting/save")
+        mockMvc.perform(post("/api/v3/markers/returning/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(requestDto))
                         .header("token", adminToken)
@@ -131,7 +129,7 @@ public class RentingMarkersIntegrationTest {
                 //then
                 .andExpect(status().isOk())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(responseDto)))
-                .andDo(document("RentingMarkers-save",
+                .andDo(document("ReturningMarkers-save",
                         Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                         requestHeaders(
@@ -141,16 +139,12 @@ public class RentingMarkersIntegrationTest {
                                 fieldWithPath("latitude").description("Value of latitude (float)").type(JsonFieldType.NUMBER),
                                 fieldWithPath("longitude").description("Value of longitude (float)").type(JsonFieldType.NUMBER),
                                 fieldWithPath("name").description("Name of renting place").type(JsonFieldType.STRING),
-                                fieldWithPath("maxBagsNum").description("Max value of place's bags").type(JsonFieldType.NUMBER),
-                                fieldWithPath("currentBagsNum").description("Current value of place's bags").type(JsonFieldType.NUMBER),
                                 fieldWithPath("imageUrl").description("Image Url for rentingMarkers").type(JsonFieldType.STRING)
                         ),
                         responseFields(
                                 fieldWithPath("latitude").description("Value of latitude (float)").type(JsonFieldType.NUMBER),
                                 fieldWithPath("longitude").description("Value of longitude (float)").type(JsonFieldType.NUMBER),
                                 fieldWithPath("name").description("Name of renting place").type(JsonFieldType.STRING),
-                                fieldWithPath("maxBagsNum").description("Max value of place's bags").type(JsonFieldType.NUMBER),
-                                fieldWithPath("currentBagsNum").description("Current value of place's bags").type(JsonFieldType.NUMBER),
                                 fieldWithPath("imageUrl").description("Image Url for rentingMarkers").type(JsonFieldType.STRING)
                         )))
                 .andDo(print())
@@ -158,59 +152,53 @@ public class RentingMarkersIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration] 대여소 목록 전체 조회")
-    void Integration_대여소목록_전체조회() throws Exception {
-        //given
-        RentingMarkersSaveRequestDto requestDto1 = RentingMarkersSaveRequestDto.builder()
+    @DisplayName("[Integration] 반납소 목록 전체 조회")
+    void Integration_반납소목록_전체조회() throws Exception {
+        ReturningMarkersSaveRequestDto requestDto1 = ReturningMarkersSaveRequestDto.builder()
                 .latitude(12345.54321)
                 .longitude(54321.12345)
                 .name("GS25 우만점")
-                .maxBagsNum(5)
-                .currentBagsNum(5)
                 .imageUrl("testImageUrl.com")
                 .build();
-        RentingMarkers rentingMarkers1 = requestDto1.toEntity();
-        RentingMarkersResponseDto responseDto1 = new RentingMarkersResponseDto(rentingMarkers1);
+        ReturningMarkers returningMarkers1 = requestDto1.toEntity();
+        ReturningMarkersResponseDto responseDto1 = new ReturningMarkersResponseDto(returningMarkers1);
 
-
-        RentingMarkersSaveRequestDto requestDto2 = RentingMarkersSaveRequestDto.builder()
+        ReturningMarkersSaveRequestDto requestDto2 = ReturningMarkersSaveRequestDto.builder()
                 .latitude(12345.54321)
                 .longitude(54321.12345)
-                .name("GS25 아주대삼거리점")
-                .maxBagsNum(5)
-                .currentBagsNum(5)
+                .name("GS25 우만점")
                 .imageUrl("testImageUrl.com")
                 .build();
-        RentingMarkers rentingMarkers2 = requestDto2.toEntity();
-        RentingMarkersResponseDto responseDto2 = new RentingMarkersResponseDto(rentingMarkers2);
+        ReturningMarkers returningMarkers2 = requestDto1.toEntity();
+        ReturningMarkersResponseDto responseDto2 = new ReturningMarkersResponseDto(returningMarkers2);
 
-        mockMvc.perform(post("/api/v3/markers/renting/save")
+        mockMvc.perform(post("/api/v3/markers/returning/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(requestDto1))
                         .header("token", adminToken)
                 )
                 .andExpect(status().isOk());
 
-        mockMvc.perform(post("/api/v3/markers/renting/save")
+        mockMvc.perform(post("/api/v3/markers/returning/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(requestDto2))
                         .header("token", adminToken)
                 )
                 .andExpect(status().isOk());
 
-        List<RentingMarkersResponseDto> responseDtoList = new ArrayList<>();
+        List<ReturningMarkersResponseDto> responseDtoList = new ArrayList<>();
         responseDtoList.add(responseDto1);
         responseDtoList.add(responseDto2);
 
         //when
-        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/markers/renting/findAll")
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/markers/returning/findAll")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("token", usersToken)
                 )
-        //then
+                //then
                 .andExpect(status().isOk())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(responseDtoList)))
-                .andDo(document("RentingMarkers-findAll",
+                .andDo(document("ReturningMarkers-findAll",
                         Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                         requestHeaders(
@@ -220,13 +208,9 @@ public class RentingMarkersIntegrationTest {
                                 fieldWithPath("[].latitude").description("Value of latitude (float)").type(JsonFieldType.NUMBER),
                                 fieldWithPath("[].longitude").description("Value of longitude (float)").type(JsonFieldType.NUMBER),
                                 fieldWithPath("[].name").description("Name of renting place").type(JsonFieldType.STRING),
-                                fieldWithPath("[].maxBagsNum").description("Max value of place's bags").type(JsonFieldType.NUMBER),
-                                fieldWithPath("[].currentBagsNum").description("Current value of place's bags").type(JsonFieldType.NUMBER),
                                 fieldWithPath("[].imageUrl").description("Image Url for rentingMarkers").type(JsonFieldType.STRING)
                         )))
                 .andDo(print())
                 .andReturn();
-
-
     }
 }

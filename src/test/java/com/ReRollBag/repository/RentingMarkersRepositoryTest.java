@@ -26,6 +26,7 @@ public class RentingMarkersRepositoryTest {
                 .name("GS25 우만점")
                 .maxBagsNum(5)
                 .currentBagsNum(5)
+                .imageUrl("testImageUrl.com")
                 .build();
 
         rentingMarkersRepository.save(rentingMarkers);
@@ -37,5 +38,6 @@ public class RentingMarkersRepositoryTest {
         assertThat(rentingMarkers.getName()).isEqualTo("GS25 우만점");
         assertThat(rentingMarkers.getMaxBagsNum()).isEqualTo(5L);
         assertThat(rentingMarkers.getCurrentBagsNum()).isEqualTo(5L);
+        assertThat(rentingMarkers.getImageUrl()).isEqualTo("testImageUrl.com");
     }
 }
