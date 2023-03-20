@@ -25,4 +25,8 @@ public class NoticesService {
         return new NoticesResponseDto(notices);
     }
 
+    public NoticesResponseDto getLastNotices() {
+        Notices lastNotices = noticesRepository.findTopByUpdatedAtOrderByUpdatedAt();
+        return new NoticesResponseDto(lastNotices);
+    }
 }
