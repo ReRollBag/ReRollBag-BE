@@ -21,6 +21,7 @@ public class NoticesRepositoryTest {
     @Test
     @DisplayName("[Repository] 공지 저장 테스트")
     void Repository_공지저장_테스트() {
+        LocalDateTime now = LocalDateTime.now();
         Notices notices = Notices.builder()
                 .content("testContent")
                 .title("testTitle")
@@ -29,10 +30,10 @@ public class NoticesRepositoryTest {
         noticesRepository.save(notices);
         Notices targetNotices = noticesRepository.findById(1L).get();
 
-        assertThat(targetNotices.getContent()).isEqualTo("getContent");
+        assertThat(targetNotices.getContent()).isEqualTo("testContent");
         assertThat(targetNotices.getTitle()).isEqualTo("testTitle");
-        assertThat(targetNotices.getCreatedAt()).isAfter(LocalDateTime.now());
-        assertThat(targetNotices.getUpdatedAt()).isAfter(LocalDateTime.now());
+        assertThat(targetNotices.getCreatedAt()).isAfter(now);
+        assertThat(targetNotices.getUpdatedAt()).isAfter(now);
     }
 
 }
