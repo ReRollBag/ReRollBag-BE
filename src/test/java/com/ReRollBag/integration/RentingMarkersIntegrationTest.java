@@ -207,7 +207,7 @@ public class RentingMarkersIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("token", usersToken)
                 )
-                //then
+        //then
                 .andExpect(status().isOk())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(responseDtoList)))
                 .andDo(document("RentingMarkers-findAll",

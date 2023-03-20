@@ -25,20 +25,19 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.http.client.methods.RequestBuilder.post;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -173,14 +172,14 @@ public class ReturningMarkersIntegrationTest {
         ReturningMarkers returningMarkers2 = requestDto1.toEntity();
         ReturningMarkersResponseDto responseDto2 = new ReturningMarkersResponseDto(returningMarkers2);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v3/markers/returning/save")
+        mockMvc.perform(post("/api/v3/markers/returning/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(requestDto1))
                         .header("token", adminToken)
                 )
                 .andExpect(status().isOk());
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v3/markers/returning/save")
+        mockMvc.perform(post("/api/v3/markers/returning/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(requestDto2))
                         .header("token", adminToken)
@@ -192,7 +191,7 @@ public class ReturningMarkersIntegrationTest {
         responseDtoList.add(responseDto2);
 
         //when
-        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/markers/renting/findAll")
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/markers/returning/findAll")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("token", usersToken)
                 )
