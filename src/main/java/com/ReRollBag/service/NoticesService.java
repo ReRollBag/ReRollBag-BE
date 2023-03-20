@@ -28,7 +28,7 @@ public class NoticesService {
     }
 
     public NoticesResponseDto getLastNotices() {
-        Notices lastNotices = noticesRepository.findTopByUpdatedAtOrderByUpdatedAt();
+        Notices lastNotices = noticesRepository.findAll().get(noticesRepository.findAll().size() - 1);
         return new NoticesResponseDto(lastNotices);
     }
 
