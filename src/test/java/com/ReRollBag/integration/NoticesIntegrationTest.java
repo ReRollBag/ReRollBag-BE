@@ -32,6 +32,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -120,7 +121,7 @@ public class NoticesIntegrationTest {
                 )
                 //then
                 .andExpect(status().isOk())
-                .andDo(document("Bags-save",
+                .andDo(document("Notices-save",
                         Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
                         Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                         requestHeaders(
@@ -139,4 +140,113 @@ public class NoticesIntegrationTest {
                 .andDo(print())
                 .andReturn();
     }
+
+    @Test
+    @DisplayName("[Integration] 가장 최근 공지 조회")
+    void Integration_가장최근공지_조회() throws Exception {
+        //given
+        NoticesSaveRequestDto requestDto1 = NoticesSaveRequestDto.builder()
+                .title("testTitle1")
+                .content("testContent1")
+                .build();
+
+        NoticesSaveRequestDto requestDto2 = NoticesSaveRequestDto.builder()
+                .title("testTitle2")
+                .content("testContent2")
+                .build();
+
+        NoticesResponseDto responseDto = NoticesResponseDto.builder()
+                .title("testTitle2")
+                .content("testContent2")
+                .build();
+
+        mockMvc.perform(post("/api/v3/notices/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(requestDto1))
+                .header("token", adminToken)
+        );
+
+        mockMvc.perform(post("/api/v3/notices/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(requestDto2))
+                .header("token", adminToken)
+        );
+
+        //when
+        mockMvc.perform(get("/api/v1/notices/getLastNotices")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("token", usersToken)
+                )
+                //then
+                .andExpect(status().isOk())
+                .andDo(document("Notices-getLastNotices",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_ADMIN")
+                        ),
+                        responseFields(
+                                fieldWithPath("title").description("Value of Title").type(JsonFieldType.STRING),
+                                fieldWithPath("content").description("Value of Content").type(JsonFieldType.STRING),
+                                fieldWithPath("createdAt").description("LocalDateTime when is created").type(JsonFieldType.STRING),
+                                fieldWithPath("updatedAt").description("LocalDateTime when is updated").type(JsonFieldType.STRING)
+                        )))
+                .andDo(print())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("[Integration] 모든 공지 조회")
+    void Integration_모든공지_조회() throws Exception {
+        //given
+        NoticesSaveRequestDto requestDto1 = NoticesSaveRequestDto.builder()
+                .title("testTitle1")
+                .content("testContent1")
+                .build();
+
+        NoticesSaveRequestDto requestDto2 = NoticesSaveRequestDto.builder()
+                .title("testTitle2")
+                .content("testContent2")
+                .build();
+
+        NoticesResponseDto responseDto = NoticesResponseDto.builder()
+                .title("testTitle2")
+                .content("testContent2")
+                .build();
+
+        mockMvc.perform(post("/api/v3/notices/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(requestDto1))
+                .header("token", adminToken)
+        );
+
+        mockMvc.perform(post("/api/v3/notices/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(requestDto2))
+                .header("token", adminToken)
+        );
+
+        //when
+        mockMvc.perform(get("/api/v1/notices/getAllNotices")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("token", usersToken)
+                )
+                //then
+                .andExpect(status().isOk())
+                .andDo(document("Notices-getAllNotices",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_ADMIN")
+                        ),
+                        responseFields(
+                                fieldWithPath("[].title").description("Value of Title").type(JsonFieldType.STRING),
+                                fieldWithPath("[].content").description("Value of Content").type(JsonFieldType.STRING),
+                                fieldWithPath("[].createdAt").description("LocalDateTime when is created").type(JsonFieldType.STRING),
+                                fieldWithPath("[].updatedAt").description("LocalDateTime when is updated").type(JsonFieldType.STRING)
+                        )))
+                .andDo(print())
+                .andReturn();
+    }
+
 }
