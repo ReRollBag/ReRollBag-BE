@@ -10,6 +10,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -28,5 +30,15 @@ public class NoticesService {
     public NoticesResponseDto getLastNotices() {
         Notices lastNotices = noticesRepository.findTopByUpdatedAtOrderByUpdatedAt();
         return new NoticesResponseDto(lastNotices);
+    }
+
+    public List<NoticesResponseDto> getAllNotices() {
+        List<Notices> noticesList = noticesRepository.findAll();
+        List<NoticesResponseDto> responseDtoList = new ArrayList<>();
+
+        for (Notices notices : noticesList)
+            responseDtoList.add(new NoticesResponseDto(notices));
+
+        return responseDtoList;
     }
 }
