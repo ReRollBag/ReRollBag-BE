@@ -26,4 +26,9 @@ public class WebController {
         return "markers.html";
     }
 
+    @GetMapping("docs/notices")
+    public String docs_notices() {
+        return "notices.html";
+    }
+
 }
