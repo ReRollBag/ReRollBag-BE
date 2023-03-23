@@ -232,8 +232,48 @@ public class BagsIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration] 가방 중복 대여 시도 시 예외 (httpStatus : 400 / AlreadyRentedException) 테스트")
+    @DisplayName("[Integration] Bags findById 테스트")
     @Order(value = 4)
+    void Integration_Bags_findById_테스트() throws Exception {
+        //given
+        LocalDateTime expectedTime = bagsRepository.findById("KOR_SUWON_1").get().getWhenIsRented();
+
+        BagsResponseDto responseDto = new BagsResponseDto(
+                "KOR_SUWON_1",
+                true,
+                expectedTime.toString(),
+                "testUsersId"
+        );
+        //when
+        mockMvc.perform(RestDocumentationRequestBuilders.get("api/v1/bags/findById/{bagsId}", "KOR_SUWON_1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("token", usersToken)
+                )
+                //then
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(responseDto)))
+                .andDo(document("Bags-findById",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("AccessToken Value for ROLE_USERS (ADMIN also can do)")
+                        ),
+                        pathParameters(
+                                parameterWithName("bagsId").description("BagsId value for find bags")
+                        ),
+                        responseFields(
+                                fieldWithPath("bagsId").description("Generated bagsId. {countryCode}_{regionCode}_{auto_increment_index}").type(JsonFieldType.STRING),
+                                fieldWithPath("rented").description("If bag is rented. Default is false.").type(JsonFieldType.BOOLEAN),
+                                fieldWithPath("whenIsRented").description("LocalDateTime of rented. If it is not renting, value is LocalDateTime.MIN").type(JsonFieldType.STRING),
+                                fieldWithPath("rentingUsersId").description("Id which users is renting. If it is not renting, value is empty String").type(JsonFieldType.STRING)
+                        )))
+                .andDo(print());
+
+    }
+
+    @Test
+    @DisplayName("[Integration] 가방 중복 대여 시도 시 예외 (httpStatus : 400 / AlreadyRentedException) 테스트")
+    @Order(value = 5)
     void Integration_가방중복대여_테스트() throws Exception {
         //given
         BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
@@ -278,7 +318,7 @@ public class BagsIntegrationTest {
 
     @Test
     @DisplayName("[Integration] 가방 대여 반납 불일치 예외 (httpStatus : 400 / ReturnRequestUserMismatchException) 테스트")
-    @Order(value = 5)
+    @Order(value = 6)
     void Integration_가방반납신청_대여반납불일치_테스트() throws Exception {
         //given
         BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
@@ -319,7 +359,7 @@ public class BagsIntegrationTest {
 
     @Test
     @DisplayName("[Integration] 가방 반납 신청 테스트")
-    @Order(value = 6)
+    @Order(value = 7)
     void Integration_가방반납신청_테스트() throws Exception {
         //given
         BagsRentOrReturnRequestDto rentOrReturnRequestDto = new BagsRentOrReturnRequestDto(
@@ -358,7 +398,7 @@ public class BagsIntegrationTest {
 
     @Test
     @DisplayName("[Integration] 가방 반납 테스트")
-    @Order(value = 7)
+    @Order(value = 8)
     void Integration_가방반납_테스트() throws Exception {
         //given
         String bagsId = "KOR_SUWON_1";
