@@ -208,4 +208,41 @@ public class BagsServiceTest {
 
     }
 
+    @Test
+    @DisplayName("[Service] Bags findById 테스트")
+    void Service_findById_테스트() throws Exception {
+        //given
+        String usersId = "test@gmail.com";
+        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
+                "test@gmail.com",
+                "testNickname",
+                "testIdToken",
+                UserRole.ROLE_USER.toString()
+        );
+        Users users = requestDto.toEntity();
+
+        String bagsId = "KOR_SUWON_1";
+        Bags bags = Bags.builder()
+                .bagsId("KOR_SUWON_1")
+                .whenIsRented(LocalDateTime.now())
+                .isRented(true)
+                .returningUsers(users)
+                .build();
+
+        users.getReturningBagsList().add(bags);
+        LocalDateTime whenIsRented = bags.getWhenIsRented();
+
+        UsersBagsRentingHistory usersBagsRentingHistory = new UsersBagsRentingHistory("testUID");
+
+        //when
+        when(bagsRepository.findById(any())).thenReturn(Optional.of(bags));
+        BagsResponseDto responseDto = bagsService.findById("KOR_SUWON_1");
+
+        //then
+        assertThat(responseDto.isRented()).isTrue();
+        assertThat(responseDto.getBagsId()).isEqualTo("KOR_SUWON_1");
+        assertThat(responseDto.getRentingUsersId()).isEqualTo("test@gmail.com");
+        assertThat(LocalDateTime.parse(responseDto.getWhenIsRented())).isBefore(LocalDateTime.now());
+    }
+
 }
