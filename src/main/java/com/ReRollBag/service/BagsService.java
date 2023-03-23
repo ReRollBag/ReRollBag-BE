@@ -147,4 +147,11 @@ public class BagsService {
         usersBagsRentingHistoryRepository.save(usersBagsRentingHistory);
     }
 
+    public BagsResponseDto findById(String bagsId) {
+        Bags bags = bagsRepository.findById(bagsId).orElseThrow(
+                () -> new IllegalArgumentException("IllegalArgumentException")
+        );
+        return new BagsResponseDto(bags);
+    }
+
 }
