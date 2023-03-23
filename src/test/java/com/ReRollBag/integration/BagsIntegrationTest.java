@@ -245,7 +245,7 @@ public class BagsIntegrationTest {
                 "testUsersId"
         );
         //when
-        mockMvc.perform(RestDocumentationRequestBuilders.get("api/v1/bags/findById/{bagsId}", "KOR_SUWON_1")
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/bags/findById/{bagsId}", "KOR_SUWON_1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("token", usersToken)
                 )
