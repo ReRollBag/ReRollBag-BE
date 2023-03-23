@@ -7,10 +7,7 @@ import com.ReRollBag.exceptions.bagsExceptions.ReturnRequestUserMismatchExceptio
 import com.ReRollBag.service.BagsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -35,6 +32,11 @@ public class BagsController extends BaseController {
     @PostMapping("api/v2/bags/requestReturning")
     public ResponseEntity<?> requestReturning(@RequestBody BagsRentOrReturnRequestDto requestDto) throws ReturnRequestUserMismatchException {
         return sendResponseHttpByJson(bagsService.requestReturning(requestDto));
+    }
+
+    @GetMapping("api/v1/bags/findById/{bagsId}")
+    public ResponseEntity<?> findById(@PathVariable String bagsId) {
+        return sendResponseHttpByJson(bagsService.findById(bagsId));
     }
 
 }
