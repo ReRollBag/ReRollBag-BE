@@ -47,3 +47,10 @@ operation::Bags-RequestReturning-ReturnRequestUserMismatchException[snippets='ht
 == Bags-Returning
 
 operation::Bags-Returning[snippets='http-request,request-headers,path-parameters,request-body,http-response,response-body,response-fields']
+
+---
+
+[[Bags-findById]]
+== Bags-findById
+
+operation::Bags-findById[snippets='http-request,request-headers,path-parameters,request-body,http-response,response-body,response-fields']
