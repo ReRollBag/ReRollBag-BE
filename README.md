@@ -116,6 +116,21 @@ For detailed information on how to use the APIs, please refer to the API documen
 |Marker| http://34.64.247.152:8080/docs/markers |
 |Notice| http://34.64.247.152:8080/docs/notices |
 
+---
+
+## Implementation
+
+* Improved user registration and login with enhanced security using JWT token and Spring Security.
+* Implementing admin account functionality using Authentication Filter
+* Increased development efficiency with Test-Driven Development (TDD) and generating API documentation using Spring REST
+  Docs
+* Deploying the server using Google Cloud Platform (GCP)
+* Renting and returning a bag using Join feature of RDBMS
+* Building a database with a list structure using the JSON storage feature of MongoDB, and implementing token
+  functionality using Redis' ExpireDB
+
+---
+
 ## Testing
 
 The project was developed using Test Driven Development, and the tests are located in the src/test/java directory.
