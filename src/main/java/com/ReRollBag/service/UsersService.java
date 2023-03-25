@@ -78,10 +78,26 @@ public class UsersService {
         // Verifying idToken and get UID from idToken
         String targetUID = getUIDFromIdToken(idToken);
 
+        // Make new users
+        Users users = new Users();
+
         // Get usersId from UsersRepository
-        Users users = usersRepository.findById(targetUID).orElseThrow(
-                () -> new IllegalArgumentException()
-        );
+        try {
+            users = usersRepository.findById(targetUID).orElseThrow(
+                    () -> new IllegalArgumentException()
+            );
+        } catch (IllegalArgumentException e) {
+            // If there is no information with UsersRepository,
+            // Make new requestDto with IdToken
+            // and return to save method
+            UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
+                    getEmailFromIdToken(idToken),
+                    getNameFromIdToken(idToken),
+                    idToken
+            );
+            return save(requestDto);
+        }
+
         String targetUsersId = users.getUsersId();
 
         String accessToken = jwtTokenProvider.createAccessToken(targetUID, targetUsersId);
@@ -91,6 +107,14 @@ public class UsersService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    private String getNameFromIdToken(String idToken) throws FirebaseAuthException {
+        return FirebaseAuth.getInstance().getUser(idToken).getDisplayName();
+    }
+
+    private String getEmailFromIdToken(String idToken) throws FirebaseAuthException {
+        return FirebaseAuth.getInstance().getUser(idToken).getEmail();
     }
 
     public AccessTokenResponseDto reIssue(HttpServletRequest request) {
@@ -105,6 +129,7 @@ public class UsersService {
     public String getUIDFromIdToken(String idToken) throws FirebaseAuthException {
         return FirebaseAuth.getInstance().verifyIdToken(idToken).getUid();
     }
+
 
     public boolean deleteDummy(String usersId) {
         Users users = usersRepository.findByUsersId(usersId);
