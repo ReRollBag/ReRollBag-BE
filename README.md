@@ -136,3 +136,11 @@ For detailed information on how to use the APIs, please refer to the API documen
 The project was developed using Test Driven Development, and the tests are located in the src/test/java directory.
 
 To run the tests, navigate to the root directory of the project and run `./gradlew test`
+
+---
+
+## Credits
+
+The ReRollBag project was developed by a team consisting of a backend developer, Donghwan Lee (Github ID: hwanld) , an
+Android developer, Heehoon Jeon (Github ID: citytexi), and a designer, Hyeonji Kim, and was created for the 2023 Google
+Solution Challenge.
