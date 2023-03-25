@@ -19,6 +19,7 @@ import com.ReRollBag.repository.UsersBagsRentingHistoryRepository;
 import com.ReRollBag.repository.UsersRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -90,12 +91,7 @@ public class UsersService {
             // If there is no information with UsersRepository,
             // Make new requestDto with IdToken
             // and return to save method
-            UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
-                    getEmailFromIdToken(idToken),
-                    getNameFromIdToken(idToken),
-                    idToken
-            );
-            return save(requestDto);
+            return save(getUserDataFromIdToken(idToken));
         }
 
         String targetUsersId = users.getUsersId();
@@ -109,13 +105,13 @@ public class UsersService {
                 .build();
     }
 
-    private String getNameFromIdToken(String idToken) throws FirebaseAuthException {
-        return FirebaseAuth.getInstance().getUser(idToken).getDisplayName();
-    }
-
-    private String getEmailFromIdToken(String idToken) throws FirebaseAuthException {
-        return FirebaseAuth.getInstance().getUser(idToken).getEmail();
-    }
+//    private String getNameFromIdToken(String idToken) throws FirebaseAuthException {
+//        return FirebaseAuth.getInstance().getUser(idToken).getDisplayName();
+//    }
+//
+//    private String getEmailFromIdToken(String idToken) throws FirebaseAuthException {
+//        return FirebaseAuth.getInstance().getUser(idToken).getEmail();
+//    }
 
     public AccessTokenResponseDto reIssue(HttpServletRequest request) {
         return jwtTokenProvider.reIssue(request);
@@ -128,6 +124,18 @@ public class UsersService {
 
     public String getUIDFromIdToken(String idToken) throws FirebaseAuthException {
         return FirebaseAuth.getInstance().verifyIdToken(idToken).getUid();
+    }
+
+    private UsersSaveRequestDto getUserDataFromIdToken(String idToken) throws FirebaseAuthException {
+        FirebaseToken token = FirebaseAuth.getInstance().verifyIdToken(idToken);
+        log.info("getUserDataFromIdToken : " + token.getEmail());
+        log.info("getUserDataFromIdToken : " + token.getName());
+
+        return new UsersSaveRequestDto(
+                token.getEmail(),
+                token.getName(),
+                idToken
+        );
     }
 
 
