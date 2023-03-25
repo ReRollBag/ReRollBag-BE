@@ -34,6 +34,12 @@ The following Library and Frameworks were used in the development of this projec
 
 ## Getting Started
 
+### Constraints
+
+Because it's the backend server project which is working now, **so it is hard to open all the properties files which
+contain key value.** So, If you want to clone this projects, you have to set properties like below. If you just want to
+check how does our server works, you can see **Usage** and **API specification** below.
+
 ### Prerequisites
 
 * Java 8 or higher
@@ -44,7 +50,54 @@ The following Library and Frameworks were used in the development of this projec
 
 * Clone the repository to your local machine
 * Navigate to the root directory of the project
-* Run ./mvnw spring-boot:run to start the server
+* Make 5 .properties files at src/main/resources and implement in your local environment :
+    * application.properties
+  ```
+  spring.h2.console.enabled=true
+  spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+  spring.datasource.url=jdbc:h2:mem:[Your Database]
+  spring.datasource.driverClassName=org.h2.Driver
+  spring.datasource.username=[Your username]
+  spring.datasource.password=[Your password]
+  ```
+    * location.properties
+  ```
+  location.firebaseKey = src/main/resources/keys/Firebase-Admin-SDK-Key.json
+  ```
+    * mongo.properties
+  ```
+  spring.data.mongodb.host=localhost
+  spring.data.mongodb.port=[Your Port]
+  spring.data.mongodb.database=[Your Database]
+  spring.data.mongodb.username=[Your Username]
+  spring.data.mongodb.password=[Your password]
+
+  spring.data.mongodb.uri=mongodb://localhost:[Your port]/[Your Database]
+  ```
+    * redis.properties
+  ```
+  spring.redis.host=localhost
+  spring.redis.port=6379
+  ```
+    * security.properties
+  ```
+  jwtToken.secretKey = [Your Secret Key]
+  ```
+* Make 1 .json files at src/main/resources/keys and implement in your local environment :
+    * Firebase-Admin-SDK-Key.json
+  ```
+  {
+    "type": ,
+    "project_id": ,
+    "private_key_id": ,
+    "private_key": ,
+    "client_email": ,
+    "client_id": ,
+    "auth_uri": ,
+    "token_uri": ,
+    "client_x509_cert_url": 
+  }
+  ```
 
 ---
 
@@ -67,4 +120,4 @@ For detailed information on how to use the APIs, please refer to the API documen
 
 The project was developed using Test Driven Development, and the tests are located in the src/test/java directory.
 
-To run the tests, navigate to the root directory of the project and run ./mvnw test.
+To run the tests, navigate to the root directory of the project and run `./gradlew test`
