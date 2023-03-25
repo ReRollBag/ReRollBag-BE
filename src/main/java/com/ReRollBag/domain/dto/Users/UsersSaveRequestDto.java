@@ -18,12 +18,9 @@ public class UsersSaveRequestDto {
     private String userRole;
 
     public UsersSaveRequestDto(String usersId, String name, String idToken) {
-        new UsersSaveRequestDto(
-                usersId,
-                name,
-                idToken,
-                null
-        );
+        this.usersId = usersId;
+        this.name = name;
+        this.idToken = idToken;
     }
 
     public Users toEntity() {
