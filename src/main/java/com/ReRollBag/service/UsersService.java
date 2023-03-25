@@ -93,7 +93,6 @@ public class UsersService {
             // and return to save method
             UsersSaveRequestDto requestDto = getUserDataFromIdToken(idToken);
             return save(requestDto);
-//            return save(getUserDataFromIdToken(idToken));
         }
 
         String targetUsersId = users.getUsersId();
@@ -134,11 +133,16 @@ public class UsersService {
         log.info("getUserDataFromIdToken, name : " + token.getName());
         log.info("getUserDataFromIdToken, idToken : " + idToken);
 
-        return new UsersSaveRequestDto(
+        UsersSaveRequestDto requestDto = new UsersSaveRequestDto(
                 token.getEmail(),
                 token.getName(),
                 idToken
         );
+
+        log.info("getUserDataFromIdToken, email : " + requestDto.getUsersId());
+        log.info("getUserDataFromIdToken, name : " + requestDto.getName());
+        log.info("getUserDataFromIdToken, idToken : " + requestDto.getIdToken());
+        return requestDto;
     }
 
 

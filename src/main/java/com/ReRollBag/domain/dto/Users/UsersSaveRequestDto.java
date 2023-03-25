@@ -3,10 +3,12 @@ package com.ReRollBag.domain.dto.Users;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class UsersSaveRequestDto {
