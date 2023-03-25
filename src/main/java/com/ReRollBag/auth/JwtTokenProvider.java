@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Optional;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -36,8 +34,8 @@ public class JwtTokenProvider {
     private final CustomUserDetailService userDetailService;
     private final RedisService redisService;
 
-    private static long accessTokenValidTime = 5 * 60L;
-    private static long refreshTokenValidTime = 3600 * 60L;
+    private static long accessTokenValidTime = 3600 * 60L;
+    private static long refreshTokenValidTime = 30 * 3600 * 60L;
 
     public void setAccessTokenValidTime(Long time) {
         accessTokenValidTime = time;
