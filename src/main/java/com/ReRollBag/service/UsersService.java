@@ -91,7 +91,9 @@ public class UsersService {
             // If there is no information with UsersRepository,
             // Make new requestDto with IdToken
             // and return to save method
-            return save(getUserDataFromIdToken(idToken));
+            UsersSaveRequestDto requestDto = getUserDataFromIdToken(idToken);
+            return save(requestDto);
+//            return save(getUserDataFromIdToken(idToken));
         }
 
         String targetUsersId = users.getUsersId();
@@ -128,8 +130,9 @@ public class UsersService {
 
     private UsersSaveRequestDto getUserDataFromIdToken(String idToken) throws FirebaseAuthException {
         FirebaseToken token = FirebaseAuth.getInstance().verifyIdToken(idToken);
-        log.info("getUserDataFromIdToken : " + token.getEmail());
-        log.info("getUserDataFromIdToken : " + token.getName());
+        log.info("getUserDataFromIdToken, email : " + token.getEmail());
+        log.info("getUserDataFromIdToken, name : " + token.getName());
+        log.info("getUserDataFromIdToken, idToken : " + idToken);
 
         return new UsersSaveRequestDto(
                 token.getEmail(),
