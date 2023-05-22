@@ -13,11 +13,12 @@ public class BagsSaveRequestDto {
     private String regionCode;
 
     public Bags toEntity() {
-        String bagsId = countryCode + "_" + regionCode + "_";
+        String region = countryCode + "_" + regionCode + "_";
         return Bags.builder()
-                .bagsId(bagsId)
+                .bagsId(region)
                 .isRented(false)
                 .whenIsRented(null)
+                .region(region)
                 .build();
     }
 }

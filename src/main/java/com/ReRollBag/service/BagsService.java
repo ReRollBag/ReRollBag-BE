@@ -32,7 +32,7 @@ public class BagsService {
 
     public BagsResponseDto save(BagsSaveRequestDto bagsSaveRequestDto) {
         Bags saveTarget = bagsSaveRequestDto.toEntity();
-        String region = saveTarget.getBagsId();
+        String region = saveTarget.getRegion();
 
         if (!bagsCount.isExistWithRegion(region)) {
             bagsCount.saveNewRegion(region);
