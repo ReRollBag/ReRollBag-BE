@@ -25,6 +25,9 @@ public class Bags extends BaseTimeEntity {
     @Column
     private LocalDateTime whenIsRented;
 
+    @Column
+    private String region;
+
     @ManyToOne(fetch = FetchType.EAGER)
     private Users rentingUsers;
 
