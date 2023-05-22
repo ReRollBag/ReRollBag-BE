@@ -97,8 +97,12 @@ public class UsersService {
 
         String targetUsersId = users.getUsersId();
 
-        String accessToken = jwtTokenProvider.createAccessToken(targetUID, targetUsersId);
-        String refreshToken = jwtTokenProvider.createRefreshToken(targetUID, targetUsersId);
+        return createToken(targetUID, targetUsersId);
+    }
+
+    public UsersLoginResponseDto createToken(String UID, String usersId) {
+        String accessToken = jwtTokenProvider.createAccessToken(UID, usersId);
+        String refreshToken = jwtTokenProvider.createRefreshToken(UID, usersId);
 
         return UsersLoginResponseDto.builder()
                 .accessToken(accessToken)
