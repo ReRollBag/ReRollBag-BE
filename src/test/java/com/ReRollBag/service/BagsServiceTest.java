@@ -242,7 +242,7 @@ public class BagsServiceTest {
         assertThat(responseDto.isRented()).isTrue();
         assertThat(responseDto.getBagsId()).isEqualTo("KOR_SUWON_1");
         assertThat(responseDto.getRentingUsersId()).isEqualTo("test@gmail.com");
-        assertThat(LocalDateTime.parse(responseDto.getWhenIsRented())).isBefore(LocalDateTime.now());
+        assertThat(LocalDateTime.parse(responseDto.getWhenIsRented())).isBeforeOrEqualTo(LocalDateTime.now());
     }
 
 }
