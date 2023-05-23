@@ -28,7 +28,7 @@ public class CertificationNumberRepositoryTest {
     void createCertificationNumber() {
         certificationNumber = CertificationNumber.builder()
                 .usersId("dummyUsersId")
-                .certificationNumber(1234L)
+                .certificationNumber(1234)
                 .expiredTime(1L)
                 .build();
         certificationNumberRepository.save(certificationNumber);
@@ -46,7 +46,7 @@ public class CertificationNumberRepositoryTest {
     void Repository_CertificationNumber_생성_테스트() {
         CertificationNumber certificationNumber = CertificationNumber.builder()
                 .usersId("dummyUsersId")
-                .certificationNumber(1234L)
+                .certificationNumber(1234)
                 .expiredTime(1L)
                 .build();
         certificationNumberRepository.save(certificationNumber);

@@ -39,7 +39,7 @@ public class AdminServiceTest {
             .UID("adminUID")
             .build();
     private static final CertificationNumber testCertificationNumber = CertificationNumber.builder()
-            .certificationNumber(1234L)
+            .certificationNumber(1234)
             .expiredTime(5L)
             .usersId(testUsers.getUsersId())
             .build();
@@ -60,7 +60,7 @@ public class AdminServiceTest {
 
     @Test
     @DisplayName("[Service] Request Admin 테스트")
-    public void Service_RequestAdmin_테스트() {
+    public void Service_RequestAdmin_테스트() throws UsersIsAlreadyAdminException {
         String token = "testToken";
 
         when(jwtTokenProvider.getUsersId(any())).thenReturn(testUsers.getUsersId());
