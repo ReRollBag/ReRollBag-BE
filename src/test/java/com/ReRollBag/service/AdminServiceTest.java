@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -105,6 +106,8 @@ public class AdminServiceTest {
         verify(usersRepository).findByUsersId(testUsers.getUsersId());
         verify(certificationNumberRepository).findById(testUsers.getUsersId());
 
+        assertThat(testUsers.getUserRole()).isEqualTo(UserRole.ROLE_ADMIN);
+        assertThat(testUsers.getManagingRegion()).isEqualTo(region);
     }
 
     @Test

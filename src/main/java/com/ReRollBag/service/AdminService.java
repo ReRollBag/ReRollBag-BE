@@ -84,13 +84,8 @@ public class AdminService {
             throw new CertificationSignatureException();
         // 4. Change user.userRole from user to admin (upgradeUsersToAdmin)
         targetUsers.setUserRole(UserRole.ROLE_ADMIN);
-
+        // 5. Change user.managingRegion to specified region
+        targetUsers.setManagingRegion(region);
     }
 
-    // 1. Find user with usersId
-    // 2. Change user.userRole to ROLE_ADMIN
-    // 3. Change user.region to specified region
-    private void upgradeUsersToAdmin(String region, String usersId) {
-
-    }
 }
