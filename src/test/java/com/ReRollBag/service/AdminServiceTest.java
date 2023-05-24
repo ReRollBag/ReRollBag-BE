@@ -4,6 +4,7 @@ import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.entity.CertificationNumber;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
+import com.ReRollBag.exceptions.adminExceptions.CertificationSignatureException;
 import com.ReRollBag.exceptions.adminExceptions.CertificationTimeExpireException;
 import com.ReRollBag.exceptions.adminExceptions.UsersIsAlreadyAdminException;
 import com.ReRollBag.repository.BagsRepository;
@@ -61,13 +62,19 @@ public class AdminServiceTest {
     @Test
     @DisplayName("[Service] Request Admin 테스트")
     public void Service_RequestAdmin_테스트() throws UsersIsAlreadyAdminException {
+        resetTestUsersRole();
+        
         String token = "testToken";
 
         when(jwtTokenProvider.getUsersId(any())).thenReturn(testUsers.getUsersId());
         when(usersRepository.findByUsersId(any())).thenReturn(testUsers);
         when(certificationNumberRepository.save(any())).thenReturn(testCertificationNumber);
 
-        verify(adminService).requestAdmin(token);
+        adminService.requestAdmin(token);
+
+        verify(jwtTokenProvider).getUsersId(token);
+        verify(usersRepository).findByUsersId(testUsers.getUsersId());
+        verify(certificationNumberRepository).save(any());
     }
 
     @Test
@@ -77,30 +84,34 @@ public class AdminServiceTest {
 
         when(jwtTokenProvider.getUsersId(any())).thenReturn(testAdmin.getUsersId());
         when(usersRepository.findByUsersId(any())).thenReturn(testAdmin);
-        when(certificationNumberRepository.save(any())).thenReturn(testCertificationNumber);
 
         assertThrows(UsersIsAlreadyAdminException.class, () -> adminService.requestAdmin(token));
     }
 
     @Test
     @DisplayName(("[Service] Verify Admin_Request_CertificationNumber 테스트"))
-    public void Service_verifyAdminRequestCertificationNumber_테스트() {
+    public void Service_verifyAdminRequestCertificationNumber_테스트() throws CertificationTimeExpireException, CertificationSignatureException {
         String token = "testToken";
-        Long certificationNumber = 1234L;
+        int certificationNumber = 1234;
         String region = "KOR_SUWON";
 
         when(certificationNumberRepository.findById(any())).thenReturn(Optional.of(testCertificationNumber));
         when(jwtTokenProvider.getUsersId(any())).thenReturn(testUsers.getUsersId());
         when(usersRepository.findByUsersId(any())).thenReturn(testUsers);
 
-        verify(adminService).verifyAdminRequestCertificationNumber(token, certificationNumber, region);
+        adminService.verifyAdminRequestCertificationNumber(token, certificationNumber, region);
+
+        verify(jwtTokenProvider).getUsersId(token);
+        verify(usersRepository).findByUsersId(testUsers.getUsersId());
+        verify(certificationNumberRepository).findById(testUsers.getUsersId());
+
     }
 
     @Test
     @DisplayName(("[Service] Verify Admin_Request_CertificationNumber : CertificationTimeExpireException 테스트"))
     public void Service_verifyAdminRequestCertificationNumber_CertificationTimeExpireException_테스트() {
         String token = "testToken";
-        Long certificationNumber = 1234L;
+        int certificationNumber = 1234;
         String region = "KOR_SUWON";
 
         when(certificationNumberRepository.findById(any())).thenReturn(Optional.empty());
@@ -114,13 +125,17 @@ public class AdminServiceTest {
     @DisplayName(("[Service] Verify Admin_Request_CertificationNumber : CertificationSignatureException 테스트"))
     public void Service_verifyAdminRequestCertificationNumber_CertificationSignatureException_테스트() {
         String token = "testToken";
-        Long wrongCertificationNumber = 9999L;
+        int wrongCertificationNumber = 9999;
         String region = "KOR_SUWON";
 
         when(certificationNumberRepository.findById(any())).thenReturn(Optional.of(testCertificationNumber));
         when(jwtTokenProvider.getUsersId(any())).thenReturn(testUsers.getUsersId());
         when(usersRepository.findByUsersId(any())).thenReturn(testUsers);
 
-        assertThrows(CertificationTimeExpireException.class, () -> adminService.verifyAdminRequestCertificationNumber(token, wrongCertificationNumber, region));
+        assertThrows(CertificationSignatureException.class, () -> adminService.verifyAdminRequestCertificationNumber(token, wrongCertificationNumber, region));
+    }
+
+    private void resetTestUsersRole() {
+        testUsers.setUserRole(UserRole.ROLE_USER);
     }
 }
