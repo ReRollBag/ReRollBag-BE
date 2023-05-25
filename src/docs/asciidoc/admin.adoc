@@ -1,0 +1,56 @@
+= RRB API
+Powered By Dongwhwan, https://github.com/hwanld
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs // 문서에 표기되는 코드들의 하이라이팅을 highlightjs를 사용
+:toc: left // toc (Table Of Contents)를 문서의 좌측에 두기
+:toclevels: 1
+:sectlinks:
+
+
+[[Admin-requestAdmin]]
+== Admin-requestAdmin
+
+* Send Request to server for being Admin.
+Server will generate random 4-digit certification Number and print it at the log.
+
+* After request, users have to call `verifyAdminRequestCertificationNumber` API for verify Certification Number and request to be admin.
+
+operation::Admin-requestAdmin[snippets='http-request,request-headers,http-response,response-fields']
+
+---
+
+[[Admin-requestAdmin-UsersIsAlreadyAdminException]]
+== Admin-requestAdmin-UsersIsAlreadyAdminException
+
+* When user who call `requestAdmin` is already Admin, Server will raise this exception.
+
+operation::Admin-requestAdmin-UsersIsAlreadyAdminException[snippets='http-request,request-headers,http-response,response-fields']
+
+---
+
+[[Admin-verifyAdminRequestCertificationNumber]]
+== Admin-verifyAdminRequestCertificationNumber
+
+operation::Admin-verifyAdminRequestCertificationNumber[snippets='http-request,request-headers,request-fields,http-response,response-fields']
+
+---
+
+[[Admin-verifyAdminRequestCertificationNumber-CertificationSignatureException]]
+== Admin-verifyAdminRequestCertificationNumber-CertificationSignatureException
+
+* When user call `verifyAdminRequestCertificationNumber` API with wrong certification number, server will raise this exception.
+
+operation::Admin-verifyAdminRequestCertificationNumber-CertificationSignatureException[snippets='http-request,request-headers,request-fields,http-response,response-fields']
+
+---
+
+[[Admin-verifyAdminRequestCertificationNumber-CertificationTimeExpireException]]
+== Admin-verifyAdminRequestCertificationNumber-CertificationTimeExpireException
+
+* When user call `verifyAdminRequestCertificationNumber` API after the certification expiration time, server will raise this excpetion.
+
+operation::Admin-verifyAdminRequestCertificationNumber-CertificationTimeExpireException[snippets='http-request,request-headers,request-fields,http-response,response-fields']
+
+---
+
