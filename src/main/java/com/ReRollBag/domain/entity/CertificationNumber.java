@@ -17,7 +17,7 @@ import org.springframework.data.redis.core.TimeToLive;
 public class CertificationNumber {
     @Id
     private String usersId;
-    private int certificationNumber;
+    private String certificationNumber;
 
     @TimeToLive
     private Long expiredTime;
