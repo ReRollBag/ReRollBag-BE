@@ -33,6 +33,8 @@ public class AdminService {
     private final CertificationNumberRepository certificationNumberRepository;
     private final PasswordEncoder passwordEncoder;
 
+    static Long certificationNumberExpiration = 60 * 5L;
+
     public UsersLoginResponseDto loginForAdmin(String idToken) throws FirebaseAuthException, UserIsNotAdminException {
         String UID = usersService.getUIDFromIdToken(idToken);
         Users users = usersRepository.findById(UID).orElseThrow(() -> new IllegalArgumentException("Cannot find users at AdminService.loginForAdmin"));
@@ -64,7 +66,7 @@ public class AdminService {
         CertificationNumber certificationNumber = CertificationNumber.builder()
                 .usersId(targetUsersId)
                 .certificationNumber(encryptedCertificationNumber)
-                .expiredTime(60 * 5L)
+                .expiredTime(certificationNumberExpiration)
                 .build();
         certificationNumberRepository.save(certificationNumber);
     }
@@ -93,6 +95,10 @@ public class AdminService {
         targetUsers.setManagingRegion(region);
         // 6. Return new jwtToken for Admin
         return usersService.createToken(targetUsers.getUID(), targetUsersID);
+    }
+
+    public void setCertificationNumberExpiration(Long expiration) {
+        certificationNumberExpiration = expiration;
     }
 
 }
