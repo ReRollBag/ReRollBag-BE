@@ -1,6 +1,7 @@
 package com.ReRollBag.service;
 
 import com.ReRollBag.auth.JwtTokenProvider;
+import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
 import com.ReRollBag.domain.entity.CertificationNumber;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
@@ -108,13 +109,16 @@ public class AdminServiceTest {
         String token = "testToken";
         int certificationNumber = 1234;
         String region = "KOR_SUWON";
+        String accessToken = "accessToken";
+        final String refreshToken = "refreshToken";
 
         when(certificationNumberRepository.findById(any())).thenReturn(Optional.of(testCertificationNumber));
         when(jwtTokenProvider.getUsersId(any())).thenReturn(testUsers.getUsersId());
         when(usersRepository.findByUsersId(any())).thenReturn(testUsers);
         when(passwordEncoder.matches(any(), any())).thenReturn(true);
+        when(usersService.createToken(any(), any())).thenReturn(new UsersLoginResponseDto(accessToken, refreshToken));
 
-        adminService.verifyAdminRequestCertificationNumber(token, certificationNumber, region);
+        UsersLoginResponseDto result = adminService.verifyAdminRequestCertificationNumber(token, certificationNumber, region);
 
         verify(jwtTokenProvider).getUsersId(token);
         verify(usersRepository).findByUsersId(testUsers.getUsersId());
@@ -123,6 +127,8 @@ public class AdminServiceTest {
 
         assertThat(testUsers.getUserRole()).isEqualTo(UserRole.ROLE_ADMIN);
         assertThat(testUsers.getManagingRegion()).isEqualTo(region);
+        assertThat(result.getAccessToken()).isEqualTo(accessToken);
+        assertThat(result.getRefreshToken()).isEqualTo(refreshToken);
     }
 
     @Test

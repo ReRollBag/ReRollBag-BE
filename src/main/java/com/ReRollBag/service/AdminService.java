@@ -76,7 +76,7 @@ public class AdminService {
     }
 
     @Transactional
-    public void verifyAdminRequestCertificationNumber(String token, int certificationNumber, String region) throws CertificationTimeExpireException, CertificationSignatureException {
+    public UsersLoginResponseDto verifyAdminRequestCertificationNumber(String token, int certificationNumber, String region) throws CertificationTimeExpireException, CertificationSignatureException {
         // 1. Find user with token
         String targetUsersID = jwtTokenProvider.getUsersId(token);
         Users targetUsers = usersRepository.findByUsersId(targetUsersID);
@@ -91,6 +91,8 @@ public class AdminService {
         targetUsers.setUserRole(UserRole.ROLE_ADMIN);
         // 5. Change user.managingRegion to specified region
         targetUsers.setManagingRegion(region);
+        // 6. Return new jwtToken for Admin
+        return usersService.createToken(targetUsers.getUID(), targetUsersID);
     }
 
 }
