@@ -31,4 +31,9 @@ public class WebController {
         return "notices.html";
     }
 
+    @GetMapping("docs/admin")
+    public String docs_admin() {
+        return "admin.html";
+    }
+
 }

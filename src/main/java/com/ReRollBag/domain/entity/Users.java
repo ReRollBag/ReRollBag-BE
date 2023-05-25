@@ -36,6 +36,9 @@ public class Users extends BaseTimeEntity implements UserDetails {
     @Column(name = "userRole")
     private UserRole userRole;
 
+    @Column(name = "managingRegion")
+    private String managingRegion;
+
     @Builder.Default
     @OneToMany(mappedBy = "rentingUsers", fetch = FetchType.EAGER)
     private List<Bags> rentingBagsList = new ArrayList<>();

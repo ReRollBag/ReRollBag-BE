@@ -24,7 +24,13 @@ public enum ErrorCode {
     ReturnRequestUserMismatchException(4000),
     AlreadyRentedException(4001),
 
-    UnknownException(5000);
+    UnknownException(5000),
+
+    // Admin ErrorCode
+    UsersIsAlreadyAdminException(6000),
+    UsersIsNotAdminException(6001),
+    CertificationSignatureException(6002),
+    CertificationTimeExpireException(6003);
 
     private final int errorCode;
 }
