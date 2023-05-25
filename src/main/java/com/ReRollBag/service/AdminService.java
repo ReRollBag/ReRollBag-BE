@@ -33,7 +33,7 @@ public class AdminService {
     private final CertificationNumberRepository certificationNumberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    static Long certificationNumberExpiration = 60 * 5L;
+    static Long certificationNumberExpiration = 5L;
 
     public UsersLoginResponseDto loginForAdmin(String idToken) throws FirebaseAuthException, UserIsNotAdminException {
         String UID = usersService.getUIDFromIdToken(idToken);

@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -94,8 +95,8 @@ public class AdminIntegrationTest {
     void init_jwtToken() throws Exception {
         accessTokenForUsers = jwtTokenProvider.createAccessToken(defaultUsers.getUID(), defaultUsers.getUsersId());
         refreshTokenForUsers = jwtTokenProvider.createRefreshToken(defaultUsers.getUID(), defaultUsers.getUsersId());
-        accessTokenForAdmin = jwtTokenProvider.createAccessToken(defaultAdmin.getUID(), defaultUsers.getUsersId());
-        refreshTokenForAdmin = jwtTokenProvider.createRefreshToken(defaultAdmin.getUID(), defaultUsers.getUsersId());
+        accessTokenForAdmin = jwtTokenProvider.createAccessToken(defaultAdmin.getUID(), defaultAdmin.getUsersId());
+        refreshTokenForAdmin = jwtTokenProvider.createRefreshToken(defaultAdmin.getUID(), defaultAdmin.getUsersId());
     }
 
     @AfterEach
@@ -132,7 +133,7 @@ public class AdminIntegrationTest {
 
         mockMvc.perform(post("/api/v1/users/requestAdmin")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("token", accessTokenForUsers)
+                        .header("token", accessTokenForAdmin)
                 )
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(errorJson)))
@@ -160,7 +161,7 @@ public class AdminIntegrationTest {
                 .message(errorMessages)
                 .build();
 
-        mockMvc.perform(post("/api/v1/users/verifyAdminRequestCertificationNumber")
+        mockMvc.perform(put("/api/v1/users/verifyAdminRequestCertificationNumber")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("token", accessTokenForUsers)
                         .content(objectMapper.writeValueAsString(verifyAdminRequestCertificationNumberDto))
@@ -171,7 +172,7 @@ public class AdminIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Integration] 잘못된 인증번호로 관리자 신청 승인 : CertificationTimeExpireException")
+    @DisplayName("[Integration] 인증 유효시간 지난 후 관리자 신청 승인 : CertificationTimeExpireException")
     void Integration_관리자신청후_인증번호입력으로_관리자신청승인_CertificationTimeExpireException() throws Exception {
 
         adminService.setCertificationNumberExpiration(1L);
@@ -187,13 +188,15 @@ public class AdminIntegrationTest {
                 .region("KOR_SUWON")
                 .build();
 
-        String errorMessages = "Certification Number is wrong";
+        Thread.sleep(1009L);
+
+        String errorMessages = "Certification Number is expired";
         ErrorJson errorJson = ErrorJson.builder()
-                .errorCode(6002)
+                .errorCode(6003)
                 .message(errorMessages)
                 .build();
 
-        mockMvc.perform(post("/api/v1/users/verifyAdminRequestCertificationNumber")
+        mockMvc.perform(put("/api/v1/users/verifyAdminRequestCertificationNumber")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("token", accessTokenForUsers)
                         .content(objectMapper.writeValueAsString(verifyAdminRequestCertificationNumberDto))
@@ -206,7 +209,7 @@ public class AdminIntegrationTest {
     }
 
     private void resetCertificationNumberExpiration() {
-        adminService.setCertificationNumberExpiration(60 * 5L);
+        adminService.setCertificationNumberExpiration(5L);
     }
 
 }
