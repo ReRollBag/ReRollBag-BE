@@ -14,13 +14,14 @@ import com.ReRollBag.repository.CertificationNumberRepository;
 import com.ReRollBag.repository.UsersRepository;
 import com.google.firebase.auth.FirebaseAuthException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Random;
 
-@Log4j2
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class AdminService {
@@ -30,6 +31,7 @@ public class AdminService {
     private final BagsRepository bagsRepository;
     private final BagsService bagsService;
     private final CertificationNumberRepository certificationNumberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UsersLoginResponseDto loginForAdmin(String idToken) throws FirebaseAuthException, UserIsNotAdminException {
         String UID = usersService.getUIDFromIdToken(idToken);
@@ -52,13 +54,16 @@ public class AdminService {
         if (targetUsers.getUserRole().equals(UserRole.ROLE_ADMIN))
             throw new UsersIsAlreadyAdminException();
 
-        // 3. Generate 4-digit random certificationNumber, each number range is 1-9;
+        // 3. Generate 4-digit random certificationNumber, each number range is 1-9, and log number
         int randomCertificationNumber = generateRandomCertificationNumber();
+        log.info("Generated Certification Number for user : `" + targetUsersId + "` is `" + randomCertificationNumber + "`");
+        // 4. Encode certificationNumber
+        String encryptedCertificationNumber = passwordEncoder.encode(Integer.toString(randomCertificationNumber));
 
-        // 4. Save certificationNumber at redis
+        // 5. Save encryptedCertificationNumber at redis
         CertificationNumber certificationNumber = CertificationNumber.builder()
                 .usersId(targetUsersId)
-                .certificationNumber(randomCertificationNumber)
+                .certificationNumber(encryptedCertificationNumber)
                 .expiredTime(60 * 5L)
                 .build();
         certificationNumberRepository.save(certificationNumber);
@@ -78,9 +83,9 @@ public class AdminService {
         // 2. Find certificationNumber in redis with user.usersId
         // 2-1. If it is not able to find CertificationNumber, throw `CertificationTimeExpireException`
         CertificationNumber targetCertificationNumber = certificationNumberRepository.findById(targetUsersID).orElseThrow(() -> new CertificationTimeExpireException());
-        // 3. Compare two certificationNumber.
+        // 3. Compare two certificationNumber. Saved cNumber is encrypted, so use passwordEncoder.matches()
         // 3-1. If both are different, throw `CertificationSignatureException`
-        if (targetCertificationNumber.getCertificationNumber() != certificationNumber)
+        if (!passwordEncoder.matches(Integer.toString(certificationNumber), targetCertificationNumber.getCertificationNumber()))
             throw new CertificationSignatureException();
         // 4. Change user.userRole from user to admin (upgradeUsersToAdmin)
         targetUsers.setUserRole(UserRole.ROLE_ADMIN);
