@@ -2,6 +2,7 @@ package com.ReRollBag.integration;
 
 import com.ReRollBag.auth.JwtTokenProvider;
 import com.ReRollBag.domain.dto.Admin.VerifyAdminRequestCertificationNumberDto;
+import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.entity.Users;
 import com.ReRollBag.enums.UserRole;
 import com.ReRollBag.exceptions.ErrorJson;
@@ -23,12 +24,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.operation.preprocess.Preprocessors;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -110,15 +117,25 @@ public class AdminIntegrationTest {
     @Test
     @DisplayName("[Integration] 관리자 신청")
     void Integration_일반계정으로_관리자신청() throws Exception {
-        String expectedMessages = "Successfully request Admin";
+        MockResponseDto expectedResponse = new MockResponseDto(true);
 
         mockMvc.perform(post("/api/v1/users/requestAdmin")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("token", accessTokenForUsers)
                 )
                 .andExpect(status().isOk())
-                .andExpect(content().string(expectedMessages))
-                .andDo(print());
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResponse)))
+                .andDo(print())
+                .andDo(document("Admin-requestAdmin",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("Normal Users jwt Access Token")
+                        ),
+                        responseFields(
+                                fieldWithPath("data").description("Result of requesting admin").type(JsonFieldType.BOOLEAN)
+                        )
+                ));
 
     }
 
@@ -137,7 +154,18 @@ public class AdminIntegrationTest {
                 )
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(objectMapper.writeValueAsString(errorJson)))
-                .andDo(print());
+                .andDo(print())
+                .andDo(document("Admin-requestAdmin-UsersIsAlreadyAdminException",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("Admin jwt Access Token")
+                        ),
+                        responseFields(
+                                fieldWithPath("errorCode").description("errorCode of UsersIsAlreadyAdminException").type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("message of UsersIsAlreadyAdminException").type(JsonFieldType.STRING)
+                        )
+                ));
     }
 
     @Test
@@ -168,7 +196,22 @@ public class AdminIntegrationTest {
                 )
                 .andExpect(status().isForbidden())
                 .andExpect(content().json(objectMapper.writeValueAsString(errorJson)))
-                .andDo(print());
+                .andDo(print())
+                .andDo(document("Admin-verifyAdminRequestCertificationNumber-CertificationSignatureException",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("Normal Users jwt Access Token")
+                        ),
+                        requestFields(
+                                fieldWithPath("region").description("Admin managing region"),
+                                fieldWithPath("certificationNumber").description("Admin Certification Number generated by Server")
+                        ),
+                        responseFields(
+                                fieldWithPath("errorCode").description("errorCode of CertificationSignatureException").type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("message of CertificationSignatureException").type(JsonFieldType.STRING)
+                        )
+                ));
     }
 
     @Test
@@ -203,7 +246,22 @@ public class AdminIntegrationTest {
                 )
                 .andExpect(status().isForbidden())
                 .andExpect(content().json(objectMapper.writeValueAsString(errorJson)))
-                .andDo(print());
+                .andDo(print())
+                .andDo(document("Admin-verifyAdminRequestCertificationNumber-CertificationTimeExpireException",
+                        Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                        Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Token").description("Normal Users jwt Access Token")
+                        ),
+                        requestFields(
+                                fieldWithPath("region").description("Admin managing region"),
+                                fieldWithPath("certificationNumber").description("Admin Certification Number generated by Server")
+                        ),
+                        responseFields(
+                                fieldWithPath("errorCode").description("errorCode of CertificationTimeExpireException").type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("message of CertificationTimeExpireException").type(JsonFieldType.STRING)
+                        )
+                ));
 
         resetCertificationNumberExpiration();
     }

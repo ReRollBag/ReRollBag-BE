@@ -23,8 +23,7 @@ public class AdminController extends BaseController {
 
     @PostMapping("api/v1/users/requestAdmin")
     public ResponseEntity<?> requestAdmin(@RequestHeader("token") String jwtToken) throws UsersIsAlreadyAdminException {
-        adminService.requestAdmin(jwtToken);
-        return sendResponseHttpByJson("Successfully request Admin");
+        return sendResponseHttpByJson(adminService.requestAdmin(jwtToken));
     }
 
     @PutMapping("api/v1/users/verifyAdminRequestCertificationNumber")

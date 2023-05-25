@@ -1,6 +1,7 @@
 package com.ReRollBag.service;
 
 import com.ReRollBag.auth.JwtTokenProvider;
+import com.ReRollBag.domain.dto.MockResponseDto;
 import com.ReRollBag.domain.dto.Users.UsersLoginResponseDto;
 import com.ReRollBag.domain.entity.CertificationNumber;
 import com.ReRollBag.domain.entity.Users;
@@ -47,7 +48,7 @@ public class AdminService {
         return usersService.createToken(UID, usersId);
     }
 
-    public void requestAdmin(String token) throws UsersIsAlreadyAdminException {
+    public MockResponseDto requestAdmin(String token) throws UsersIsAlreadyAdminException {
         // 1. Find user with token
         String targetUsersId = jwtTokenProvider.getUsersId(token);
         Users targetUsers = usersRepository.findByUsersId(targetUsersId);
@@ -69,6 +70,10 @@ public class AdminService {
                 .expiredTime(certificationNumberExpiration)
                 .build();
         certificationNumberRepository.save(certificationNumber);
+
+        return MockResponseDto.builder()
+                .data(true)
+                .build();
     }
 
     private int generateRandomCertificationNumber() {
