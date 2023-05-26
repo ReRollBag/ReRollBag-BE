@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class SlackWebHookService {
 
     public void publishMessageToSlack(String messages) {
-        SlackApi slackApi = new SlackApi("https://hooks.slack.com/services/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");
+        SlackApi slackApi = new SlackApi("https://hooks.slack.com/services/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");
         log.info("publishMessageToSlack!");
         slackApi.call(new SlackMessage(messages));
     }
