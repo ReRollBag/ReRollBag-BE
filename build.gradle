@@ -37,21 +37,24 @@ dependencies {
 	implementation group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.32'
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'org.springframework.security:spring-security-test'
-	implementation 'org.projectlombok:lombok:1.18.24'
+	implementation 'org.projectlombok:lombok:1.18.26'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
-	// For Firebase Admin SDK
-	implementation 'com.google.firebase:firebase-admin:9.1.1'
+    // For Firebase Admin SDK
+    implementation 'com.google.firebase:firebase-admin:9.1.1'
 
-	annotationProcessor 'org.projectlombok:lombok'
-	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	//Spring REST Docs
-	asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor:2.0.6.RELEASE'
-	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc:2.0.6.RELEASE'
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    //Spring REST Docs
+    asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor:2.0.6.RELEASE'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc:2.0.6.RELEASE'
+
+    // Slack
+    implementation("net.gpedro.integrations.slack:slack-webhook:1.4.0")
 }
 
 tasks.named('test') {
