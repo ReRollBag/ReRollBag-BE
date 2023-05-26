@@ -33,6 +33,7 @@ public class AdminService {
     private final BagsService bagsService;
     private final CertificationNumberRepository certificationNumberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SlackWebHookService slackWebHookService;
 
     static Long certificationNumberExpiration = 5L;
 
@@ -60,10 +61,14 @@ public class AdminService {
         // 3. Generate 4-digit random certificationNumber, each number range is 1-9, and log number
         int randomCertificationNumber = generateRandomCertificationNumber();
         log.info("Generated Certification Number for user : `" + targetUsersId + "` is `" + randomCertificationNumber + "`");
-        // 4. Encode certificationNumber
+
+        // 4. Notify Generated 4-digit random certification Number to Slack Bot
+        slackWebHookService.publishMessageToSlack("Generated Certification Number for user : `" + targetUsersId + "` is `" + randomCertificationNumber + "`");
+
+        // 5. Encode certificationNumber
         String encryptedCertificationNumber = passwordEncoder.encode(Integer.toString(randomCertificationNumber));
 
-        // 5. Save encryptedCertificationNumber at redis
+        // 6. Save encryptedCertificationNumber at redis
         CertificationNumber certificationNumber = CertificationNumber.builder()
                 .usersId(targetUsersId)
                 .certificationNumber(encryptedCertificationNumber)

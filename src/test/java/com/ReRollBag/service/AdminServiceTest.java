@@ -66,6 +66,8 @@ public class AdminServiceTest {
     private CertificationNumberRepository certificationNumberRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private SlackWebHookService slackWebHookService;
 
     @BeforeEach
     public void resetTestUsersRole() {
