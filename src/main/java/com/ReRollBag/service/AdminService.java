@@ -35,7 +35,7 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
     private final SlackWebHookService slackWebHookService;
 
-    static Long certificationNumberExpiration = 5L;
+    static Long certificationNumberExpiration = 5 * 60L;
 
     public UsersLoginResponseDto loginForAdmin(String idToken) throws FirebaseAuthException, UserIsNotAdminException {
         String UID = usersService.getUIDFromIdToken(idToken);
