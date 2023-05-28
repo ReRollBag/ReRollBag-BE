@@ -267,7 +267,7 @@ public class AdminIntegrationTest {
     }
 
     private void resetCertificationNumberExpiration() {
-        adminService.setCertificationNumberExpiration(5L);
+        adminService.setCertificationNumberExpiration(5 * 60L);
     }
 
 }

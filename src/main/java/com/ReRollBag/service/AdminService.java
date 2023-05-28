@@ -35,7 +35,7 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
     private final SlackWebHookService slackWebHookService;
 
-    static Long certificationNumberExpiration = 5 * 60L;
+    static Long certificationNumberExpiration = 5 * 60 * 1000L;
 
     public UsersLoginResponseDto loginForAdmin(String idToken) throws FirebaseAuthException, UserIsNotAdminException {
         String UID = usersService.getUIDFromIdToken(idToken);
@@ -63,7 +63,7 @@ public class AdminService {
         log.info("Generated Certification Number for user : `" + targetUsersId + "` is `" + randomCertificationNumber + "`");
 
         // 4. Notify Generated 4-digit random certification Number to Slack Bot
-        slackWebHookService.publishMessageToSlack("Generated Certification Number for user : `" + targetUsersId + "` is `" + randomCertificationNumber + "`");
+//        slackWebHookService.publishMessageToSlack("Generated Certification Number for user : `" + targetUsersId + "` is `" + randomCertificationNumber + "`");
 
         // 5. Encode certificationNumber
         String encryptedCertificationNumber = passwordEncoder.encode(Integer.toString(randomCertificationNumber));
